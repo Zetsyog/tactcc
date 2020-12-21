@@ -1,0 +1,11 @@
+# Prerequisites
+*.d
+
+# Object files
+*.o
+
+# Executable files
+bin/*
+
+# Editor local config
+.vscode/
