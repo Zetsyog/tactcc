@@ -1,8 +1,9 @@
 # Prerequisites
 *.d
 
-# Object files
+# Build files
 *.o
+build/*
 
 # Executable files
 bin/*

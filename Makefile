@@ -48,4 +48,5 @@ $(LBUILD): $(LSOURCES)
 .PHONY: clean
 clean:
 	rm -rf $(OBJDIR)/*
+	rm $(INCLUDE_PATH)/$(LEX_HDR_NAME)
 	rm -f $(BINDIR)/$(TARGET)
