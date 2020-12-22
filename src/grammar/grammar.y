@@ -5,8 +5,9 @@
     void yyerror(char *s);
 %}
 %code requires{
-  #include "Intermediate_code.h"
-  #include "generation_code.h"
+  #include "../include/grammar.h"
+  #include "../include/Intermediate_code.h"
+  #include "../include/generation_code.h"
 }
 
 %token PROG VAR UNIT BOOL INT ARRAY FUNC REF IF THEN ELSE
