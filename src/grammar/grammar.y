@@ -2,7 +2,7 @@
     #include <stdio.h>
     int yylex();
     int yyparse();
-    int yyerror(char *s);
+    void yyerror(char *s);
 %}
 %code requires{
   #include "Intermediate_code.h"
@@ -10,8 +10,9 @@
 }
 
 %token PROG VAR UNIT BOOL INT ARRAY FUNC REF IF THEN ELSE
-%token WHILE RETURN BEGIN READ WRITE IDENT WRITE IDENT COM
-%token INTEGER OF AND OR XOR NOT
+%token WHILE RETURN BEGIN_TOK READ WRITE IDENT COM
+%token END AND OR XOR NOT DO
+%token INTEGER OF
 
 %start program
 
@@ -38,7 +39,7 @@ typename : atomictype
           ;
 
 atomictype : UNIT
-            | BOLL
+            | BOOL
             | INT
             ;
 
@@ -92,8 +93,8 @@ instr : IF expr THEN M instr { complete($2.true,$4);
     | RETURN
     | IDENT '(' exprlist ')'
     | IDENT '(' ')'
-    | BEGIN sequence END
-    | BEGIN END
+    | BEGIN_TOK sequence END
+    | BEGIN_TOK END
     | READ lvalue { gencode(READ,$2->name);
                     $$.next = NULL;
                   }
@@ -124,7 +125,7 @@ lvalue : IDENT
 exprlist : expr
         | expr ',' exprlist
         ;
-expr : cte
+expr : INT
       | '(' expr ')' { $$ = $2;}
       | expr opb expr
       | opu expr
