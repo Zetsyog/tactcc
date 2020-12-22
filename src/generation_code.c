@@ -51,3 +51,26 @@ int gencode(OP op , ...)
     return index;
 
 }
+
+
+int* crelist(int addr)
+{
+    int* list = malloc(sizeof(int));
+    for(int i = 0; i < sizeof(list); i++)
+    {
+        list[i]=addr;
+    }
+    return list;
+}
+
+int* concat(int * list1, int * list2)
+{
+    list1, list2 = malloc(sizeof(int));
+    int* list_concat=malloc(sizeof(list1)+sizeof(list2));
+    for(int i = 0; i < sizeof(list1);i++)
+        list_concat[i] = list1 [i];
+    for(int j=0; j < sizeof(list2) ; j++)
+        list_concat[j+sizeof(list1)]=list2[j];
+
+    return list_concat;
+}

@@ -1,14 +1,12 @@
 %{
     #include <stdio.h>
+    #include "./../include/grammar.h"
+    #include "./../include/Intermediate_code.h"
+    #include "./../include/generation_code.h"
     int yylex();
     int yyparse();
     void yyerror(char *s);
 %}
-%code requires{
-  #include "../include/grammar.h"
-  #include "../include/Intermediate_code.h"
-  #include "../include/generation_code.h"
-}
 
 %token PROG VAR UNIT BOOL INT ARRAY FUNC REF IF THEN ELSE
 %token WHILE RETURN BEGIN_TOK READ WRITE IDENT COM
@@ -20,28 +18,28 @@
 %%
 
 
-program : PROG IDENT
+program :  PROG IDENT
         ;
 
-vardeclist : /*epsilon*/
+vardeclist : /*epsilon*/ {$$ = malloc(sizeof(int));}
             | varsdecl {$$ = $1;}
-            | varsdecl ';' vardecllist {$$ = concat($1,$3);}
+            | varsdecl ';' vardeclist {$$ = concat($1,$3);}
             ;
 
 varsdecl : VAR identlist ':' typename {$$=$2;}
         ;
 
 identlist : IDENT
-          | IDENT ',' identlist {$$ = $1;}
+          | IDENT ',' identlist { $$ = $1;}
           ;
 
-typename : atomictype
-          | arraytype
+typename : atomictype { $$.type = $1.type ;}
+          | arraytype { $$.type = TYPE_ARRAY;}
           ;
 
-atomictype : UNIT
-            | BOOL
-            | INT
+atomictype : UNIT  { $$.type = TYPE_UINT;}
+            | BOOL { $$.type = TYPE_BOOL;}
+            | INT  { $$.type = TYPE_INT;}
             ;
 
 arraytype : ARRAY '[' rangelist ']' OF atomictype
@@ -51,16 +49,20 @@ rangelist : INTEGER '.' '.' INTEGER
           | INTEGER '.''.' INTEGER ',' rangelist
           ;
 
-fundecllist :/*epsilon*/
-            | fundecl ';' fundecllist
+fundecllist :/*epsilon*/              { $$ = malloc(sizeof(int));}
+            | fundecl ';' fundecllist { $$ = crelist($1);
+                                        $$ = $3;
+                                      }
             ;
 
-fundecl : FUNC IDENT '(' parlist ')' ':' atomictype vardecllist instr
+fundecl : FUNC IDENT '(' parlist ')' ':' atomictype vardeclist instr
         ;
 
-parlist : /*epsilon*/
-        | par
-        | par ',' parlist
+parlist : /*epsilon*/     { $$ = malloc(sizeof(int));}
+        | par             { $$ = crelist($1);}
+        | par ',' parlist { $$ = crelist($1);
+                            $$ = concat($$, $3);
+                          }
         ;
 
 par : IDENT ':' typename
@@ -82,7 +84,7 @@ instr : IF expr THEN M instr { complete($2.true,$4);
                                     }
 
     | WHILE expr DO M instr { complete($3.True, $5);
-                              complete($6.next, $2);
+                              complete($5.next, $2);
                               $$.next = $3.False;
                               gencode(GOTO, $2);
                             }
@@ -126,8 +128,8 @@ lvalue : IDENT
 exprlist : expr
         | expr ',' exprlist
         ;
-expr : INT
-      | '(' expr ')' { $$ = $2;}
+expr : INT                      { $$.type = TYPE_INT;}
+      | '(' expr ')'            { $$ = $2;}
       | expr opb expr
       | opu expr
       | IDENT '('exprlist ')'
@@ -135,19 +137,19 @@ expr : INT
       | IDENT '[' exprlist ']'
       | IDENT
       ;
-opb :"+"  { $$ = ADD; }
-    |"-"  { $$ = MINUS; }
-    |"*"  { $$ = MULTIPLIES; }
-    |"/"  { $$ = DIVIDES; }
-    |"<"  { $$ = LOWER; }
-    |"<=" { $$ = LOWER_OR_EQUAL;}
-    |">"  { $$ = SUPERIOR; }
-    |">=" { $$ = SUPERIOR_OR_EQUAL; }
-    |"="  { $$ = EQUALS; }
-    |"<>" { $$ = DIFFERENT; }
-    | AND { $$ = AND; }
-    | OR  { $$ = OR; }
-    | XOR { $$ = XOR; }
+opb :'+'    { $$ = ADD; }
+    |'-'    { $$ = MINUS; }
+    |'*'    { $$ = MULTIPLIES; }
+    |'/'    { $$ = DIVIDES; }
+    |'<'    { $$ = LOWER; }
+    |'<''=' { $$ = LOWER_OR_EQUAL;}
+    |'>'    { $$ = SUPERIOR; }
+    |'>''=' { $$ = SUPERIOR_OR_EQUAL; }
+    |'='    { $$ = EQUALS; }
+    |'<''>' { $$ = DIFFERENT; }
+    | AND   { $$ = AND; }
+    | OR    { $$ = OR; }
+    | XOR   { $$ = XOR; }
     ;
 opu : '-' { $$ = NEGATE;}
   | NOT { $$ = NOT;}

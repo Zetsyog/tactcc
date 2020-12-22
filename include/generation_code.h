@@ -3,5 +3,6 @@
 
 int gencode(Operation op, ...);
 int* crelist(int addr);
-void concat(int* list1, int* list2);
+int* concat(int* list1, int* list2);
 void newtemp();
+void complete(int* list, int addr);

@@ -11,11 +11,11 @@ typedef enum {
     SUPERIOR          = 8,
     SUPERIOR_OR_EQUAL = 9,
     EQUALS            = 10,
-    DIFFERENT         = 11,
+    DIFFERENT         = 11
 } Operation;
 
 typedef struct{
-    OP      op;
+    Operation     op;
     void*   arg1;
     void*   arg2;
     void*   res;
