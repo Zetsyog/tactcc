@@ -20,7 +20,7 @@ LBUILD   := $(LSOURCES:$(SRCDIR)/%.l=$(OBJDIR)/%.lex.c)
 SOURCES  := $(wildcard $(SRCDIR)/**/*.c) $(wildcard $(SRCDIR)/*.c)
 
 INCLUDES := $(wildcard $(INCLUDE_PATH)/**/*.h) $(wildcard $(INCLUDE_PATH)/*.h)
-OBJECTS  := $(SOURCES:$(SRCDIR)/%.c=$(OBJDIR)/%.o
+OBJECTS  := $(SOURCES:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
 OBJECTS2 := $(YBUILD:$(OBJDIR)/%.c=$(OBJDIR)/%.o) $(LBUILD:$(OBJDIR)/%.c=$(OBJDIR)/%.o)
 
 $(BINDIR)/$(TARGET): $(OBJECTS2) $(OBJECTS)
