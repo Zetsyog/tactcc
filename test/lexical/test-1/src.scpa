@@ -1,0 +1,6 @@
+program test
+    var i,j: int
+    begin
+        i := 4;
+        j := -5;
+    end

@@ -10,3 +10,6 @@ bin/*
 
 # Editor local config
 .vscode/
+
+# Log files
+*.log
