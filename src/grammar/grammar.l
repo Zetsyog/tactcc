@@ -28,7 +28,7 @@ commentaire "(*"(.|\n)*"*)"
 "else"     return(ELSE);
 "while"    return(WHILE);
 "return"   return(RETURN);
-"begin"    return(BEGIN_TOK);
+"begin"    {printf("BEGIN_TOK\n");return(BEGIN_TOK); }
 "end"      return(END);
 "read"     return(READ);
 "write"    return(WRITE);
@@ -39,8 +39,8 @@ commentaire "(*"(.|\n)*"*)"
 "xor"      return(XOR);
 "not"      return(NOT);       
 "+"|"-"|"*"|"/"|"<"|"<="|">"|">="|"="|"<>"  {return yytext[0];}
-{ident} yylval=(int)yytext[0]; return(IDENT);
-{integer} yylval=atoi(yytext); return(INTEGER);
+{ident} { yylval=(int)yytext[0]; printf("IDENT_TOK\n"); return(IDENT); }
+{integer} { yylval=atoi(yytext); printf("INT_TOK\n"); return(INT); }
 {commentaire} return(COM);
 
 %%

@@ -73,8 +73,7 @@ extern int yydebug;
     XOR = 279,
     NOT = 280,
     DO = 281,
-    INTEGER = 282,
-    OF = 283
+    OF = 282
   };
 #endif
 /* Tokens.  */
@@ -102,8 +101,7 @@ extern int yydebug;
 #define XOR 279
 #define NOT 280
 #define DO 281
-#define INTEGER 282
-#define OF 283
+#define OF 282
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED

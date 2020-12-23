@@ -6,7 +6,7 @@
 
 #define can_log(level)                                                         \
     {                                                                          \
-        if (log_level < level)                                                 \
+        if (_log_level < level)                                                 \
             return;                                                            \
     }
 
