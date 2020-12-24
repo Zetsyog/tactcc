@@ -3,58 +3,50 @@
 #include "grammar.h"
 #include <stdio.h>
 
+static void print_sym_val(struct symbol_t *sym) {
+	if(sym->sym_type == SYM_VAR) {
+		printf("%s", sym->name);
+	} else if(sym->sym_type == SYM_CST) {
+		printf("%i", sym->data);
+	}
+}
+
 void print_intermediate_code() {
 	for (int i = 0; i < nextquad; i++) {
 		printf("%i\t", i + 1);
-		struct quad *quad = tabQuad[i];
+		struct quad_t quad = tabQuad[i];
 
-		switch (quad->op) {
-		case ASSIGNMENT:
-			printf("%s := %s\n", (char *)quad->res, (char *)quad->arg1);
+		switch (quad.op) {
+		case OP_ASSIGNMENT:
+			print_sym_val(quad.res);
+			printf(" := ");
+			print_sym_val(quad.arg1);
+			printf("\n");
 			break;
-		case ADD:
-			printf("%s := %s + %s\n", (char *)quad->res, (char *)quad->arg1,
-				   (char *)quad->arg2);
+		case OP_ADD:
 			break;
-		case MINUS:
-			printf("%s := %s - %s\n", (char *)quad->res, (char *)quad->arg1,
-				   (char *)quad->arg2);
+		case OP_MINUS:
 			break;
-		case MULTIPLIES:
-			printf("%s := %s * %s\n", (char *)quad->res, (char *)quad->arg1,
-				   (char *)quad->arg2);
+		case OP_MULTIPLIES:
 			break;
-		case DIVIDES:
-			printf("%s := %s / %s\n", (char *)quad->res, (char *)quad->arg1,
-				   (char *)quad->arg2);
+		case OP_DIVIDES:
 			break;
-		case POWER:
-			printf("%s := %s ^ %s\n", (char *)quad->res, (char *)quad->arg1,
-				   (char *)quad->arg2);
+		case OP_POWER:
 			break;
-		case LOWER:
-			printf("%s := %s < %s\n", (char *)quad->res, (char *)quad->arg1,
-				   (char *)quad->arg2);
+		case OP_LOWER:
 			break;
-		case LOWER_OR_EQUAL:
-			printf("%s := %s <= %s\n", (char *)quad->res, (char *)quad->arg1,
-				   (char *)quad->arg2);
+		case OP_LOWER_OR_EQUAL:
 			break;
-		case SUPERIOR:
-			printf("%s := %s > %s\n", (char *)quad->res, (char *)quad->arg1,
-				   (char *)quad->arg2);
+		case OP_SUPERIOR:
 			break;
-		case SUPERIOR_OR_EQUAL:
-			printf("%s := %s >= %s\n", (char *)quad->res, (char *)quad->arg1,
-				   (char *)quad->arg2);
+		case OP_SUPERIOR_OR_EQUAL:
 			break;
-		case EQUALS:
-			printf("%s := %s = %s\n", (char *)quad->res, (char *)quad->arg1,
-				   (char *)quad->arg2);
+		case OP_EQUALS:
 			break;
-		case DIFFERENT:
-			printf("%s := %s <> %s\n", (char *)quad->res, (char *)quad->arg1,
-				   (char *)quad->arg2);
+		case OP_DIFFERENT:
+			break;
+		case OP_GOTO:
+			// TODO
 			break;
         }
 	}

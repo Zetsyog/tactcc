@@ -53,27 +53,29 @@ extern int yydebug;
     VAR = 259,
     UNIT = 260,
     BOOL = 261,
-    INT = 262,
-    ARRAY = 263,
-    FUNC = 264,
-    REF = 265,
-    IF = 266,
-    THEN = 267,
-    ELSE = 268,
-    WHILE = 269,
-    RETURN = 270,
-    BEGIN_TOK = 271,
-    READ = 272,
-    WRITE = 273,
-    IDENT = 274,
-    COM = 275,
-    END = 276,
-    AND = 277,
-    OR = 278,
-    XOR = 279,
-    NOT = 280,
-    DO = 281,
-    OF = 282
+    ARRAY = 262,
+    FUNC = 263,
+    REF = 264,
+    IF = 265,
+    THEN = 266,
+    ELSE = 267,
+    WHILE = 268,
+    RETURN = 269,
+    BEGIN_TOK = 270,
+    READ = 271,
+    WRITE = 272,
+    COM = 273,
+    END = 274,
+    AND = 275,
+    OR = 276,
+    XOR = 277,
+    NOT = 278,
+    DO = 279,
+    OF = 280,
+    INT = 281,
+    IDENT = 282,
+    OPU = 283,
+    IFEND = 284
   };
 #endif
 /* Tokens.  */
@@ -81,31 +83,56 @@ extern int yydebug;
 #define VAR 259
 #define UNIT 260
 #define BOOL 261
-#define INT 262
-#define ARRAY 263
-#define FUNC 264
-#define REF 265
-#define IF 266
-#define THEN 267
-#define ELSE 268
-#define WHILE 269
-#define RETURN 270
-#define BEGIN_TOK 271
-#define READ 272
-#define WRITE 273
-#define IDENT 274
-#define COM 275
-#define END 276
-#define AND 277
-#define OR 278
-#define XOR 279
-#define NOT 280
-#define DO 281
-#define OF 282
+#define ARRAY 262
+#define FUNC 263
+#define REF 264
+#define IF 265
+#define THEN 266
+#define ELSE 267
+#define WHILE 268
+#define RETURN 269
+#define BEGIN_TOK 270
+#define READ 271
+#define WRITE 272
+#define COM 273
+#define END 274
+#define AND 275
+#define OR 276
+#define XOR 277
+#define NOT 278
+#define DO 279
+#define OF 280
+#define INT 281
+#define IDENT 282
+#define OPU 283
+#define IFEND 284
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-typedef int YYSTYPE;
+union YYSTYPE
+{
+#line 16 "src/grammar/grammar.y"
+
+        struct {
+                struct list_t *true;
+                struct list_t *false;
+        } cond;
+        struct list_t *pos;
+        struct {
+                struct symbol_t *ptr;
+        } var;
+        struct node_t *list;
+        int quad;
+        int intVal;
+        char strVal[SYM_NAME_MAX_LEN];
+        struct symbol_t *sym;
+        unsigned int a_type;
+        enum operation_t operation;
+
+#line 133 "./include/grammar.h"
+
+};
+typedef union YYSTYPE YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
 #endif

@@ -1,39 +1,15 @@
 #ifndef GEN_DEF_H
 #define GEN_DEF_H
 
-typedef enum {
-	ASSIGNMENT		  = 0,
-	ADD				  = 1,
-	MINUS			  = 2,
-	MULTIPLIES		  = 3,
-	DIVIDES			  = 4,
-	POWER			  = 5,
-	LOWER			  = 6,
-	LOWER_OR_EQUAL	  = 7,
-	SUPERIOR		  = 8,
-	SUPERIOR_OR_EQUAL = 9,
-	EQUALS			  = 10,
-	DIFFERENT		  = 11,
-	GOTO			  = 12
-
-} operation;
-
-struct quad {
-	operation op;
-	void *arg1;
-	void *arg2;
-	void *res;
-};
+#include "generation/quad.h"
+#include "generation/symtable.h"
 
 typedef unsigned int uint;
 
-int nextquad;
-struct quad *tabQuad[10000];
-
-int gencode(operation op, ...);
-int *crelist(int addr);
-int *concat(int *list1, int *list2);
-void newtemp();
+int gencode(uint op, ...);
+struct list_t *crelist(int pos);
+struct list_t *concat(struct list_t *list1, struct list_t *list2);
+struct symbol_t *newtemp(enum sym_type_t, enum atomic_type_t, int data);
 void complete(int *list, int addr);
 
 #endif

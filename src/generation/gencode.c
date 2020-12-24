@@ -1,5 +1,7 @@
 #include "generation/defs.h"
 #include "grammar.h"
+#include "logger.h"
+#include "util.h"
 #include <stdarg.h>
 #include <stdlib.h>
 
@@ -9,61 +11,64 @@ int gencode(uint op, ...) {
 	int index	= nextquad;
 	size_t size = 0;
 
-	if (op == GOTO) {
-		tabQuad[index]		 = (struct quad *)malloc(sizeof(struct quad));
-		tabQuad[index]->arg1 = NULL;
-		tabQuad[index]->arg2 = NULL;
-		tabQuad[index]->res	 = va_arg(args, int *);
-	} else if (op == READ || WRITE) {
-		tabQuad[index]		 = (struct quad *)malloc(sizeof(struct quad));
-		tabQuad[index]->arg1 = va_arg(args, char *);
-		tabQuad[index]->arg2 = NULL;
-		tabQuad[index]->res	 = NULL;
-	} else if (op == ASSIGNMENT) {
+	log_debug("new quad %u", op);
 
-		tabQuad[index]		 = (struct quad *)malloc(sizeof(struct quad));
-		tabQuad[index]->arg1 = va_arg(args, char *);
-		tabQuad[index]->arg2 = NULL;
-		tabQuad[index]->res	 = va_arg(args, int *);
+	if (op == OP_GOTO) {
+		tabQuad[index].arg1 = NULL;
+		tabQuad[index].arg2 = NULL;
+		tabQuad[index].res	= va_arg(args, int *);
+	} else if (op == OP_ASSIGNMENT) {
+		tabQuad[index].arg1 = va_arg(args, void *);
+		tabQuad[index].arg2 = NULL;
+		tabQuad[index].res	= va_arg(args, void *);
+		log_debug("%s := %s\n", ((struct symbol_t *)tabQuad[index].res)->name,
+				  ((struct symbol_t *)tabQuad[index].arg1)->name);
 	} else {
-		tabQuad[index]		 = (struct quad *)malloc(sizeof(struct quad));
-		tabQuad[index]->arg1 = va_arg(args, void *);
-		tabQuad[index]->arg2 = NULL;
+		tabQuad[index].arg1 = va_arg(args, void *);
+		tabQuad[index].arg2 = NULL;
 		if (op >= 15)
 			size = 2;
 		else
 			size = 3;
 
 		if (size >= 3)
-			tabQuad[index]->arg2 = va_arg(args, void *);
+			tabQuad[index].arg2 = va_arg(args, void *);
 
-		tabQuad[index]->res = NULL;
+		tabQuad[index].res = NULL;
 
 		if (size >= 2)
-			tabQuad[index]->res = va_arg(args, void *);
+			tabQuad[index].res = va_arg(args, void *);
 	}
 
-	tabQuad[index]->op = op;
+	tabQuad[index].op = op;
 	va_end(args);
 	nextquad++;
 	return index;
 }
 
-int *crelist(int addr) {
-	int *list = malloc(sizeof(int));
-	for (int i = 0; i < sizeof(list); i++) {
-		list[i] = addr;
-	}
-	return list;
+struct list_t *crelist(int pos) {
+	struct list_t *l;
+	MCHECK(l = malloc(sizeof(struct list_t)));
+	l->position = pos;
+	l->next		= NULL;
+	return l;
 }
 
-int *concat(int *list1, int *list2) {
-	list1, list2 = malloc(sizeof(int));
-	int *list_concat = malloc(sizeof(list1) + sizeof(list2));
-	for (int i = 0; i < sizeof(list1); i++)
-		list_concat[i] = list1[i];
-	for (int j = 0; j < sizeof(list2); j++)
-		list_concat[j + sizeof(list1)] = list2[j];
+struct list_t *concat(struct list_t *list1, struct list_t *list2) {
+	struct list_t *res;
+	if (list1 != NULL)
+		res = list1;
+	else if (list2 != NULL)
+		res = list2;
+	else
+		res = NULL;
 
-	return list_concat;
+	if (list1 != NULL) {
+		while (list1 != NULL)
+			list1 = list1->next;
+
+		list1->next = list2;
+	}
+
+	return res;
 }
