@@ -73,7 +73,9 @@ extern int yydebug;
     XOR = 279,
     NOT = 280,
     DO = 281,
-    OF = 282
+    OF = 282,
+    OPU = 283,
+    IFEND = 284
   };
 #endif
 /* Tokens.  */
@@ -102,10 +104,27 @@ extern int yydebug;
 #define NOT 280
 #define DO 281
 #define OF 282
+#define OPU 283
+#define IFEND 284
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-typedef int YYSTYPE;
+union YYSTYPE
+{
+#line 10 "src/grammar/grammar.y"
+
+        struct {
+                struct list_t *true;
+                struct list_t *false;
+        } cond;
+        struct list_t *pos;
+        int quad;
+        int intVal;
+
+#line 125 "./include/grammar.h"
+
+};
+typedef union YYSTYPE YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
 #endif

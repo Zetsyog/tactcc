@@ -3,8 +3,6 @@
     #include <stdlib.h>
 
     #include "grammar.h"
-    extern int yylval;
-
 %}
 
 integer [0-9]+
@@ -28,7 +26,7 @@ commentaire "(*"(.|\n)*"*)"
 "else"     return(ELSE);
 "while"    return(WHILE);
 "return"   return(RETURN);
-"begin"    {printf("BEGIN_TOK\n");return(BEGIN_TOK); }
+"begin"    return(BEGIN_TOK);
 "end"      return(END);
 "read"     return(READ);
 "write"    return(WRITE);
@@ -39,8 +37,11 @@ commentaire "(*"(.|\n)*"*)"
 "xor"      return(XOR);
 "not"      return(NOT);       
 "+"|"-"|"*"|"/"|"<"|"<="|">"|">="|"="|"<>"  {return yytext[0];}
-{ident} { yylval=(int)yytext[0]; printf("IDENT_TOK\n"); return(IDENT); }
-{integer} { yylval=atoi(yytext); printf("INT_TOK\n"); return(INT); }
+{ident} { /* yylval=(int)yytext[0]; */ return(IDENT); }
+{integer} { 
+    yylval.intVal=atoi(yytext); 
+    return(INT); 
+}
 {commentaire} return(COM);
 
 %%

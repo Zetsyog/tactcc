@@ -7,9 +7,27 @@ int yyparse();
 void yyerror(const char *s);
 %}
 
+%union {
+        struct {
+                struct list_t *true;
+                struct list_t *false;
+        } cond;
+        struct list_t *pos;
+        int quad;
+        int intVal;
+}
+
 %token PROG VAR UNIT BOOL INT ARRAY FUNC REF IF THEN ELSE
 %token WHILE RETURN BEGIN_TOK READ WRITE IDENT COM
 %token END AND OR XOR NOT DO OF
+
+%left XOR OR '+' '-'
+%left AND '*' '/'
+%left '^'
+%left OPU NOT
+
+%nonassoc IFEND
+%nonassoc ELSE
 
 %start program
 
@@ -118,7 +136,7 @@ opb:'+'    { }
    | XOR   { }
    ;
 
-opu: '-' { }
+opu: '-' %prec OPU{ }
    | NOT { }
    ;
 
