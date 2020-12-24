@@ -9,6 +9,7 @@ struct symbol_t *newtemp(enum sym_type_t sym_type,
 	char name[SYM_NAME_MAX_LEN] = {0};
     do {
 		snprintf(name, SYM_NAME_MAX_LEN - 1, "%s%u", TMP_VAR_PREFIX, nextTmp);
+		nextTmp++;
 	} while (st_get(name) != NULL);
 
 	struct symbol_t *sym = sym_create(name, sym_type, atomic_type);

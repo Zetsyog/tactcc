@@ -51,4 +51,6 @@ commentaire "(*"(.|\n)*"*)"
 }
 {commentaire} return(COM);
 
+[[:space:]]+      ;
+
 %%

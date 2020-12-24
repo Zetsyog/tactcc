@@ -13,20 +13,16 @@ int gencode(uint op, ...) {
 
 	log_debug("new quad %u", op);
 
-	if (op == GOTO) {
+	if (op == OP_GOTO) {
 		tabQuad[index].arg1 = NULL;
 		tabQuad[index].arg2 = NULL;
 		tabQuad[index].res	= va_arg(args, int *);
-	} else if (op == READ || op == WRITE) {
-		tabQuad[index].arg1 = va_arg(args, char *);
+	} else if (op == OP_ASSIGNMENT) {
+		tabQuad[index].arg1 = va_arg(args, void *);
 		tabQuad[index].arg2 = NULL;
-		tabQuad[index].res	= NULL;
-	} else if (op == ASSIGNMENT) {
-		tabQuad[index].arg1 = va_arg(args, char *);
-		tabQuad[index].arg2 = NULL;
-		tabQuad[index].res	= va_arg(args, int *);
+		tabQuad[index].res	= va_arg(args, void *);
 		log_debug("%s := %s\n", ((struct symbol_t *)tabQuad[index].res)->name,
-				  tabQuad[index].arg1);
+				  ((struct symbol_t *)tabQuad[index].arg1)->name);
 	} else {
 		tabQuad[index].arg1 = va_arg(args, void *);
 		tabQuad[index].arg2 = NULL;

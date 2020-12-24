@@ -20,7 +20,7 @@ void yyerror(const char *s);
         } cond;
         struct list_t *pos;
         struct {
-                void *ptr;
+                struct symbol_t *ptr;
         } var;
         struct node_t *list;
         int quad;
@@ -28,6 +28,7 @@ void yyerror(const char *s);
         char strVal[SYM_NAME_MAX_LEN];
         struct symbol_t *sym;
         unsigned int a_type;
+        enum operation_t operation;
 }
 
 %token PROG VAR UNIT BOOL ARRAY FUNC REF IF THEN ELSE
@@ -45,6 +46,7 @@ void yyerror(const char *s);
 %type <sym> lvalue
 %type <a_type> varsdecl atomictype typename
 %type <list> vardeclist identlist
+%type <operation> opu
 
 %nonassoc IFEND
 %nonassoc ELSE
@@ -131,20 +133,25 @@ par: IDENT ':' typename
 instr: IF expr THEN M instr { }
      | IF expr THEN M instr ELSE N instr { }
      | WHILE expr DO M instr {  }
-     | lvalue ':' '=' expr { gencode(ASSIGNMENT, $4.ptr, $1); }
+     | lvalue ':' '=' expr {
+                                log_debug("calling gencode(%s, %s)", 
+                                        ((struct symbol_t *)$4.ptr)->name, 
+                                        $1->name);
+                                gencode(OP_ASSIGNMENT, $4.ptr, $1); 
+                            }
      | RETURN expr
      | RETURN
      | IDENT '(' exprlist ')'
      | IDENT '(' ')'
-     | BEGIN_TOK sequence END { }
+     | BEGIN_TOK sequence END
      | BEGIN_TOK END
-     | READ lvalue { }
-     | WRITE expr { }
+     | READ lvalue
+     | WRITE expr
      ;
 
-sequence: instr ';' M sequence { }
-        | instr ';'            { }
-        | instr                { }
+sequence: instr ';' M sequence
+        | instr ';'
+        | instr
         ;
 
 M: /* empty */  { }
@@ -155,13 +162,14 @@ N:  { }
 
 
 lvalue: IDENT { 
-            struct st_entry_t *e = st_get($1);
-            if(e == NULL) {
-                log_error("syntax error: ident %s not declared", $1);
-                exit(1);
-            }
-            $$ = e->value;
-        }
+    struct st_entry_t *e = st_get($1);
+    if(e == NULL) {
+        log_error("syntax error: ident %s not declared", $1);
+        exit(1);
+    }
+    log_debug("lvalue: %s", ((struct symbol_t *)e->value)->name);
+    $$ = e->value; 
+}
       | IDENT '[' exprlist ']'  {}
       ;
 
@@ -170,11 +178,19 @@ exprlist: expr
         ;
 
 expr: INT { 
-    $$.ptr = newtemp(SYM_CST, A_INT, $1);
+    $$.ptr = newtemp(SYM_CST, A_INT, $1);    
+    log_debug("expr: %s", ((struct symbol_t *)$$.ptr)->name);
 }
     | '(' expr ')'            { }
     | expr opb expr
-    | opu expr
+    | opu expr {
+        if($2.ptr->atomic_type == A_INT && $1 == OP_NEGATE) {
+            $$.ptr = $2.ptr;
+            $2.ptr->data *= -1;
+        } else {
+            log_error("syntax: invalid operation");
+        }
+    }
     | IDENT '('exprlist ')'
     | IDENT '(' ')'
     | IDENT '[' exprlist ']'
@@ -196,8 +212,8 @@ opb:'+'    { }
    | XOR   { }
    ;
 
-opu: '-' %prec OPU{ }
-   | NOT { }
+opu: '-' %prec OPU{ $$ = OP_NEGATE;  }
+   | NOT { $$ = NOT; }
    ;
 
 %%

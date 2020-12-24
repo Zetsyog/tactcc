@@ -63,8 +63,9 @@ struct st_entry_t *st_put(char *key,
 	}
 
 	// Getting here means the key doesn't already exist
-	MCHECK(entry = calloc(1, sizeof(struct st_entry_t)) + strlen(key) + 1);
-	strcpy(entry->key, key);
+	size_t len = strlen(key);
+	MCHECK(entry = calloc(1, sizeof(struct st_entry_t) + len + 1));
+	strncpy(entry->key, key, len);
 	entry->value = value;
 
 	// Add the element at the beginning of the linked list

@@ -2,19 +2,24 @@
 #define GEN_QUAD_H
 
 enum operation_t {
-	ASSIGNMENT		  = 0,
-	ADD				  = 1,
-	MINUS			  = 2,
-	MULTIPLIES		  = 3,
-	DIVIDES			  = 4,
-	POWER			  = 5,
-	LOWER			  = 6,
-	LOWER_OR_EQUAL	  = 7,
-	SUPERIOR		  = 8,
-	SUPERIOR_OR_EQUAL = 9,
-	EQUALS			  = 10,
-	DIFFERENT		  = 11,
-	GOTO			  = 12
+	OP_ASSIGNMENT		 = 0,
+	OP_ADD				 = 1,
+	OP_MINUS			 = 2,
+	OP_MULTIPLIES		 = 3,
+	OP_DIVIDES			 = 4,
+	OP_POWER			 = 5,
+	OP_LOWER			 = 6,
+	OP_LOWER_OR_EQUAL	 = 7,
+	OP_SUPERIOR			 = 8,
+	OP_SUPERIOR_OR_EQUAL = 9,
+	OP_EQUALS			 = 10,
+	OP_DIFFERENT		 = 11,
+	OP_GOTO				 = 12,
+	OP_NEGATE			 = 13,
+	OP_AND				 = 14,
+	OP_OR				 = 15,
+	OP_XOR				 = 16,
+	OP_NOT				 = 17
 
 };
 
