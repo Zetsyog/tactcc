@@ -56,6 +56,9 @@ void print_intermediate_code() {
 			printf("%s := %s <> %s\n", (char *)quad.res, (char *)quad.arg1,
 				   (char *)quad.arg2);
 			break;
+		case GOTO:
+			// TODO
+			break;
         }
 	}
 }

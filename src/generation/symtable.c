@@ -3,6 +3,10 @@
 #include "util.h"
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
+
+struct symtable_t *st;
+
 
 /**
  * djb2 hash function by Dan Bernstein.
@@ -18,7 +22,6 @@ unsigned long st_hash(char *str) {
 }
 
 struct symtable_t *st_create(unsigned int size) {
-	struct symtable_t *st;
 	MCHECK(st = malloc(sizeof(struct symtable_t)));
 	if ((st->table = calloc(size, sizeof(struct st_entry_t *))) == NULL) {
 		free(st);
@@ -29,7 +32,7 @@ struct symtable_t *st_create(unsigned int size) {
 	return st;
 }
 
-struct st_entry_t *st_get(struct symtable_t *st, char *key) {
+struct st_entry_t *st_get(char *key) {
 	unsigned long h		 = st_hash(key) % st->size;
 	struct st_entry_t *e = st->table[h];
 	while (e != NULL) {
@@ -41,10 +44,12 @@ struct st_entry_t *st_get(struct symtable_t *st, char *key) {
 	return NULL;
 }
 
-struct st_entry_t *st_put(struct symtable_t *st, char *key,
-						  struct symbol_t value) {
+struct st_entry_t *st_put(char *key,
+						  struct symbol_t *value) {
 	if (st == NULL)
 		return NULL;
+
+	log_debug("Adding entry %s (%u) in symtable", value->name, value->atomic_type);
 
 	unsigned long hash		 = st_hash(key) % st->size;
 	struct st_entry_t *entry = st->table[hash];
@@ -58,7 +63,7 @@ struct st_entry_t *st_put(struct symtable_t *st, char *key,
 	}
 
 	// Getting here means the key doesn't already exist
-	MCHECK(entry = malloc(sizeof(struct st_entry_t)) + strlen(key) + 1);
+	MCHECK(entry = calloc(1, sizeof(struct st_entry_t)) + strlen(key) + 1);
 	strcpy(entry->key, key);
 	entry->value = value;
 
@@ -71,7 +76,7 @@ struct st_entry_t *st_put(struct symtable_t *st, char *key,
 	return NULL;
 }
 
-void st_destroy(struct symtable_t *st) {
+void st_destroy() {
 	if (st->usage != 0) {
 		unsigned int idx = 0;
 		while (idx < st->size) {
@@ -84,4 +89,14 @@ void st_destroy(struct symtable_t *st) {
 	}
 	free(st->table);
 	free(st);
+}
+
+void st_debug() {
+	unsigned int idx = 0;
+		while (idx < st->size) {
+			if (st->table[idx] != NULL) {
+				printf("%s\n", st->table[idx]->value->name);
+			}
+			idx++;
+		}
 }

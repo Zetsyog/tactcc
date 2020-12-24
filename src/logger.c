@@ -25,9 +25,9 @@ void log_format(FILE *file, const char *tag, const char *message,
 
     strftime(buffer, 26, "%Y-%m-%d %H:%M:%S", tm_info);
 
-    printf("%s [%s]: ", buffer, tag);
+    fprintf(file, "%s [%s]: ", buffer, tag);
     vfprintf(file, message, args);
-    printf("\n");
+    fprintf(file, "\n");
 }
 
 void log_debug(const char *message, ...) {
@@ -54,8 +54,9 @@ void log_error(const char *message, ...) {
     can_log(LOG_LEVEL_ERROR);
     va_list args;
     va_start(args, message);
-    printf("\033[1;31m");
+    fprintf(stderr, "\033[1;31m");
     log_format(stderr, "ERROR", message, args);
-    printf("\033[0m");
+    fprintf(stderr, "\033[0m");
     va_end(args);
+	exit(1);
 }

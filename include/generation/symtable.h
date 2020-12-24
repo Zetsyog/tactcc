@@ -4,7 +4,7 @@
 #include "generation/symbol.h"
 
 struct st_entry_t {
-	struct symbol_t value;
+	struct symbol_t *value;
 	struct st_entry_t *next;
 	char key[];
 };
@@ -29,27 +29,27 @@ struct symtable_t *st_create(unsigned int size);
  * @param key the key to search for
  * @return the data looked for, else return NULL
  */
-struct st_entry_t *st_get(struct symtable_t *t, char *key);
+struct st_entry_t *st_get(char *key);
+
+void st_debug();
 
 /**
  * Store a value in the table with the given key
  * If data is already store with the same key it will be replaced
  * TODO : check if it is not better to use symbol_t * as value
- * @param t the working symtable
  * @param key
  * @param value
  * @return NULL on success
  */
-struct st_entry_t *st_put(struct symtable_t *t, char *key,
-						  struct symbol_t value);
+struct st_entry_t *st_put(char *key,
+						  struct symbol_t *value);
 
 // TODO: maybe add new functions like clear, remove, iterate
 // dunno if needed
 
 /**
  * Destroy a symbol table
- * @param t The table to destroy
  */
-void st_destroy(struct symtable_t *t);
+void st_destroy();
 
 #endif

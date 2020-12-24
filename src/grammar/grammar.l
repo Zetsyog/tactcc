@@ -1,8 +1,10 @@
 %{
     #include <stdio.h>
     #include <stdlib.h>
-
+    #include <string.h>
+    #include "generation/defs.h"
     #include "grammar.h"
+    #include "util.h"
 %}
 
 integer [0-9]+
@@ -37,7 +39,12 @@ commentaire "(*"(.|\n)*"*)"
 "xor"      return(XOR);
 "not"      return(NOT);       
 "+"|"-"|"*"|"/"|"<"|"<="|">"|">="|"="|"<>"  {return yytext[0];}
-{ident} { /* yylval=(int)yytext[0]; */ return(IDENT); }
+{ident} {
+    memset(yylval.strVal, 0, SYM_NAME_MAX_LEN);
+    strncpy(yylval.strVal, yytext, SYM_NAME_MAX_LEN);
+    log_debug("[LEX] (ident): %s", yylval.strVal);
+    return(IDENT); 
+}
 {integer} { 
     yylval.intVal=atoi(yytext); 
     return(INT); 

@@ -2,8 +2,9 @@ CC   ?= gcc
 YACC ?= yacc
 LEX  ?= lex
 
-CFLAGS  ?= -Wall -Wextra -g
-LDLIBS  ?= -lfl
+CFLAGS    ?= -Wall -Wextra -g
+LDLIBS    ?= -lfl
+YACCFLAGS ?= -v
 
 INCLUDE_PATH = ./include
 TARGET   = scalpa
@@ -38,7 +39,7 @@ $(OBJECTS2): $(OBJDIR)/%.o : $(OBJDIR)/%.c
 $(YBUILD): $(YSOURCES)
 	@echo --- Compiling yacc ---
 	mkdir -p $(dir $@)
-	$(YACC) -o $@ --defines=$(INCLUDE_PATH)/$(LEX_HDR_NAME) $<
+	$(YACC) $(YACCFLAGS) -o $@ --defines=$(INCLUDE_PATH)/$(LEX_HDR_NAME) $<
 
 $(LBUILD): $(LSOURCES)
 	@echo --- Compiling lex ---

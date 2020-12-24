@@ -2,6 +2,7 @@
 #define UTIL_H
 
 #include "logger.h"
+#include "util/node.h"
 
 #define MCHECK(op)                       \
 	do {                                 \
