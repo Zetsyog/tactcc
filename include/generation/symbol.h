@@ -7,17 +7,20 @@
  * Type of a symbol
  */
 enum sym_type_t {
-	SYM_CST,   /* Constant */
-	SYM_VAR,   /* Variable */
-	SYM_ARRAY, /* Array */
-	SYM_FUN	   /* Function */
+	SYM_CST	  = 0, /* Constant */
+	SYM_VAR	  = 1, /* Variable */
+	SYM_ARRAY = 2, /* Array */
+	SYM_FUN	  = 3  /* Function */
 };
+
+extern char *sym_type_str[];
 
 /**
  * Atomic types availables in Scalpa
  */
 // TODO: move in a more appropriate location
-enum atomic_type_t { A_UNIT, A_INT, A_BOOL };
+enum atomic_type_t { A_UNIT = 0, A_INT = 1, A_BOOL = 2 };
+extern char *atomic_type_str[];
 
 struct symbol_t {
 	char name[SYM_NAME_MAX_LEN];

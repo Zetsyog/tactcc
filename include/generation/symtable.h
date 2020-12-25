@@ -16,6 +16,8 @@ struct symtable_t {
 	struct st_entry_t **table; // the table where entries are stored
 };
 
+extern struct symtable_t *st;
+
 /**
  * Create a new symbol table
  * @param size the initial size of the table
@@ -31,7 +33,10 @@ struct symtable_t *st_create(unsigned int size);
  */
 struct st_entry_t *st_get(char *key);
 
-void st_debug();
+/**
+ * Print the symbol table in stdout
+ */
+void st_print();
 
 /**
  * Store a value in the table with the given key

@@ -4,6 +4,7 @@
 #include "generation/defs.h"
 #include "grammar.h"
 #include "util.h"
+#include "mips/defs.h"
 #include "generation/print_code.h"
 
 int yylex();
@@ -226,9 +227,11 @@ int main(void)
     yyparse();
     log_info("done");
     log_debug("Sym table :");
-
+    st_print();
     log_debug("Result :");
     print_intermediate_code();
+    log_debug("Generated MIPS :");
+    gen_mips(stdout);
     st_destroy();
     return 0;
 }

@@ -4,6 +4,14 @@
 #include <string.h>
 #include <stdlib.h>
 
+char *sym_type_str[] = {[SYM_CST]	= "CONST",
+						[SYM_VAR]	= "VAR",
+						[SYM_ARRAY] = "ARRAY",
+						[SYM_FUN]	= "FUNC"};
+
+char *atomic_type_str[] = {
+	[A_UNIT] = "unit", [A_INT] = "int", [A_BOOL] = "bool"};
+
 struct symbol_t *sym_create(char *name, enum sym_type_t sym_type,
 						  enum atomic_type_t atomic_type) {
 	struct symbol_t *s;

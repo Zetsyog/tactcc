@@ -35,7 +35,7 @@ struct list_t {
 	struct list_t *next;
 };
 
-int nextquad;
+unsigned int nextquad;
 struct quad_t tabQuad[10000];
 
 #endif
