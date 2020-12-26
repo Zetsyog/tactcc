@@ -24,30 +24,143 @@ void print_intermediate_code() {
 			printf("\n");
 			break;
 		case OP_ADD:
+			print_sym_val(quad.res);
+			printf(" := ");
+			print_sym_val(quad.arg1);
+			printf(" + ");
+			print_sym_val(quad.arg2);
+			printf("\n");
 			break;
 		case OP_MINUS:
+			print_sym_val(quad.res);
+			printf(" := ");
+			print_sym_val(quad.arg1);
+			printf(" - ");
+			print_sym_val(quad.arg2);
+			printf("\n");
 			break;
 		case OP_MULTIPLIES:
+			print_sym_val(quad.res);
+			printf(" := ");
+			print_sym_val(quad.arg1);
+			printf(" * ");
+			print_sym_val(quad.arg2);
+			printf("\n");
 			break;
 		case OP_DIVIDES:
+			print_sym_val(quad.res);
+			printf(" := ");
+			print_sym_val(quad.arg1);
+			printf(" / ");
+			print_sym_val(quad.arg2);
+			printf("\n");
 			break;
 		case OP_POWER:
+			print_sym_val(quad.res);
+			printf(" := ");
+			print_sym_val(quad.arg1);
+			printf(" ^ ");
+			print_sym_val(quad.arg2);
+			printf("\n");
 			break;
 		case OP_LOWER:
+			print_sym_val(quad.res);
+			printf(" := ");
+			print_sym_val(quad.arg1);
+			printf(" < ");
+			print_sym_val(quad.arg2);
+			printf("\n");
 			break;
 		case OP_LOWER_OR_EQUAL:
+			print_sym_val(quad.res);
+			printf(" := ");
+			print_sym_val(quad.arg1);
+			printf(" <= ");
+			print_sym_val(quad.arg2);
+			printf("\n");
 			break;
 		case OP_SUPERIOR:
+			print_sym_val(quad.res);
+			printf(" := ");
+			print_sym_val(quad.arg1);
+			printf(" > ");
+			print_sym_val(quad.arg2);
+			printf("\n");
 			break;
 		case OP_SUPERIOR_OR_EQUAL:
+			print_sym_val(quad.res);
+			printf(" := ");
+			print_sym_val(quad.arg1);
+			printf(" >= ");
+			print_sym_val(quad.arg2);
+			printf("\n");
 			break;
 		case OP_EQUALS:
+			print_sym_val(quad.res);
+			printf(" := ");
+			print_sym_val(quad.arg1);
+			printf(" = ");
+			print_sym_val(quad.arg2);
+			printf("\n");
 			break;
 		case OP_DIFFERENT:
+			print_sym_val(quad.res);
+			printf(" := ");
+			print_sym_val(quad.arg1);
+			printf(" <> ");
+			print_sym_val(quad.arg2);
+			printf("\n");
 			break;
 		case OP_GOTO:
+			if(quad.arg1 == NULL){
+					printf("GOTO ?");
+			}else{
+							printf(" GOTO ");
+							print_sym_val(quad.res);
+							printf("\n");
+			}
+
 			// TODO
+
 			break;
-        }
+		case OP_NEGATE:
+			print_sym_val(quad.res);
+			printf(" := ");
+			printf(" - ");
+			print_sym_val(quad.arg1);
+			printf("\n");
+			break;
+		case OP_AND:
+			print_sym_val(quad.res);
+			printf(" := ");
+			print_sym_val(quad.arg1);
+			printf(" AND ");
+			print_sym_val(quad.arg2);
+			printf("\n");
+			break;
+		case OP_OR:
+			print_sym_val(quad.res);
+			printf(" := ");
+			print_sym_val(quad.arg1);
+			printf(" OR ");
+			print_sym_val(quad.arg2);
+			printf("\n");
+			break;
+		case OP_XOR:
+			print_sym_val(quad.res);
+			printf(" := ");
+			print_sym_val(quad.arg1);
+			printf(" XOR ");
+			print_sym_val(quad.arg2);
+			printf("\n");
+			break;
+		case OP_NOT:
+			print_sym_val(quad.res);
+			printf(" := ");
+			printf(" NOT ");
+			print_sym_val(quad.arg1);
+			printf("\n");
+			break;
+		}
 	}
 }

@@ -46,7 +46,7 @@ void yyerror(const char *s);
 %type <sym> lvalue
 %type <a_type> varsdecl atomictype typename
 %type <list> vardeclist identlist
-%type <operation> opu
+%type <operation> opu opb
 
 %nonassoc IFEND
 %nonassoc ELSE
@@ -58,14 +58,14 @@ program: PROG IDENT vardeclist fundecllist instr
        ;
 
 vardeclist: /*epsilon*/ { $$ = NULL; }
-          | varsdecl {  }
+          | varsdecl {}
           | varsdecl ';' vardeclist {}
           ;
 
-varsdecl: VAR identlist ':' typename { 
+varsdecl: VAR identlist ':' typename {
     if($4 == A_UNIT)
         log_error("syntax error: var cannot be of type UNIT");
-    
+
     struct node_t *list = $2;
     struct symbol_t *tmp = (struct symbol_t *)list->data;
     while(tmp != NULL) {
@@ -99,7 +99,7 @@ identlist: IDENT    {
          ;
 
 typename: atomictype { $$ = $1; }
-        | arraytype { }
+        | arraytype {}
         ;
 
 atomictype: UNIT { $$ = A_UNIT; }
@@ -107,15 +107,15 @@ atomictype: UNIT { $$ = A_UNIT; }
           | INT  { $$ = A_INT; }
           ;
 
-arraytype: ARRAY '[' rangelist ']' OF atomictype
+arraytype: ARRAY '[' rangelist ']' OF atomictype {}
          ;
 
 rangelist: INT '.' '.' INT
          | INT '.''.' INT ',' rangelist
          ;
 
-fundecllist: /*epsilon*/              { }
-           | fundecl ';' fundecllist { }
+fundecllist: /*epsilon*/              {  }
+           | fundecl ';' fundecllist {  }
            ;
 
 fundecl: FUNC IDENT '(' parlist ')' ':' atomictype vardeclist instr
@@ -134,10 +134,10 @@ instr: IF expr THEN M instr { }
      | IF expr THEN M instr ELSE N instr { }
      | WHILE expr DO M instr {  }
      | lvalue ':' '=' expr {
-                                log_debug("calling gencode(%s, %s)", 
-                                        ((struct symbol_t *)$4.ptr)->name, 
+                                log_debug("calling gencode(%s, %s)",
+                                        ((struct symbol_t *)$4.ptr)->name,
                                         $1->name);
-                                gencode(OP_ASSIGNMENT, $4.ptr, $1); 
+                                gencode(OP_ASSIGNMENT, $4.ptr, $1);
                             }
      | RETURN expr
      | RETURN
@@ -149,9 +149,9 @@ instr: IF expr THEN M instr { }
      | WRITE expr
      ;
 
-sequence: instr ';' M sequence
-        | instr ';'
-        | instr
+sequence: instr ';' M sequence {}
+        | instr ';' {}
+        | instr     {}
         ;
 
 M: /* empty */  { }
@@ -161,14 +161,14 @@ N:  { }
  ;
 
 
-lvalue: IDENT { 
+lvalue: IDENT {
     struct st_entry_t *e = st_get($1);
     if(e == NULL) {
         log_error("syntax error: ident %s not declared", $1);
         exit(1);
     }
     log_debug("lvalue: %s", ((struct symbol_t *)e->value)->name);
-    $$ = e->value; 
+    $$ = e->value;
 }
       | IDENT '[' exprlist ']'  {}
       ;
@@ -177,11 +177,13 @@ exprlist: expr
         | expr ',' exprlist
         ;
 
-expr: INT { 
-    $$.ptr = newtemp(SYM_CST, A_INT, $1);    
+expr: INT {
+    $$.ptr = newtemp(SYM_CST, A_INT, $1);
     log_debug("expr: %s", ((struct symbol_t *)$$.ptr)->name);
 }
-    | '(' expr ')'            { }
+    | '(' expr ')'  {
+                        $$ = $2;
+                    }
     | expr opb expr
     | opu expr {
         if($2.ptr->atomic_type == A_INT && $1 == OP_NEGATE) {
@@ -197,19 +199,20 @@ expr: INT {
     | IDENT
     ;
 
-opb:'+'    { }
-   |'-'    { }
-   |'*'    { }
-   |'/'    { }
-   |'<'    { }
-   |'<''=' { }
-   |'>'    { }
-   |'>''=' { }
-   |'='    { }
-   |'<''>' { }
-   | AND   { }
-   | OR    { }
-   | XOR   { }
+opb:'+'    { $$ = OP_ADD; }
+   |'-'    { $$ = OP_MINUS; }
+   |'*'    { $$ = OP_MULTIPLIES; }
+   |'/'    { $$ = OP_DIVIDES; }
+   |'^'    { $$ = OP_POWER; }
+   |'<'    { $$ = OP_LOWER; }
+   |'<''=' { $$ = OP_LOWER_OR_EQUAL; }
+   |'>'    { $$ = OP_SUPERIOR; }
+   |'>''=' { $$ = OP_SUPERIOR_OR_EQUAL; }
+   |'='    { $$ = OP_EQUALS; }
+   |'<''>' { $$ = OP_DIFFERENT; }
+   | AND   { $$ = AND; }
+   | OR    { $$ = OR; }
+   | XOR   { $$ = XOR; }
    ;
 
 opu: '-' %prec OPU{ $$ = OP_NEGATE;  }
