@@ -4,7 +4,9 @@
 #include "generation/defs.h"
 #include "grammar.h"
 #include "util.h"
+#include "mips/defs.h"
 #include "generation/print_code.h"
+#include "options.h"
 
 int yylex();
 int yyparse();
@@ -134,8 +136,8 @@ instr: IF expr THEN M instr { }
      | IF expr THEN M instr ELSE N instr { }
      | WHILE expr DO M instr {  }
      | lvalue ':' '=' expr {
-                                log_debug("calling gencode(%s, %s)",
-                                        ((struct symbol_t *)$4.ptr)->name,
+                                log_debug("calling gencode(:=, %s, %s)", 
+                                        ((struct symbol_t *)$4.ptr)->name, 
                                         $1->name);
                                 gencode(OP_ASSIGNMENT, $4.ptr, $1);
                             }
@@ -146,7 +148,7 @@ instr: IF expr THEN M instr { }
      | BEGIN_TOK sequence END
      | BEGIN_TOK END
      | READ lvalue
-     | WRITE expr
+     | WRITE expr { gencode(OP_WRITE, $2.ptr);  }
      ;
 
 sequence: instr ';' M sequence {}
@@ -196,7 +198,14 @@ expr: INT {
     | IDENT '('exprlist ')'
     | IDENT '(' ')'
     | IDENT '[' exprlist ']'
-    | IDENT
+    | IDENT { 
+        struct st_entry_t *e = st_get($1);
+        if(e == NULL) {
+            log_error("syntax error: ident %s not declared", $1);
+            exit(1);
+        }
+        $$.ptr = e->value; 
+    }
     ;
 
 opb:'+'    { $$ = OP_ADD; }
@@ -221,17 +230,42 @@ opu: '-' %prec OPU{ $$ = OP_NEGATE;  }
 
 %%
 
-int main(void)
+int main(int argc, char **argv)
 {
+    log_init();
+    parse_opt(argc, argv);
+    FILE *out = stdout;
+
+    if(options.output_path != NULL) {
+        out = fopen(options.output_path, "w");
+        if(out == NULL) {
+            log_error("Can't open file %s", options.output_path);
+            exit(EXIT_FAILURE);
+        }
+    } 
+
     log_info("Starting compilation");
     st_create(10000);
     nextquad = 0;
     yyparse();
     log_info("done");
-    log_debug("Sym table :");
-
+    if(options.print_tos) {
+        log_debug("Sym table :");
+        st_print();
+    }
     log_debug("Result :");
     print_intermediate_code();
+    if(options.output_path != NULL) {
+        log_info("Compiling in file %s", options.output_path);
+    } else {
+        log_debug("Generated MIPS :");
+    }
+    gen_mips(out);
+    if(options.output_path != NULL) {
+        fclose(out);
+    }
+    
+    
     st_destroy();
     return 0;
 }

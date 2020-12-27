@@ -1,12 +1,11 @@
 #include "generation/symtable.h"
 #include "logger.h"
 #include "util.h"
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
 
 struct symtable_t *st;
-
 
 /**
  * djb2 hash function by Dan Bernstein.
@@ -44,12 +43,12 @@ struct st_entry_t *st_get(char *key) {
 	return NULL;
 }
 
-struct st_entry_t *st_put(char *key,
-						  struct symbol_t *value) {
+struct st_entry_t *st_put(char *key, struct symbol_t *value) {
 	if (st == NULL)
 		return NULL;
 
-	log_debug("Adding entry %s (%u) in symtable", value->name, value->atomic_type);
+	log_debug("Adding entry %s (%u) in symtable", value->name,
+			  value->atomic_type);
 
 	unsigned long hash		 = st_hash(key) % st->size;
 	struct st_entry_t *entry = st->table[hash];
@@ -92,12 +91,24 @@ void st_destroy() {
 	free(st);
 }
 
-void st_debug() {
+void st_print() {
 	unsigned int idx = 0;
-		while (idx < st->size) {
-			if (st->table[idx] != NULL) {
-				printf("%s\n", st->table[idx]->value->name);
+	struct symbol_t *tmp;
+
+	printf("=============== SYMBOL TABLE ===============\n");
+	printf("%-9s%-8s%-15s %-5s %s\n", "SymType", "Type", "Name", "", "Value");
+	while (idx < st->size) {
+		if (st->table[idx] != NULL) {
+			tmp = st->table[idx]->value;
+			printf("%-9s%-8s%-15s", sym_type_str[tmp->sym_type],
+				   atomic_type_str[tmp->atomic_type], tmp->name);
+			if (tmp->atomic_type == A_INT) {
+				printf("=%-5s", "");
+				if (tmp->data >= 0)
+					printf(" ");
+				printf("%i\n", tmp->data);
 			}
-			idx++;
 		}
+		idx++;
+	}
 }

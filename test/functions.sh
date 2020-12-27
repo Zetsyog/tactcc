@@ -72,76 +72,41 @@ On_ICyan="\e[0;106m"    # Cyan
 On_IWhite="\e[0;107m"   # White
 
 TEST_NB=0
-SUCCESS=0
-FAILED=0
+SUCCESS_NB=0
+FAILED_NB=0
 
 title ()
 {
     COURANT="$1"
-    echo "${Blue}==== $1 ====${Reset}"
+    printf "${Blue}"
+    printf "==== $1 ====\n" | tee -a $LOG
+    printf "${Reset}"
 }
 
-ok ()
+success ()
 {
-    echo "${Green}OK${Reset}"
+    SUCCESS_NB=$((SUCCESS_NB+1))
+    printf "${Green}"
+    echo "OK" | tee -a $LOG
+    printf "${Reset}"
+    
 }
 
 fail ()
 {
+    FAILED_NB=$((FAILED_NB+1))
     echo "${BRed}Test failed${Reset}"
     echo "==> Exit"
-    exit 1
 }
 
 test_diff()
 {
-    echo "$2" | diff "$1" -
-}
- 
-test_in_out ()
-{
-    STDIN=$1
-    EXEPECTED=$2
-    TEST_FUNC=$3
-    OUT=/tmp/compil-test.out.$$
-    TEST_NB=$((TEST_NB+1))
-
-    # execute le programme, conserve la sortie (stdout et stderr confondu)
-    echo "" >> $LOG
-    echo "### Exec" >> $LOG
-    echo "$STDIN" | ./$TARGET 2>&1 > $OUT
-    EXITCODE=$?
-
-    # conserve la sorte dans le log
-    cat $OUT >> $LOG
-    echo "==> exitcode: $EXITCODE" >> $LOG
-
-    if [ $EXITCODE -ne 0 ]
-    then
-    FAILED=$((FAILED+1))
-    fail
-    fi
-
-
-    # Compare avec l'attendu
-    echo ""
-    echo "#### Comp" >> $LOG
-    $TEST_FUNC "$OUT" "$EXPECTED" >> $LOG
-    if [ $? -ne 0 ]
-    then
-        FAILED=$((FAILED+1))
-        fail
-    else
-        echo "${Green}OK"
-        SUCCESS=$((SUCCESS+1))
-    fi
+    diff "$1" "$2"
 }
 
-test_file_in_out ()
+test_grep()
 {
-    STDIN=$(cat $1)
-    EXPECTED=$(cat $2)
-    test_in_out "$STDIN" "$EXPECTED" "$3"
+  cat "$1" | grep "$2"
 }
 
 test_in_file ()
@@ -154,7 +119,8 @@ test_in_file ()
     # execute le programme, conserve la sortie (stdout et stderr confondu)
     echo "" >> $LOG
     echo "### Exec" >> $LOG
-    echo "$STDIN" > ./$TARGET 2>&1 > $OUT
+    echo "cat $STDIN | ./$TARGET" >> $LOG
+    cat $STDIN | ./$TARGET 2>&1 > $OUT
     EXITCODE=$?
 
     # conserve la sorte dans le log
@@ -163,32 +129,65 @@ test_in_file ()
 
     if [ $EXITCODE -ne $EXPECTED ]
     then
-        FAILED=$((FAILED+1))
         fail
     else
-        echo "${Green}OK"
-        SUCCESS=$((SUCCESS+1))
+        success
     fi
-}
-
-
-run_test_file () 
-{
-    echo "Exec $TARGET with input ${PREFIX}/$1"
-    test_file_in_out "${PREFIX}/$1" "${PREFIX}/$2" "$3"
 }
 
 run_test_simple ()
 {
     printf "Exec $TARGET with input ${PREFIX}/$1..."
-    STDIN=$(cat ${PREFIX}/$1)
+    STDIN="${PREFIX}/$1"
     test_in_file "$STDIN" "$2"
+}
+
+# test_comp_exec <scalpa_file> <expected_out> <comp_func>
+test_comp_exec() 
+{
+    ASM_FILE=/tmp/mips-test.asm.$$
+    OUT=/tmp/mips-test.out.$$
+    STDIN="${PREFIX}/$1"
+    EXPECTED="${PREFIX}/$2"
+    TEST_FUNC=$3
+    TEST_NB=$((TEST_NB+1))
+
+    printf "Compiling $STDIN..."
+    LOG_LEVEL=100
+    # On compile le code scalpa
+    echo "cat $STDIN | $TARGET -o $ASM_FILE" >> $LOG
+    cat "$STDIN" | ./$TARGET 2>&1 -o "$ASM_FILE" >> $LOG
+    EXITCODE=$?
+
+    if [ $EXITCODE -ne 0 ]
+    then
+        # conserve la sorte dans le log
+        echo "==> compilation failed" >> $LOG
+        fail
+        return
+    else
+        echo "${Green}OK${Reset}"
+    fi
+
+    printf "spim -file $ASM_FILE > $OUT" | tee -a $log
+    spim -file $ASM_FILE | tail -n +6 > $OUT
+
+    echo "" >> $LOG
+    echo "#### Comparaison" >> $LOG
+    $TEST_FUNC "$OUT" "$EXPECTED" >> $LOG
+
+    if [ $? -ne 0 ]; then
+        fail
+        return
+    else
+        success
+    fi
 }
 
 show_result () 
 {
     title "Result"
     echo "$TEST_NB tests"
-    echo "${Green}$SUCCESS / $TEST_NB passed"
-    echo "${Red}$FAILED / $TEST_NB failed"
+    echo "${Green}$SUCCESS_NB / $TEST_NB passed"
+    echo "${Red}$FAILED_NB / $TEST_NB failed"
 }

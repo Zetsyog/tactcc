@@ -12,7 +12,8 @@ static void print_sym_val(struct symbol_t *sym) {
 }
 
 void print_intermediate_code() {
-	for (int i = 0; i < nextquad; i++) {
+	unsigned int i;
+	for (i = 0; i < nextquad; i++) {
 		printf("%i\t", i + 1);
 		struct quad_t quad = tabQuad[i];
 
@@ -159,6 +160,11 @@ void print_intermediate_code() {
 			printf(" := ");
 			printf(" NOT ");
 			print_sym_val(quad.arg1);
+			printf("\n");
+			break;
+		case OP_WRITE:
+			printf("%s ", "write");
+			print_sym_val(quad.res);
 			printf("\n");
 			break;
 		}

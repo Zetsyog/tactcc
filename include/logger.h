@@ -13,6 +13,12 @@
 #define LOG_LEVEL_ALL __INT_MAX__
 
 /**
+ *  Initialize logger data
+ *  Must be called before using any log function
+ */
+void log_init();
+
+/**
  *  Define the current log level
  *  Every logged message at a level above will be ignored
  */

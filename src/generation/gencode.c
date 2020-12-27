@@ -5,42 +5,58 @@
 #include <stdarg.h>
 #include <stdlib.h>
 
+unsigned int nextquad		 = 0;
+struct quad_t tabQuad[10000] = {0};
+
 int gencode(uint op, ...) {
 	va_list args;
 	va_start(args, op);
-	int index	= nextquad;
-	size_t size = 0;
+	int index		   = nextquad;
+	size_t size		   = 0;
+	unsigned int label = 0;
+
+	tabQuad[index].arg1 = NULL;
+	tabQuad[index].arg2 = NULL;
+
+	switch (op) {
+	case OP_GOTO:
+	case OP_WRITE:
+	case OP_READ:
+		size = 0;
+		break;
+	case OP_ASSIGNMENT:
+		size = 1;
+		break;
+	case OP_IF:
+		op	  = va_arg(args, int);
+		size  = 2;
+		label = 1;
+		break;
+	default:
+		size = 2;
+		break;
+	}
 
 	log_debug("new quad %u", op);
 
-	if (op == OP_GOTO) {
-		tabQuad[index].arg1 = NULL;
-		tabQuad[index].arg2 = NULL;
-		tabQuad[index].res	= va_arg(args, int *);
-	} else if (op == OP_ASSIGNMENT) {
-		tabQuad[index].arg1 = va_arg(args, void *);
-		tabQuad[index].arg2 = NULL;
-		tabQuad[index].res	= va_arg(args, void *);
-		log_debug("%s := %s\n", ((struct symbol_t *)tabQuad[index].res)->name,
-				  ((struct symbol_t *)tabQuad[index].arg1)->name);
-	} else {
-		tabQuad[index].arg1 = va_arg(args, void *);
-		tabQuad[index].arg2 = NULL;
-		if (op >= 15)
-			size = 2;
-		else
-			size = 3;
+	if (size > 2) {
+		log_error("error: too many args for gencode");
+	}
 
-		if (size >= 3)
+	if (size >= 1) {
+		tabQuad[index].arg1 = va_arg(args, void *);
+		if (size == 2) {
 			tabQuad[index].arg2 = va_arg(args, void *);
-
-		tabQuad[index].res = NULL;
-
-		if (size >= 2)
-			tabQuad[index].res = va_arg(args, void *);
+		}
+	}
+	if(label) {
+		tabQuad[index].label = va_arg(args, void *);
+	} else {
+		tabQuad[index].res = va_arg(args, void *);
 	}
 
 	tabQuad[index].op = op;
+	tabQuad[index].id = index;
 	va_end(args);
 	nextquad++;
 	return index;
