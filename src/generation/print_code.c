@@ -167,6 +167,21 @@ void print_intermediate_code() {
 			print_sym_val(quad.res);
 			printf("\n");
 			break;
+		case OP_READ:
+			printf("%s ", "read");
+			print_sym_val(quad.res);
+			printf("\n");
+			break;	
+		case OP_IF:
+			printf(" if ");
+			print_sym_val(quad.arg1);
+			printf("GOTO");
+			if(quad.arg2 != NULL){
+				print_sym_val(quad.arg1);
+				printf("\n");
+			} else {
+				printf("? \n");	
+			}
 		}
 	}
 }

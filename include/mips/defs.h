@@ -40,10 +40,23 @@ enum mips_helper_op_t {
 	LA		= 12,
 	SW		= 13,
 	MOVE	= 14,
+	INSTR_ADD   = 15,
+	INSTR_ADDI  = 16,
+	INSTR_SUB   = 17,
+	INSTR_AND   = 18,
+	INSTR_ANDI  = 19,
+	INSTR_NOR   = 20,
+	INSTR_OR    = 21,
+	INSTR_ORI 	= 22,
+	INSTR_XOR 	= 23,
+	INSTR_XORI	= 24,
+	INSTR_DIV		= 25,
+	INSTR_MULT 	= 26,
 	SYSCALL = 100,
     RAW = 101,
     TAB = 102,
     DECL = 103,
+
 };
 
 #define FIRST_INSTR_IDX LI

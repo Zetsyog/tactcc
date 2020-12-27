@@ -25,7 +25,6 @@ void yyerror(const char *s);
                 struct symbol_t *ptr;
         } var;
         struct node_t *list;
-        int quad;
         int intVal;
         char strVal[SYM_NAME_MAX_LEN];
         struct symbol_t *sym;
@@ -46,8 +45,9 @@ void yyerror(const char *s);
 
 %type <var> expr
 %type <sym> lvalue
-%type <a_type> varsdecl atomictype typename
-%type <list> vardeclist identlist
+%type <a_type> varsdecl atomictype typename arraytype
+%type <list> fundecllist vardeclist identlist parlist
+%type <quad> M N
 %type <operation> opu opb
 
 %nonassoc IFEND
@@ -116,28 +116,28 @@ rangelist: INT '.' '.' INT
          | INT '.''.' INT ',' rangelist
          ;
 
-fundecllist: /*epsilon*/              {  }
-           | fundecl ';' fundecllist {  }
+fundecllist: /*epsilon*/              { $$ = NULL; }
+           | fundecl ';' fundecllist { $$ = $3;}
            ;
 
-fundecl: FUNC IDENT '(' parlist ')' ':' atomictype vardeclist instr
+fundecl: FUNC IDENT '(' parlist ')' ':' atomictype vardeclist M instr
        ;
 
-parlist: /*epsilon*/     { }
+parlist: /*epsilon*/     {  $$ = NULL; }
        | par             { }
        | par ',' parlist { }
        ;
 
-par: IDENT ':' typename
-   | REF IDENT ':' typename
+par: IDENT ':' typename {}
+   | REF IDENT ':' typename {}
    ;
 
 instr: IF expr THEN M instr { }
      | IF expr THEN M instr ELSE N instr { }
      | WHILE expr DO M instr {  }
      | lvalue ':' '=' expr {
-                                log_debug("calling gencode(:=, %s, %s)", 
-                                        ((struct symbol_t *)$4.ptr)->name, 
+                                log_debug("calling gencode(:=, %s, %s)",
+                                        ((struct symbol_t *)$4.ptr)->name,
                                         $1->name);
                                 gencode(OP_ASSIGNMENT, $4.ptr, $1);
                             }
@@ -147,19 +147,19 @@ instr: IF expr THEN M instr { }
      | IDENT '(' ')'
      | BEGIN_TOK sequence END
      | BEGIN_TOK END
-     | READ lvalue
+     | READ lvalue { gencode(OP_READ, $2); }
      | WRITE expr { gencode(OP_WRITE, $2.ptr);  }
      ;
 
 sequence: instr ';' M sequence {}
-        | instr ';' {}
-        | instr     {}
+        | instr ';' { }
+        | instr     { }
         ;
 
 M: /* empty */  { }
  ;
 
-N:  { }
+N:  /* empty */  { }
  ;
 
 
@@ -186,7 +186,7 @@ expr: INT {
     | '(' expr ')'  {
                         $$ = $2;
                     }
-    | expr opb expr
+    | expr opb expr {}
     | opu expr {
         if($2.ptr->atomic_type == A_INT && $1 == OP_NEGATE) {
             $$.ptr = $2.ptr;
@@ -198,13 +198,13 @@ expr: INT {
     | IDENT '('exprlist ')'
     | IDENT '(' ')'
     | IDENT '[' exprlist ']'
-    | IDENT { 
+    | IDENT {
         struct st_entry_t *e = st_get($1);
         if(e == NULL) {
             log_error("syntax error: ident %s not declared", $1);
             exit(1);
         }
-        $$.ptr = e->value; 
+        $$.ptr = e->value;
     }
     ;
 
@@ -219,9 +219,9 @@ opb:'+'    { $$ = OP_ADD; }
    |'>''=' { $$ = OP_SUPERIOR_OR_EQUAL; }
    |'='    { $$ = OP_EQUALS; }
    |'<''>' { $$ = OP_DIFFERENT; }
-   | AND   { $$ = AND; }
-   | OR    { $$ = OR; }
-   | XOR   { $$ = XOR; }
+   | AND   { $$ = OP_AND; }
+   | OR    { $$ = OP_OR; }
+   | XOR   { $$ = OP_XOR; }
    ;
 
 opu: '-' %prec OPU{ $$ = OP_NEGATE;  }
@@ -242,7 +242,7 @@ int main(int argc, char **argv)
             log_error("Can't open file %s", options.output_path);
             exit(EXIT_FAILURE);
         }
-    } 
+    }
 
     log_info("Starting compilation");
     st_create(10000);
@@ -264,8 +264,8 @@ int main(int argc, char **argv)
     if(options.output_path != NULL) {
         fclose(out);
     }
-    
-    
+
+
     st_destroy();
     return 0;
 }

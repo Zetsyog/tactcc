@@ -122,14 +122,13 @@ union YYSTYPE
                 struct symbol_t *ptr;
         } var;
         struct node_t *list;
-        int quad;
         int intVal;
         char strVal[SYM_NAME_MAX_LEN];
         struct symbol_t *sym;
         unsigned int a_type;
         enum operation_t operation;
 
-#line 133 "./include/grammar.h"
+#line 132 "./include/grammar.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

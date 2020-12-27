@@ -9,7 +9,13 @@
 static const char *op_str[SYSCALL] = {
 	[INSTR_TO_STR_IDX(LI)] = "li",	   [INSTR_TO_STR_IDX(LW)] = "lw",
 	[INSTR_TO_STR_IDX(LA)] = "la",	   [INSTR_TO_STR_IDX(SW)] = "sw",
-	[INSTR_TO_STR_IDX(MOVE)] = "move", [INSTR_TO_STR_IDX(SYSCALL)] = "syscall"};
+	[INSTR_TO_STR_IDX(MOVE)] = "move", [INSTR_TO_STR_IDX(SYSCALL)] = "syscall",
+	[INSTR_TO_STR_IDX(INSTR_ADD)] = "add",	 [INSTR_TO_STR_IDX(INSTR_ADDI)] = "addi",
+	[INSTR_TO_STR_IDX(INSTR_SUB)] = "sub", 	 [INSTR_TO_STR_IDX(INSTR_AND)] = "and",
+	[INSTR_TO_STR_IDX(INSTR_ANDI)] = "andi", [INSTR_TO_STR_IDX(INSTR_NOR)] = "nor",
+	[INSTR_TO_STR_IDX(INSTR_OR)] = "or",		 [INSTR_TO_STR_IDX(INSTR_ORI)] = "ori",
+	[INSTR_TO_STR_IDX(INSTR_XOR)] = "ori",	 [INSTR_TO_STR_IDX(INSTR_XORI)] = "xori",
+	[INSTR_TO_STR_IDX(INSTR_DIV)] = "div", 	 [INSTR_TO_STR_IDX(INSTR_MULT)] = "mult"};
 
 static void print_sym_name(FILE *out, struct symbol_t *sym) {
 	if(sym->sym_type == SYM_VAR) {

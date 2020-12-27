@@ -3,7 +3,6 @@ program test
     begin
         i := 4;
         j := -5;
-
         write i;
         write j;
     end
