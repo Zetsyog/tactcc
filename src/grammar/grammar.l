@@ -9,9 +9,16 @@
 
 integer [0-9]+
 ident [A-Za-z][A-Za-z0-9]*
-commentaire "(*"(.|\n)*"*)"
+string \"(\\.|[^"\\])*\"
+
+%x COMMENT
 
 %%
+
+"(*" { BEGIN(COMMENT); }
+<COMMENT>"*)" { BEGIN(INITIAL); }
+<COMMENT>\n   {}
+<COMMENT>.    {}
 
 [;,:().]  return(yytext[0]);
 
@@ -29,7 +36,7 @@ commentaire "(*"(.|\n)*"*)"
 "while"    return(WHILE);
 "return"   return(RETURN);
 "begin"    return(BEGIN_TOK);
-"end"      return(END);
+"end"      return(END_TOK);
 "read"     return(READ);
 "write"    return(WRITE);
 "of"       return(OF);
@@ -37,7 +44,21 @@ commentaire "(*"(.|\n)*"*)"
 "and"      return(AND);
 "or"       return(OR);
 "xor"      return(XOR);
-"not"      return(NOT);       
+"not"      return(NOT);
+"true"     return(TRUE);
+"false"    return(FALSE);
+{string}   {
+    memset(yylval.strVal, 0, SYM_NAME_MAX_LEN);
+    unsigned int len = strlen(yytext);
+    if(len > SYM_NAME_MAX_LEN) {
+        len = SYM_NAME_MAX_LEN;
+    } else {
+        len -= 2;
+    }
+    strncpy(yylval.strVal, yytext + 1, len);
+    return(STR_CST);
+}
+
 "+"|"-"|"*"|"/"|"<"|"<="|">"|">="|"="|"<>"  {return yytext[0];}
 {ident} {
     memset(yylval.strVal, 0, SYM_NAME_MAX_LEN);
@@ -49,7 +70,5 @@ commentaire "(*"(.|\n)*"*)"
     yylval.intVal=atoi(yytext); 
     return(INT); 
 }
-{commentaire} return(COM);
-
 [[:space:]]+       ;
 %%

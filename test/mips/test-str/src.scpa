@@ -1,0 +1,12 @@
+program test
+    var i,j: int
+    begin
+        i := 4;
+        j := -5;
+
+        write i;
+        write "\n";
+        write j;
+        write "\n";
+        write "Fin du programme\n";
+    end

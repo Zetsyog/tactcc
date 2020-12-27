@@ -34,10 +34,12 @@ void yyerror(const char *s);
 }
 
 %token PROG VAR UNIT BOOL ARRAY FUNC REF IF THEN ELSE
-%token WHILE RETURN BEGIN_TOK READ WRITE COM
-%token END AND OR XOR NOT DO OF
+%token WHILE RETURN BEGIN_TOK READ WRITE
+%token END_TOK AND OR XOR NOT DO OF
+%token TRUE FALSE
 %token <intVal> INT
 %token <strVal> IDENT
+%token <strVal> STR_CST
 
 %left XOR OR '+' '-'
 %left AND '*' '/'
@@ -145,8 +147,8 @@ instr: IF expr THEN M instr { }
      | RETURN
      | IDENT '(' exprlist ')'
      | IDENT '(' ')'
-     | BEGIN_TOK sequence END
-     | BEGIN_TOK END
+     | BEGIN_TOK sequence END_TOK
+     | BEGIN_TOK END_TOK
      | READ lvalue
      | WRITE expr { gencode(OP_WRITE, $2.ptr);  }
      ;
@@ -180,9 +182,12 @@ exprlist: expr
         ;
 
 expr: INT {
-    $$.ptr = newtemp(SYM_CST, A_INT, $1);
-    log_debug("expr: %s", ((struct symbol_t *)$$.ptr)->name);
-}
+        $$.ptr = newtemp(SYM_CST, A_INT, $1);
+        log_debug("expr: %s", ((struct symbol_t *)$$.ptr)->name);
+    }
+    | STR_CST {
+        $$.ptr = newtemp(SYM_CST, A_STR, $1);
+    }
     | '(' expr ')'  {
                         $$ = $2;
                     }
@@ -190,7 +195,7 @@ expr: INT {
     | opu expr {
         if($2.ptr->atomic_type == A_INT && $1 == OP_NEGATE) {
             $$.ptr = $2.ptr;
-            $2.ptr->data *= -1;
+            $2.ptr->int_val *= -1;
         } else {
             log_error("syntax: invalid operation");
         }
@@ -273,4 +278,5 @@ int main(int argc, char **argv)
 void yyerror(const char *s)
 {
     fprintf(stderr,"%s\n",s);
+    exit(EXIT_FAILURE);
 }

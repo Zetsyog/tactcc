@@ -96,7 +96,6 @@ fail ()
 {
     FAILED_NB=$((FAILED_NB+1))
     echo "${BRed}Test failed${Reset}"
-    echo "==> Exit"
 }
 
 test_diff()
@@ -117,15 +116,14 @@ test_in_file ()
     TEST_NB=$((TEST_NB+1))
 
     # execute le programme, conserve la sortie (stdout et stderr confondu)
-    echo "" >> $LOG
-    echo "### Exec" >> $LOG
     echo "cat $STDIN | ./$TARGET" >> $LOG
+    echo "#### Output" >> $LOG
     cat $STDIN | ./$TARGET 2>&1 > $OUT
     EXITCODE=$?
 
     # conserve la sorte dans le log
     cat $OUT >> $LOG
-    echo "==> exitcode: $EXITCODE" >> $LOG
+    echo "==> exitcode: $EXITCODE ; expected: => $EXPECTED" >> $LOG
 
     if [ $EXITCODE -ne $EXPECTED ]
     then
@@ -137,7 +135,8 @@ test_in_file ()
 
 run_test_simple ()
 {
-    printf "Exec $TARGET with input ${PREFIX}/$1..."
+    echo "# Test (exitcode):" >> $LOG
+    printf "${PREFIX}/$1..."
     STDIN="${PREFIX}/$1"
     test_in_file "$STDIN" "$2"
 }
@@ -153,9 +152,10 @@ test_comp_exec()
     TEST_NB=$((TEST_NB+1))
 
     printf "Compiling $STDIN..."
-    LOG_LEVEL=100
     # On compile le code scalpa
+    echo "# Test (compilation & execution):" >> $LOG
     echo "cat $STDIN | $TARGET -o $ASM_FILE" >> $LOG
+    echo "#### Output" >> $LOG
     cat "$STDIN" | ./$TARGET 2>&1 -o "$ASM_FILE" >> $LOG
     EXITCODE=$?
 
@@ -169,11 +169,13 @@ test_comp_exec()
         echo "${Green}OK${Reset}"
     fi
 
-    printf "spim -file $ASM_FILE > $OUT" | tee -a $log
+    printf "spim -file $ASM_FILE > $OUT..." >> $LOG
+    printf "Testing execution..."
     spim -file $ASM_FILE | tail -n +6 > $OUT
 
     echo "" >> $LOG
-    echo "#### Comparaison" >> $LOG
+    echo "#### Comp" >> $LOG
+    echo "$TEST_FUNC $OUT $EXPECTED" >> $LOG
     $TEST_FUNC "$OUT" "$EXPECTED" >> $LOG
 
     if [ $? -ne 0 ]; then
@@ -182,6 +184,8 @@ test_comp_exec()
     else
         success
     fi
+    echo "" >> $LOG
+    echo ""
 }
 
 show_result () 

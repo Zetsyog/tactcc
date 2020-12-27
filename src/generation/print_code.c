@@ -4,10 +4,18 @@
 #include <stdio.h>
 
 static void print_sym_val(struct symbol_t *sym) {
-	if(sym->sym_type == SYM_VAR) {
+	if (sym->sym_type == SYM_VAR) {
 		printf("%s", sym->name);
-	} else if(sym->sym_type == SYM_CST) {
-		printf("%i", sym->data);
+	} else if (sym->sym_type == SYM_CST) {
+		switch (sym->atomic_type) {
+		case A_INT:
+			printf("%i", sym->int_val);
+			break;
+		case A_STR:
+			printf("\"%s\"", sym->str_val);
+		default:
+			break;
+		}
 	}
 }
 
@@ -113,12 +121,12 @@ void print_intermediate_code() {
 			printf("\n");
 			break;
 		case OP_GOTO:
-			if(quad.arg1 == NULL){
-					printf("GOTO ?");
-			}else{
-							printf(" GOTO ");
-							print_sym_val(quad.res);
-							printf("\n");
+			if (quad.arg1 == NULL) {
+				printf("GOTO ?");
+			} else {
+				printf(" GOTO ");
+				print_sym_val(quad.res);
+				printf("\n");
 			}
 
 			// TODO
@@ -166,6 +174,13 @@ void print_intermediate_code() {
 			printf("%s ", "write");
 			print_sym_val(quad.res);
 			printf("\n");
+			break;
+		case OP_READ:
+			printf("%s ", "write");
+			print_sym_val(quad.res);
+			printf("\n");
+			break;
+		default:
 			break;
 		}
 	}

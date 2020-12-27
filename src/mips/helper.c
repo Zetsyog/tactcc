@@ -27,7 +27,7 @@ void mips(FILE *out, ...) {
 	va_start(args, out);
 
 	unsigned int op, nospace = 1;
-	while ((op = va_arg(args, int)) != LR) {
+	while ((op = va_arg(args, int)) != END) {
 		if(nospace) {
 			nospace = 0;
 		} else {
@@ -42,6 +42,9 @@ void mips(FILE *out, ...) {
 			break;
 		case REG:
 			fprintf(out, "$%s", va_arg(args, char *));
+			break;
+		case IMM_STR:
+			fprintf(out, "\"%s\"", va_arg(args, char *));
 			break;
 		case TAB:
 			fprintf(out, "\t");

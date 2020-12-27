@@ -28,11 +28,12 @@ enum syscall_svc_t {
 };
 
 enum mips_helper_op_t {
-	LR = 0,
+	END = 0,
 	// Data Formats
 	IMM = 1,
 	SYM = 2,
 	REG = 3,
+	IMM_STR = 4,
 	// TODO
 	// Instructions :
 	LI		= 10,

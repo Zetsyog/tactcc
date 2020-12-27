@@ -104,9 +104,9 @@ void st_print() {
 				   atomic_type_str[tmp->atomic_type], tmp->name);
 			if (tmp->atomic_type == A_INT) {
 				printf("=%-5s", "");
-				if (tmp->data >= 0)
+				if (tmp->int_val >= 0)
 					printf(" ");
-				printf("%i\n", tmp->data);
+				printf("%i\n", tmp->int_val);
 			}
 		}
 		idx++;
