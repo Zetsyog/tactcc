@@ -49,6 +49,11 @@ void print_intermediate_code() {
 		case OP_GOTO:
 			// TODO
 			break;
-        }
+		case OP_WRITE:
+			printf("%s ", "write");
+			print_sym_val(quad.res);
+			printf("\n");
+			break;
+		}
 	}
 }

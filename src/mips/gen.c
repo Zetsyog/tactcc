@@ -6,31 +6,31 @@
 
 void gen_st(FILE *out) {
 	// Segment data
-	mips(out, TAB, RAW, ".data", END);
+	mips(out, TAB, RAW, ".data", LR);
 	unsigned int i = 0;
 	struct symbol_t *tmp;
 
 	while (i < st->size) {
 		if (st->table[i] != NULL && st->table[i]->value != NULL) {
 			tmp = st->table[i]->value;
-			mips(out, DECL, tmp, TAB, RAW, ".word", TAB, IMM, tmp->data, END);
+			mips(out, DECL, tmp, TAB, RAW, ".word", TAB, IMM, tmp->data, LR);
 		}
 		i++;
 	}
 }
 
 void gen_syscall(FILE *out, enum syscall_svc_t id) {
-	mips(out, LI, REG, "v0", IMM, id, END);
-	mips(out, SYSCALL, END);
+	mips(out, LI, REG, "v0", IMM, id, LR);
+	mips(out, SYSCALL, LR);
 }
 
 void gen_quad(FILE *out, struct quad_t *quad) {
 	if (quad->op == OP_ASSIGNMENT) {
-		mips(out, LW, REG, "t0", SYM, quad->arg1, END);
-		mips(out, SW, REG, "t0", SYM, quad->res, END);
+		mips(out, LW, REG, "t0", SYM, quad->arg1, LR);
+		mips(out, SW, REG, "t0", SYM, quad->res, LR);
 	} else if (quad->op == OP_WRITE) {
 		if(to_sym(quad->res)->atomic_type == A_INT) {
-			mips(out, LW, REG, "a0", SYM, quad->res, END);
+			mips(out, LW, REG, "a0", SYM, quad->res, LR);
 			gen_syscall(out, SYS_PRINT_INT);
 		}
 	}

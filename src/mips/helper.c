@@ -27,7 +27,7 @@ void mips(FILE *out, ...) {
 	va_start(args, out);
 
 	unsigned int op, nospace = 1;
-	while ((op = va_arg(args, int)) != END) {
+	while ((op = va_arg(args, int)) != LR) {
 		if(nospace) {
 			nospace = 0;
 		} else {
