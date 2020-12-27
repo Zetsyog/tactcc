@@ -88,3 +88,16 @@ struct list_t *concat(struct list_t *list1, struct list_t *list2) {
 
 	return res;
 }
+
+void complete(struct list_t *list, int addr)
+{
+		if(tabQuad[list->position].op == OP_GOTO) {
+				if(tabQuad[list->position].arg1 == NULL)
+						tabQuad[list->position].arg1 = &addr;
+		} else if(tabQuad[list->position].op == IF) {
+							if(tabQuad[list->position].res == NULL)
+									tabQuad[list->position].res = &addr;
+		}
+		list = list -> next;
+		
+}
