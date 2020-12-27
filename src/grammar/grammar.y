@@ -50,10 +50,10 @@ void yyerror(const char *s);
 %type <expr_val> expr
 %type <instr_val> instr sequence
 %type <sym> lvalue
-%type <a_type> varsdecl atomictype typename
-%type <list> vardeclist identlist
+%type <a_type> varsdecl atomictype typename arraytype
+%type <list> fundecllist vardeclist identlist parlist
+%type <quad> M N
 %type <operation> opu opb
-%type <quad> M
 
 %nonassoc IFEND
 %nonassoc ELSE
@@ -121,20 +121,20 @@ rangelist: INT '.' '.' INT
          | INT '.''.' INT ',' rangelist
          ;
 
-fundecllist: /*epsilon*/              {  }
-           | fundecl ';' fundecllist {  }
+fundecllist: /*epsilon*/              { $$ = NULL; }
+           | fundecl ';' fundecllist { $$ = $3;}
            ;
 
-fundecl: FUNC IDENT '(' parlist ')' ':' atomictype vardeclist instr
+fundecl: FUNC IDENT '(' parlist ')' ':' atomictype vardeclist M instr
        ;
 
-parlist: /*epsilon*/     { }
+parlist: /*epsilon*/     {  $$ = NULL; }
        | par             { }
        | par ',' parlist { }
        ;
 
-par: IDENT ':' typename
-   | REF IDENT ':' typename
+par: IDENT ':' typename {}
+   | REF IDENT ':' typename {}
    ;
 
 cond: IF expr THEN M instr { }
@@ -170,10 +170,10 @@ instr: cond {}
      | RETURN expr
      | RETURN
      | IDENT '(' exprlist ')'
-     | IDENT '(' ')'
+     | IDENT '(' ')' 
      | BEGIN_TOK sequence END_TOK { $$.next = NULL; }
      | BEGIN_TOK END_TOK { $$.next = NULL; }
-     | READ lvalue
+     | READ lvalue { $$.next = NULL; gencode(OP_READ, $2); }
      | WRITE expr { $$.next = NULL; gencode(OP_WRITE, $2.ptr);  }
      ;
 
@@ -188,7 +188,7 @@ sequence: instr ';' M sequence {
 M: /* empty */  { $$ = nextquad; }
  ;
 
-N:  { }
+N:  /* empty */  { }
  ;
 
 
@@ -245,13 +245,13 @@ expr: INT {
     | IDENT '('exprlist ')'
     | IDENT '(' ')'
     | IDENT '[' exprlist ']'
-    | IDENT { 
+    | IDENT {
         struct st_entry_t *e = st_get($1);
         if(e == NULL) {
             log_error("syntax error: ident %s not declared", $1);
             exit(1);
         }
-        $$.ptr = e->value; 
+        $$.ptr = e->value;
     }
     ;
 
@@ -266,9 +266,9 @@ opb:'+'    { $$ = OP_ADD; }
    |'>''=' { $$ = OP_SUPERIOR_OR_EQUAL; }
    |'='    { $$ = OP_EQUALS; }
    |'<''>' { $$ = OP_DIFFERENT; }
-   | AND   { $$ = AND; }
-   | OR    { $$ = OR; }
-   | XOR   { $$ = XOR; }
+   | AND   { $$ = OP_AND; }
+   | OR    { $$ = OP_OR; }
+   | XOR   { $$ = OP_XOR; }
    ;
 
 opu: '-' %prec OPU{ $$ = OP_NEGATE;  }
@@ -289,7 +289,7 @@ int main(int argc, char **argv)
             log_error("Can't open file %s", options.output_path);
             exit(EXIT_FAILURE);
         }
-    } 
+    }
 
     log_info("Starting compilation");
     st_create(10000);
@@ -311,8 +311,8 @@ int main(int argc, char **argv)
     if(options.output_path != NULL) {
         fclose(out);
     }
-    
-    
+
+
     st_destroy();
     return 0;
 }
