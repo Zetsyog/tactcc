@@ -1,9 +1,9 @@
 #include "generation/defs.h"
 #include "util.h"
 #include <stdarg.h>
-#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define TMP_VAR_PREFIX "__tmp__"
 
@@ -21,10 +21,10 @@ struct symbol_t *newtemp(enum sym_type_t sym_type,
 
 	struct symbol_t *sym = sym_create(name, sym_type, atomic_type);
 	if (sym_type == SYM_CST) {
-		if (atomic_type == A_INT) {
+		if (atomic_type == A_INT || atomic_type == A_BOOL) {
 			sym->int_val = va_arg(args, int);
-		} else if (A_STR) {
-			char *str = va_arg(args, char *);
+		} else if (atomic_type == A_STR) {
+			char *str  = va_arg(args, char *);
 			size_t len = strlen(str);
 			MCHECK(sym->str_val = calloc(1, len + 1));
 			strncpy(sym->str_val, str, len);
@@ -32,10 +32,10 @@ struct symbol_t *newtemp(enum sym_type_t sym_type,
 			log_error("Unsupported constant type %s",
 					  atomic_type_str[atomic_type]);
 		}
-	} else if (sym_type == SYM_FUN) {
-		log_error("TODO: func support");
 	} else if (sym_type == SYM_VAR) {
 		log_error("TODO: tmp var support");
+	} else {
+		log_error("Unsupported cst var type");
 	}
 
 	st_put(sym->name, sym);

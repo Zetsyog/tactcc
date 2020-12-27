@@ -4,6 +4,7 @@
 #include "util.h"
 #include <stdarg.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 unsigned int nextquad		 = 0;
 struct quad_t tabQuad[10000] = {0};
@@ -20,6 +21,9 @@ int gencode(uint op, ...) {
 
 	switch (op) {
 	case OP_GOTO:
+		label = 1;
+		size  = 0;
+		break;
 	case OP_WRITE:
 	case OP_READ:
 		size = 0;
@@ -80,7 +84,7 @@ struct list_t *concat(struct list_t *list1, struct list_t *list2) {
 		res = NULL;
 
 	if (list1 != NULL) {
-		while (list1 != NULL)
+		while (list1->next != NULL)
 			list1 = list1->next;
 
 		list1->next = list2;
@@ -89,14 +93,12 @@ struct list_t *concat(struct list_t *list1, struct list_t *list2) {
 	return res;
 }
 
-void complete(struct list_t *list, void *addr) {
+void complete(struct list_t *list, unsigned int pos) {
 	if (list == NULL)
 		return;
 
-	while (list->next != NULL) {
-		tabQuad[list->position].label = addr;
+	while (list != NULL) {
+		tabQuad[list->position].label = &tabQuad[pos];
 		list = list->next;
 	}
-
-	list = list->next;
 }

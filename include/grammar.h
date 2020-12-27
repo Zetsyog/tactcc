@@ -117,23 +117,24 @@ union YYSTYPE
 {
 #line 18 "src/grammar/grammar.y"
 
-        struct {
-                struct list_t *true;
-                struct list_t *false;
-        } cond;
-        struct list_t *pos;
-        struct {
-                struct symbol_t *ptr;
-        } var;
-        struct node_t *list;
-        int quad;
-        int intVal;
-        char strVal[SYM_NAME_MAX_LEN];
-        struct symbol_t *sym;
-        unsigned int a_type;
-        enum operation_t operation;
+    struct list_t *pos;
+    struct {
+        struct symbol_t *ptr;
+        struct list_t *true;
+        struct list_t *false;
+    } expr_val;
+    struct {
+        struct list_t *next;
+    } instr_val;
+    struct node_t *list;
+    int quad;
+    int intVal;
+    char strVal[SYM_NAME_MAX_LEN];
+    struct symbol_t *sym;
+    unsigned int a_type;
+    enum operation_t operation;
 
-#line 137 "./include/grammar.h"
+#line 138 "./include/grammar.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

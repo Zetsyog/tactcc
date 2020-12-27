@@ -9,6 +9,7 @@ static void print_sym_val(struct symbol_t *sym) {
 	} else if (sym->sym_type == SYM_CST) {
 		switch (sym->atomic_type) {
 		case A_INT:
+		case A_BOOL:
 			printf("%i", sym->int_val);
 			break;
 		case A_STR:
@@ -22,7 +23,7 @@ static void print_sym_val(struct symbol_t *sym) {
 void print_intermediate_code() {
 	unsigned int i;
 	for (i = 0; i < nextquad; i++) {
-		printf("%i\t", i + 1);
+		printf("%i\t", i);
 		struct quad_t quad = tabQuad[i];
 
 		switch (quad.op) {
@@ -121,16 +122,13 @@ void print_intermediate_code() {
 			printf("\n");
 			break;
 		case OP_GOTO:
-			if (quad.arg1 == NULL) {
-				printf("GOTO ?");
+			if (quad.label == NULL) {
+				printf("GOTO ?\n");
 			} else {
-				printf(" GOTO ");
-				print_sym_val(quad.res);
+				printf("GOTO ");
+				printf("%i", quad.label->id);
 				printf("\n");
 			}
-
-			// TODO
-
 			break;
 		case OP_NEGATE:
 			print_sym_val(quad.res);
