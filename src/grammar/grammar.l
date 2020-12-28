@@ -13,6 +13,9 @@ string \"(\\.|[^"\\])*\"
 
 %x COMMENT
 
+%option nounput
+%option noinput
+
 %%
 
 "(*" { BEGIN(COMMENT); }
@@ -69,5 +72,5 @@ string \"(\\.|[^"\\])*\"
     yylval.intVal=atoi(yytext); 
     return(INT); 
 }
-[[:space:]]+       ;
+[[:space:]]+
 %%

@@ -11,6 +11,7 @@
 int yylex();
 int yyparse();
 void yyerror(const char *s);
+extern void yylex_destroy();
 %}
 
 %define parse.error verbose
@@ -70,23 +71,24 @@ vardeclist: /*epsilon*/ { $$ = NULL; }
           ;
 
 varsdecl: VAR identlist ':' typename {
-    if($4 == A_UNIT)
-        log_error("syntax error: var cannot be of type UNIT");
+            if($4 == A_UNIT)
+                log_error("syntax error: var cannot be of type UNIT");
 
-    struct node_t *list = $2;
-    struct symbol_t *tmp = (struct symbol_t *)list->data;
-    while(tmp != NULL) {
-        tmp->atomic_type = $4;
-        tmp->sym_type = SYM_VAR;
+            struct node_t *list = $2;
+            struct symbol_t *tmp = (struct symbol_t *)list->data;
+            while(tmp != NULL) {
+                tmp->atomic_type = $4;
+                tmp->sym_type = SYM_VAR;
 
-        st_put(tmp->name, tmp);
+                st_put(tmp->name, tmp);
 
-        list = list->next;
-        if(list == NULL)
-            break;
-        tmp = (struct symbol_t *) list->data;
-    }
-}
+                list = list->next;
+                if(list == NULL)
+                    break;
+                tmp = (struct symbol_t *) list->data;
+            }
+            node_destroy($2, 0);
+        }
         ;
 
 identlist: IDENT    {
@@ -339,6 +341,7 @@ int main(int argc, char **argv)
 
 
     st_destroy();
+    yylex_destroy();
     return 0;
 }
 

@@ -11,5 +11,6 @@ struct list_t *crelist(int pos);
 struct list_t *concat(struct list_t *list1, struct list_t *list2);
 struct symbol_t *newtemp(enum sym_type_t, enum atomic_type_t, ...);
 void complete(struct list_t *list, unsigned int pos);
+void destroy_list(struct list_t *list);
 
 #endif

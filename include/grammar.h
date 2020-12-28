@@ -115,7 +115,7 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 18 "src/grammar/grammar.y"
+#line 19 "src/grammar/grammar.y"
 
     struct list_t *pos;
     struct {

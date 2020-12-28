@@ -81,6 +81,9 @@ void st_destroy() {
 		unsigned int idx = 0;
 		while (idx < st->size) {
 			if (st->table[idx] != NULL) {
+				if(st->table[idx]->value != NULL) {
+					sym_destroy(st->table[idx]->value);
+				}
 				free(st->table[idx]);
 				st->table[idx] = NULL;
 			}

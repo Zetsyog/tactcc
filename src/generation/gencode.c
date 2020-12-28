@@ -106,9 +106,20 @@ void complete(struct list_t *list, unsigned int pos) {
 		return;
 
 	tabQuad[pos].print_label = 1;
-	
+	struct list_t *orig		 = list;
+
 	while (list != NULL) {
 		tabQuad[list->position].label = &tabQuad[pos];
 		list = list->next;
+	}
+	destroy_list(orig);
+}
+
+void destroy_list(struct list_t *list) {
+	struct list_t *tmp;
+	while(list != NULL) {
+		tmp = list->next;
+		free(list);
+		list = tmp;
 	}
 }
