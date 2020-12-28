@@ -146,7 +146,7 @@ cond: IF expr THEN M instr { complete($2.true , $4);
                                           complete($2.true , $4);
                                           complete($2.false , $7);
                                           $$.next = concat($5.next , $8.next);
-                                          $$.next = concat($$.next , (struct list_t *)$7);
+                                          $$.next = concat($$.next , $7.next);
                                           $$.next = concat($$.next , crelist(nextquad));
                                           gencode(OP_GOTO , NULL);
                                         }
@@ -203,7 +203,7 @@ sequence: instr ';' M sequence {
 M: /* empty */  { $$ = nextquad; }
  ;
 
-N:  /* empty */  { (struct list_t *)$$.next = crelist(nextquad);
+N:  /* empty */  { $$.next = crelist(nextquad);
                    gencode(OP_GOTO,NULL);
                    $$ = nextquad;
                  }
