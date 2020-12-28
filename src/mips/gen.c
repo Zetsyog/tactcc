@@ -15,11 +15,13 @@ void gen_st(FILE *out) {
 			tmp = st->table[i]->value;
 			switch (tmp->atomic_type) {
 			case A_INT:
+			case A_BOOL:
 				mips(out, DECL, tmp, TAB, RAW, ".word", TAB, IMM, tmp->int_val,
 					 END);
 				break;
 			case A_STR:
-				mips(out, DECL, tmp, TAB, RAW, ".asciiz", TAB, IMM_STR, tmp->str_val, END);
+				mips(out, DECL, tmp, TAB, RAW, ".asciiz", TAB, IMM_STR,
+					 tmp->str_val, END);
 				break;
 
 			default:
@@ -36,17 +38,28 @@ void gen_syscall(FILE *out, enum syscall_svc_t id) {
 }
 
 void gen_quad(FILE *out, struct quad_t *quad) {
+	if (quad->print_label)
+		mips(out, TAB, QLABEL, quad, COLON, END);
+
 	if (quad->op == OP_ASSIGNMENT) {
 		mips(out, LW, REG, "t0", SYM, quad->arg1, END);
 		mips(out, SW, REG, "t0", SYM, quad->res, END);
 	} else if (quad->op == OP_WRITE) {
-		if (quad->res->atomic_type == A_INT) {
+		switch (quad->res->atomic_type) {
+		case A_INT:
+		case A_BOOL:
 			mips(out, LW, REG, "a0", SYM, quad->res, END);
 			gen_syscall(out, SYS_PRINT_INT);
-		} else if(quad->res->atomic_type == A_STR) {
+			break;
+		case A_STR:
 			mips(out, LA, REG, "a0", SYM, quad->res, END);
 			gen_syscall(out, SYS_PRINT_STR);
+			break;
+		default:
+			break;
 		}
+	} else if (quad->op == OP_GOTO) {
+		mips(out, BRANCH, QLABEL, quad->label, END);
 	}
 }
 

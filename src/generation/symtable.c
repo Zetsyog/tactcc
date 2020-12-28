@@ -102,12 +102,23 @@ void st_print() {
 			tmp = st->table[idx]->value;
 			printf("%-9s%-8s%-15s", sym_type_str[tmp->sym_type],
 				   atomic_type_str[tmp->atomic_type], tmp->name);
-			if (tmp->atomic_type == A_INT) {
-				printf("=%-5s", "");
+			printf("=%-5s", "");
+			switch (tmp->atomic_type)
+			{
+			case A_INT:
+			case A_BOOL:
 				if (tmp->int_val >= 0)
 					printf(" ");
-				printf("%i\n", tmp->int_val);
+				printf("%i", tmp->int_val);
+				break;
+			case A_STR:
+				printf("\"%s\"", tmp->str_val);
+				break;
+			default:
+				printf("no display");
+				break;
 			}
+			printf("\n");
 		}
 		idx++;
 	}

@@ -55,6 +55,9 @@ int gencode(uint op, ...) {
 	}
 	if (label) {
 		tabQuad[index].label = va_arg(args, void *);
+		if(tabQuad[index].label != NULL) {
+			tabQuad[index].label->print_label = 1;
+		}
 	} else {
 		tabQuad[index].res = va_arg(args, void *);
 	}
@@ -97,6 +100,8 @@ void complete(struct list_t *list, unsigned int pos) {
 	if (list == NULL)
 		return;
 
+	tabQuad[pos].print_label = 1;
+	
 	while (list != NULL) {
 		tabQuad[list->position].label = &tabQuad[pos];
 		list = list->next;

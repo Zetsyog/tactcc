@@ -30,39 +30,42 @@ enum syscall_svc_t {
 enum mips_helper_op_t {
 	END = 0,
 	// Data Formats
-	IMM = 1,
-	SYM = 2,
-	REG = 3,
+	IMM		= 1,
+	SYM		= 2,
+	REG		= 3,
 	IMM_STR = 4,
+	QLABEL	= 5,
 	// TODO
 	// Instructions :
-	LI		= 10,
-	LW		= 11,
-	LA		= 12,
-	SW		= 13,
-	MOVE	= 14,
-	INSTR_ADD   = 15,
-	INSTR_ADDI  = 16,
-	INSTR_SUB   = 17,
-	INSTR_AND   = 18,
-	INSTR_ANDI  = 19,
-	INSTR_NOR   = 20,
-	INSTR_OR    = 21,
-	INSTR_ORI 	= 22,
-	INSTR_XOR 	= 23,
-	INSTR_XORI	= 24,
-	INSTR_DIV		= 25,
-	INSTR_MULT 	= 26,
-	SYSCALL = 100,
-    RAW = 101,
-    TAB = 102,
-    DECL = 103,
+	LI		   = 10,
+	LW		   = 11,
+	LA		   = 12,
+	SW		   = 13,
+	MOVE	   = 14,
+	INSTR_ADD  = 15,
+	INSTR_ADDI = 16,
+	INSTR_SUB  = 17,
+	INSTR_AND  = 18,
+	INSTR_ANDI = 19,
+	INSTR_NOR  = 20,
+	INSTR_OR   = 21,
+	INSTR_ORI  = 22,
+	INSTR_XOR  = 23,
+	INSTR_XORI = 24,
+	INSTR_DIV  = 25,
+	INSTR_MULT = 26,
+	BRANCH	   = 27,
+	BEQ		   = 28,
+	SYSCALL	   = 100,
+	RAW		   = 101,
+	TAB		   = 102,
+	DECL	   = 103,
+	COLON	   = 104
 
 };
 
 #define FIRST_INSTR_IDX LI
 #define LAST_INSTR_IDX SYSCALL - LI
-
 
 void mips(FILE *out, ...);
 

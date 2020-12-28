@@ -22,13 +22,14 @@ enum operation_t {
 	OP_GOTO				 = 17, /* goto label */
 	OP_WRITE			 = 18, /* write x */
 	OP_READ				 = 19, /* read x */
-	OP_IF				 = 20
+	OP_IF				 = 20,
+	OP_WHILE			 = 21
 };
 
 struct quad_t {
 	unsigned int id;
 	enum operation_t op;
-	unsigned int has_label : 1;
+	unsigned int print_label : 1;
 	struct symbol_t *arg1;
 	struct symbol_t *arg2;
 	union {
