@@ -32,7 +32,19 @@ struct symbol_t {
 	};
 };
 
-struct symbol_t *sym_create(char *name, enum sym_type_t, enum atomic_type_t);
-void sym_destroy(struct symbol_t *);
+/**
+ * Create and allocate a new symbole_t
+ * @param name of the symbol
+ * @param sym_type @see sym_type_t
+ * @param a_type atomic type @ee atomic_type_t
+ * @return pointer to the created symbol
+ */
+struct symbol_t *sym_create(char *name, enum sym_type_t sym_type, enum atomic_type_t a_type);
+
+/**
+ * Free memory for a given symbol
+ * @param sym The symbol to destroy
+ */
+void sym_destroy(struct symbol_t *sym);
 
 #endif
