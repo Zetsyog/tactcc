@@ -7,6 +7,7 @@ LDLIBS    ?= -lfl
 YACCFLAGS ?= -v
 
 INCLUDE_PATH = ./include
+TEST_DIR = test
 TARGET   = scalpa
 SRCDIR   = src
 OBJDIR   = build
@@ -49,5 +50,6 @@ $(LBUILD): $(LSOURCES)
 .PHONY: clean
 clean:
 	rm -rf $(OBJDIR)/*
+	find $(TEST_DIR)/ -name "*.tmp" -type f -delete
 	rm $(INCLUDE_PATH)/$(LEX_HDR_NAME)
 	rm -f $(BINDIR)/$(TARGET)

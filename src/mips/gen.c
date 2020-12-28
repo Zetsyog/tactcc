@@ -13,23 +13,31 @@ void gen_st(FILE *out) {
 	while (i < st->size) {
 		if (st->table[i] != NULL && st->table[i]->value != NULL) {
 			tmp = st->table[i]->value;
-			switch (tmp->atomic_type) {
-			case A_INT:
-			case A_BOOL:
-				mips(out, DECL, tmp, TAB, RAW, ".word", TAB, IMM, tmp->int_val,
-					 END);
-				break;
-			case A_STR:
-				mips(out, DECL, tmp, TAB, RAW, ".asciiz", TAB, IMM_STR,
-					 tmp->str_val, END);
-				break;
+			if (tmp->sym_type == SYM_VAR) {
+				switch (tmp->atomic_type) {
+				case A_INT:
+				case A_BOOL:
+					mips(out, SYM, tmp, COLON, TAB, RAW, ".word", TAB, IMM,
+						 tmp->int_val, END);
+					break;
+				case A_STR:
+					mips(out, SYM, tmp, COLON, TAB, RAW, ".asciiz", TAB,
+						 IMM_STR, tmp->str_val, END);
+					break;
 
-			default:
-				break;
+				default:
+					break;
+				}
+			} else if (tmp->sym_type == SYM_CST) {
+				if (tmp->atomic_type == A_STR) {
+					mips(out, SYM, tmp, COLON, TAB, RAW, ".asciiz", TAB,
+						 IMM_STR, tmp->str_val, END);
+				}
 			}
 		}
 		i++;
 	}
+	mips(out, END);
 }
 
 void gen_syscall(FILE *out, enum syscall_svc_t id) {
@@ -37,34 +45,55 @@ void gen_syscall(FILE *out, enum syscall_svc_t id) {
 	mips(out, SYSCALL, END);
 }
 
-void gen_quad(FILE *out, struct quad_t *quad) {
-	if (quad->print_label)
-		mips(out, TAB, QLABEL, quad, COLON, END);
-
-	if (quad->op == OP_ASSIGNMENT) {
-		mips(out, LW, REG, "t0", SYM, quad->arg1, END);
-		mips(out, SW, REG, "t0", SYM, quad->res, END);
-	} else if (quad->op == OP_WRITE) {
-		switch (quad->res->atomic_type) {
-		case A_INT:
-		case A_BOOL:
-			mips(out, LW, REG, "a0", SYM, quad->res, END);
-			gen_syscall(out, SYS_PRINT_INT);
-			break;
-		case A_STR:
-			mips(out, LA, REG, "a0", SYM, quad->res, END);
-			gen_syscall(out, SYS_PRINT_STR);
-			break;
-		default:
-			break;
-		}
-	} else if (quad->op == OP_GOTO) {
-		mips(out, BRANCH, QLABEL, quad->label, END);
+void gen_write(FILE *out, struct quad_t *quad) {
+	mips(out, LOAD, REG, "a0", SYM, quad->res, END);
+	switch (quad->res->atomic_type) {
+	case A_INT:
+	case A_BOOL:
+		gen_syscall(out, SYS_PRINT_INT);
+		break;
+	case A_STR:
+		gen_syscall(out, SYS_PRINT_STR);
+		break;
+	default:
+		break;
 	}
 }
 
+void gen_assign(FILE *out, struct quad_t *quad) {
+	mips(out, LOAD, REG, "t0", SYM, quad->arg1, END);
+	mips(out, SW, REG, "t0", SYM, quad->res, END);
+}
+
+void gen_quad(FILE *out, struct quad_t *quad) {
+	if (quad->print_label) {
+		mips(out, TAB, QLABEL, quad, COLON, END);
+	}
+
+	switch (quad->op) {
+	case OP_ASSIGNMENT:
+		gen_assign(out, quad);
+		break;
+	case OP_WRITE:
+		gen_write(out, quad);
+		break;
+	case OP_GOTO:
+		mips(out, BRANCH, QLABEL, quad->label, END);
+		break;
+	case OP_EQUALS:
+		mips(out, LOAD, REG, "t0", SYM, quad->arg1, END);
+		mips(out, LOAD, REG, "t1", SYM, quad->arg2, END);
+		mips(out, BEQ, REG, "t0", REG, "t1", QLABEL, quad->label, END);
+		break;
+	default:
+		break;
+	}
+	mips(out, END);
+}
+
 void gen_exit(FILE *out) {
-	fprintf(out, "\n\n");
+	fprintf(out, "\n");
+	mips(out, TAB, RAW, "exit", COLON, END);
 	gen_syscall(out, SYS_EXIT);
 }
 

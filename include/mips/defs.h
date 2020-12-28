@@ -5,7 +5,9 @@
 
 #define VAR_PREFIX "_uvar_"
 #define TMP_PREFIX "__"
-#define IF_PREFIX "_if_"
+#define LOOP_LABEL_PREFIX "__loop"
+#define ASSIGN_LABEL_PREFIX "__assign"
+#define DEFAULT_LABEL_PREFIX "__label"
 
 enum syscall_svc_t {
 	SYS_PRINT_INT	 = 1,
@@ -56,11 +58,11 @@ enum mips_helper_op_t {
 	INSTR_MULT = 26,
 	BRANCH	   = 27,
 	BEQ		   = 28,
+	LOAD	   = 29,
 	SYSCALL	   = 100,
 	RAW		   = 101,
 	TAB		   = 102,
-	DECL	   = 103,
-	COLON	   = 104
+	COLON	   = 103
 
 };
 

@@ -1,5 +1,6 @@
 #include "generation/defs.h"
 #include "mips/defs.h"
+#include "util.h"
 #include <stdarg.h>
 #include <stdio.h>
 
@@ -24,9 +25,8 @@ static const char *op_str[SYSCALL] = {[INSTR_TO_STR_IDX(LI)]		= "li",
 									  [INSTR_TO_STR_IDX(INSTR_XORI)] = "xori",
 									  [INSTR_TO_STR_IDX(INSTR_DIV)]	 = "div",
 									  [INSTR_TO_STR_IDX(INSTR_MULT)] = "mult",
-									  [INSTR_TO_STR_IDX(BRANCH)] = "b",
-									  [INSTR_TO_STR_IDX(BEQ)] = "beq"
-									  };
+									  [INSTR_TO_STR_IDX(BRANCH)]	 = "b",
+									  [INSTR_TO_STR_IDX(BEQ)]		 = "beq"};
 
 static void print_sym_name(FILE *out, struct symbol_t *sym) {
 	if (sym->sym_type == SYM_VAR) {
@@ -40,12 +40,38 @@ static void print_sym_name(FILE *out, struct symbol_t *sym) {
 }
 
 static void print_quad_label(FILE *out, struct quad_t *quad) {
-	fprintf(out, "__%s_%u",
+	fprintf(out, "%s_%u",
 			quad->op == OP_ASSIGNMENT
-				? "assign"
-				: quad->op == OP_IF ? "cond"
-									: quad->op == OP_WHILE ? "loop" : "label",
+				? ASSIGN_LABEL_PREFIX
+				: IS_BOOL_OP(quad->op) ? LOOP_LABEL_PREFIX
+									   : DEFAULT_LABEL_PREFIX,
 			quad->id);
+}
+
+static void print_load(FILE *out, int reg_opt, char *reg, int arg_type,
+					   struct symbol_t *arg) {
+	if (reg_opt != REG) {
+		return;
+	}
+	if (arg_type != SYM) {
+		return;
+	}
+
+	if (arg->atomic_type == A_STR) {
+		fprintf(out, "la ");
+	} else if (arg->sym_type == SYM_CST) {
+		fprintf(out, "li ");
+	} else if (arg->sym_type == SYM_VAR) {
+		fprintf(out, "lw ");
+	}
+	fprintf(out, "$%s ", reg);
+	if (arg->atomic_type == A_STR) {
+		print_sym_name(out, arg);
+	} else if (arg->sym_type == SYM_CST) {
+		fprintf(out, "%i", arg->int_val);
+	} else if (arg->sym_type == SYM_VAR) {
+		print_sym_name(out, arg);
+	}
 }
 
 void mips(FILE *out, ...) {
@@ -58,6 +84,13 @@ void mips(FILE *out, ...) {
 			nospace = 0;
 		} else {
 			fprintf(out, " ");
+		}
+		if (op == LOAD) {
+			unsigned int t1		 = va_arg(args, int);
+			char *reg			 = va_arg(args, char *);
+			unsigned int t2		 = va_arg(args, int);
+			struct symbol_t *sym = va_arg(args, void *);
+			print_load(out, t1, reg, t2, sym);
 		}
 		switch (op) {
 		case IMM:
@@ -82,12 +115,11 @@ void mips(FILE *out, ...) {
 		case RAW:
 			fprintf(out, "%s", va_arg(args, char *));
 			break;
-		case DECL:
-			print_sym_name(out, va_arg(args, void *));
-			fprintf(out, ":");
-			break;
 		case COLON:
 			fprintf(out, ":");
+			nospace = 1;
+			break;
+		case LOAD:
 			break;
 		default:
 			fprintf(out, "%s", op_str[INSTR_TO_STR_IDX(op)]);

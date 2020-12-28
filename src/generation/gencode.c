@@ -31,17 +31,22 @@ int gencode(uint op, ...) {
 	case OP_ASSIGNMENT:
 		size = 1;
 		break;
-	case OP_IF:
-		op	  = va_arg(args, int);
-		size  = 2;
-		label = 1;
+	case OP_NEGATE:
+	case OP_ADD:
+	case OP_MINUS:
+	case OP_MULTIPLIES:
+	case OP_DIVIDES:
+	case OP_POWER:
+		size = 2;
+		label = 0;
 		break;
 	default:
+		label = 1;
 		size = 2;
 		break;
 	}
 
-	log_debug("new quad %u", op);
+	log_debug("new quad %u of type %u", nextquad, op);
 
 	if (size > 2) {
 		log_error("error: too many args for gencode");

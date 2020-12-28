@@ -1,14 +1,18 @@
 #ifndef GEN_QUAD_H
 #define GEN_QUAD_H
 
+#define IS_BOOL_OP(op) op >= OP_LOWER && op <= OP_NOT
+
 enum operation_t {
 	OP_ASSIGNMENT		 = 0,  /* res := x */
+	// Expr op
 	OP_NEGATE			 = 1,  /* res := -x */
 	OP_ADD				 = 2,  /* res := x + y */
 	OP_MINUS			 = 3,  /* res := x - y */
 	OP_MULTIPLIES		 = 4,  /* res := x * y */
 	OP_DIVIDES			 = 5,  /* res := x / y */
 	OP_POWER			 = 6,  /* res := x ^ y */
+	// Bool op
 	OP_LOWER			 = 7,  /* res := x < y or if(x < y) goto label */
 	OP_LOWER_OR_EQUAL	 = 8,  /* idem with <= */
 	OP_SUPERIOR			 = 9,  /* idem with > */
@@ -19,11 +23,10 @@ enum operation_t {
 	OP_OR				 = 14, /* idem with or */
 	OP_XOR				 = 15, /* idem with xor */
 	OP_NOT				 = 16, /* idem with not */
+	// Other
 	OP_GOTO				 = 17, /* goto label */
 	OP_WRITE			 = 18, /* write x */
 	OP_READ				 = 19, /* read x */
-	OP_IF				 = 20,
-	OP_WHILE			 = 21
 };
 
 struct quad_t {
