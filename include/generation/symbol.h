@@ -1,3 +1,6 @@
+/**
+ * @file
+ */
 #ifndef GEN_SYMBOL_H
 #define GEN_SYMBOL_H
 

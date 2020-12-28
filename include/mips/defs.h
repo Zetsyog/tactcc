@@ -1,3 +1,6 @@
+/**
+ * @file
+ */
 #ifndef MIPS_DEFS_H
 #define MIPS_DEFS_H
 

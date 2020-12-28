@@ -1,3 +1,6 @@
+/**
+ * @file
+ */
 #ifndef GEN_DEF_H
 #define GEN_DEF_H
 
