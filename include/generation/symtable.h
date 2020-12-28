@@ -3,6 +3,9 @@
 
 #include "generation/symbol.h"
 
+#define TMP_VAR_PREFIX "__tmp__"
+#define CONST_PREFIX "__const__"
+
 struct st_entry_t {
 	struct symbol_t *value;
 	struct st_entry_t *next;

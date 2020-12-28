@@ -48,7 +48,7 @@ void yyerror(const char *s);
 %left OPU NOT
 
 %type <expr_val> expr
-%type <instr_val> instr sequence
+%type <instr_val> instr sequence loop
 %type <sym> lvalue
 %type <a_type> varsdecl atomictype typename arraytype
 %type <list> fundecllist vardeclist identlist parlist
@@ -137,13 +137,17 @@ par: IDENT ':' typename {}
    | REF IDENT ':' typename {}
    ;
 
-cond: IF expr THEN M instr { }
+loop: WHILE expr DO M instr {  }
+    | IF expr THEN M instr {
+        log_debug("Condition quad %u", nextquad);
+        complete($2.true, $4);
+        $$.next = concat($2.false, $5.next);
+        $$.next = concat($$.next, crelist(nextquad));
+        gencode(OP_GOTO, NULL);
+    }
     | IF expr THEN M instr ELSE N instr { }
 
-loop: WHILE expr DO M instr {  }
-
-instr: cond {}
-     | loop {}
+instr: loop { $$.next = $1.next; }
      | lvalue ':' '=' expr {
             $$.next = NULL;
             if(($4.ptr != NULL && $1->atomic_type != $4.ptr->atomic_type )
@@ -174,7 +178,21 @@ instr: cond {}
      | BEGIN_TOK sequence END_TOK { $$.next = NULL; }
      | BEGIN_TOK END_TOK { $$.next = NULL; }
      | READ lvalue { $$.next = NULL; gencode(OP_READ, $2); }
-     | WRITE expr { $$.next = NULL; gencode(OP_WRITE, $2.ptr);  }
+     | WRITE expr { 
+        $$.next = NULL;
+        if($2.ptr->atomic_type == A_BOOL) {
+            complete($2.true, nextquad);
+            gencode(OP_WRITE, newtemp(SYM_CST, A_STR, "true"));
+            $$.next = crelist(nextquad);
+            gencode(OP_GOTO, NULL);
+            complete($2.false, nextquad);
+            gencode(OP_WRITE, newtemp(SYM_CST, A_STR, "false"));
+            $$.next = concat($$.next, crelist(nextquad));
+            gencode(OP_GOTO, NULL);
+        } else {
+            gencode(OP_WRITE, $2.ptr);
+        }
+     }
      ;
 
 sequence: instr ';' M sequence {
@@ -249,8 +267,15 @@ expr: INT {
         struct st_entry_t *e = st_get($1);
         if(e == NULL) {
             log_error("syntax error: ident %s not declared", $1);
-            exit(1);
         }
+        if(e->value->atomic_type == A_BOOL) {
+            $$.true = crelist(nextquad); 
+            $$.false = crelist(nextquad + 1);
+            struct symbol_t *tmp = newtemp(SYM_CST, A_BOOL, 1);
+            log_debug("Gen IF %s == %u", e->value->name, tmp->int_val);
+            gencode(OP_EQUALS, e->value, tmp, NULL);
+            gencode(OP_GOTO, NULL);
+        } 
         $$.ptr = e->value;
     }
     ;
@@ -264,7 +289,7 @@ opb:'+'    { $$ = OP_ADD; }
    |'<''=' { $$ = OP_LOWER_OR_EQUAL; }
    |'>'    { $$ = OP_SUPERIOR; }
    |'>''=' { $$ = OP_SUPERIOR_OR_EQUAL; }
-   |'='    { $$ = OP_EQUALS; }
+   |'=''=' { $$ = OP_EQUALS; }
    |'<''>' { $$ = OP_DIFFERENT; }
    | AND   { $$ = OP_AND; }
    | OR    { $$ = OP_OR; }

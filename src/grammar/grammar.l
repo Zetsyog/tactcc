@@ -63,7 +63,6 @@ string \"(\\.|[^"\\])*\"
 {ident} {
     memset(yylval.strVal, 0, SYM_NAME_MAX_LEN);
     strncpy(yylval.strVal, yytext, SYM_NAME_MAX_LEN);
-    log_debug("[LEX] (ident): %s", yylval.strVal);
     return(IDENT); 
 }
 {integer} { 
