@@ -54,7 +54,7 @@ clean:
 	rm $(INCLUDE_PATH)/$(LEX_HDR_NAME)
 	rm -f $(BINDIR)/$(TARGET)
 
-test:
+test: $(BINDIR)/$(TARGET)
 	cd test; sh test.sh
 
 doc:

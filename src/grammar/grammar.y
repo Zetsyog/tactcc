@@ -140,11 +140,11 @@ par: IDENT ':' typename {}
    ;
 
 loop: WHILE M expr DO M instr {
-                                complete($3.true , $5);
-                                complete($6.next , $2);
-                                $$.next=$3.false;
-                                gencode(OP_GOTO,$2);
-                            }
+        complete($3.true , $5);
+        complete($6.next , $2);
+        $$.next=$3.false;
+        gencode(OP_GOTO,$2);
+    }
     | IF expr THEN M instr {
         log_debug("Condition quad %u", nextquad);
         complete($2.true, $4);
@@ -221,10 +221,10 @@ M: /* empty */  { $$ = nextquad; }
  ;
 
 N:  /* empty */  {
-                   /* $$.next = crelist(nextquad);
-                   gencode(OP_GOTO,NULL);
-                   $$ = nextquad; */
-                 }
+/*  $$.next = crelist(nextquad);
+    gencode(OP_GOTO,NULL);
+    $$ = nextquad; */
+ }
  ;
 
 
