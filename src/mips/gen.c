@@ -16,11 +16,11 @@ void gen_st(FILE *out) {
 			switch (tmp->atomic_type) {
 			case A_INT:
 			case A_BOOL:
-				mips(out, DECL, tmp, TAB, RAW, ".word", TAB, IMM, tmp->int_val,
-					 END);
+				mips(out, SYM, tmp, COLON, TAB, RAW, ".word", TAB, IMM,
+					 tmp->int_val, END);
 				break;
 			case A_STR:
-				mips(out, DECL, tmp, TAB, RAW, ".asciiz", TAB, IMM_STR,
+				mips(out, SYM, tmp, COLON, TAB, RAW, ".asciiz", TAB, IMM_STR,
 					 tmp->str_val, END);
 				break;
 

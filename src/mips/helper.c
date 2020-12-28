@@ -82,10 +82,6 @@ void mips(FILE *out, ...) {
 		case RAW:
 			fprintf(out, "%s", va_arg(args, char *));
 			break;
-		case DECL:
-			print_sym_name(out, va_arg(args, void *));
-			fprintf(out, ":");
-			break;
 		case COLON:
 			fprintf(out, ":");
 			break;

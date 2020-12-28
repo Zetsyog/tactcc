@@ -59,8 +59,7 @@ enum mips_helper_op_t {
 	SYSCALL	   = 100,
 	RAW		   = 101,
 	TAB		   = 102,
-	DECL	   = 103,
-	COLON	   = 104
+	COLON	   = 103
 
 };
 
