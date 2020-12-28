@@ -48,7 +48,7 @@ void yyerror(const char *s);
 %left OPU NOT
 
 %type <expr_val> expr
-%type <instr_val> instr sequence
+%type <instr_val> instr sequence loop cond
 %type <sym> lvalue
 %type <a_type> varsdecl atomictype typename arraytype
 %type <list> fundecllist vardeclist identlist parlist
@@ -137,13 +137,28 @@ par: IDENT ':' typename {}
    | REF IDENT ':' typename {}
    ;
 
-cond: IF expr THEN M instr { }
-    | IF expr THEN M instr ELSE N instr { }
+cond: IF expr THEN M instr { complete($2.true , $4);
+                             $$.next = concat($2.false , $5.next);
+                             $$.next = concat($$.next , crelist(nextquad));
+                             gencode(OP_GOTO , NULL);
+                           }
+    | IF expr THEN M instr ELSE N instr {
+                                          complete($2.true , $4);
+                                          complete($2.false , $7);
+                                          $$.next = concat($5.next , $8.next);
+                                          $$.next = concat($$.next , (struct list_t *)$7);
+                                          $$.next = concat($$.next , crelist(nextquad));
+                                          gencode(OP_GOTO , NULL);
+                                        }
 
-loop: WHILE expr DO M instr {  }
+loop: WHILE M expr DO M instr { complete($3.true , $5);
+                                complete($6.next , $2);
+                                $$.next=$3.false;
+                                gencode(OP_GOTO,$2);
+                              }
 
-instr: cond {}
-     | loop {}
+instr: cond {$$=$1;}
+     | loop {$$=$1;}
      | lvalue ':' '=' expr {
             $$.next = NULL;
             if(($4.ptr != NULL && $1->atomic_type != $4.ptr->atomic_type )
@@ -161,8 +176,8 @@ instr: cond {}
                 concat($$.next, crelist(nextquad));
                 gencode(OP_GOTO, NULL);
             } else {
-                log_debug("calling gencode(:=, %s, %s)", 
-                    ($4.ptr)->name, 
+                log_debug("calling gencode(:=, %s, %s)",
+                    ($4.ptr)->name,
                     $1->name);
                 gencode(OP_ASSIGNMENT, $4.ptr, $1);
             }
@@ -170,7 +185,7 @@ instr: cond {}
      | RETURN expr
      | RETURN
      | IDENT '(' exprlist ')'
-     | IDENT '(' ')' 
+     | IDENT '(' ')'
      | BEGIN_TOK sequence END_TOK { $$.next = NULL; }
      | BEGIN_TOK END_TOK { $$.next = NULL; }
      | READ lvalue { $$.next = NULL; gencode(OP_READ, $2); }
@@ -188,7 +203,10 @@ sequence: instr ';' M sequence {
 M: /* empty */  { $$ = nextquad; }
  ;
 
-N:  /* empty */  { }
+N:  /* empty */  { (struct list_t *)$$.next = crelist(nextquad);
+                   gencode(OP_GOTO,NULL);
+                   $$ = nextquad;
+                 }
  ;
 
 
@@ -272,7 +290,7 @@ opb:'+'    { $$ = OP_ADD; }
    ;
 
 opu: '-' %prec OPU{ $$ = OP_NEGATE;  }
-   | NOT { $$ = NOT; }
+   | NOT { $$ = OP_NOT; }
    ;
 
 %%
