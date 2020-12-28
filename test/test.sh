@@ -1,6 +1,7 @@
 . ./functions.sh
 TARGET="../bin/scalpa"
 LOG="test.log"
+export LOG_LEVEL=100
 
 rm test.log
 

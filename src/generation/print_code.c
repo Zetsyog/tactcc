@@ -4,17 +4,26 @@
 #include <stdio.h>
 
 static void print_sym_val(struct symbol_t *sym) {
-	if(sym->sym_type == SYM_VAR) {
+	if (sym->sym_type == SYM_VAR) {
 		printf("%s", sym->name);
-	} else if(sym->sym_type == SYM_CST) {
-		printf("%i", sym->data);
+	} else if (sym->sym_type == SYM_CST) {
+		switch (sym->atomic_type) {
+		case A_INT:
+		case A_BOOL:
+			printf("%i", sym->int_val);
+			break;
+		case A_STR:
+			printf("\"%s\"", sym->str_val);
+		default:
+			break;
+		}
 	}
 }
 
 void print_intermediate_code() {
 	unsigned int i;
 	for (i = 0; i < nextquad; i++) {
-		printf("%i\t", i + 1);
+		printf("%i\t", i);
 		struct quad_t quad = tabQuad[i];
 
 		switch (quad.op) {
@@ -113,16 +122,13 @@ void print_intermediate_code() {
 			printf("\n");
 			break;
 		case OP_GOTO:
-			if(quad.arg1 == NULL){
-					printf("GOTO ?");
-			}else{
-							printf(" GOTO ");
-							print_sym_val(quad.res);
-							printf("\n");
+			if (quad.label == NULL) {
+				printf("GOTO ?\n");
+			} else {
+				printf("GOTO ");
+				printf("%i", quad.label->id);
+				printf("\n");
 			}
-
-			// TODO
-
 			break;
 		case OP_NEGATE:
 			print_sym_val(quad.res);
@@ -168,20 +174,26 @@ void print_intermediate_code() {
 			printf("\n");
 			break;
 		case OP_READ:
-			printf("%s ", "read");
+			printf("%s ", "write");
 			print_sym_val(quad.res);
 			printf("\n");
-			break;	
+			break;
 		case OP_IF:
 			printf(" if ");
 			print_sym_val(quad.arg1);
 			printf("GOTO");
-			if(quad.arg2 != NULL){
+			if (quad.arg2 != NULL) {
 				print_sym_val(quad.arg1);
 				printf("\n");
 			} else {
-				printf("? \n");	
+				printf("? \n");
 			}
+			break;
+		default:
+			printf("%s ", "read");
+			print_sym_val(quad.res);
+			printf("\n");
+			break;
 		}
 	}
 }

@@ -64,18 +64,20 @@ extern int yydebug;
     BEGIN_TOK = 270,
     READ = 271,
     WRITE = 272,
-    COM = 273,
-    END = 274,
-    AND = 275,
-    OR = 276,
-    XOR = 277,
-    NOT = 278,
-    DO = 279,
-    OF = 280,
-    INT = 281,
-    IDENT = 282,
-    OPU = 283,
-    IFEND = 284
+    END_TOK = 273,
+    AND = 274,
+    OR = 275,
+    XOR = 276,
+    NOT = 277,
+    DO = 278,
+    OF = 279,
+    TRUE = 280,
+    FALSE = 281,
+    INT = 282,
+    IDENT = 283,
+    STR_CST = 284,
+    OPU = 285,
+    IFEND = 286
   };
 #endif
 /* Tokens.  */
@@ -94,18 +96,20 @@ extern int yydebug;
 #define BEGIN_TOK 270
 #define READ 271
 #define WRITE 272
-#define COM 273
-#define END 274
-#define AND 275
-#define OR 276
-#define XOR 277
-#define NOT 278
-#define DO 279
-#define OF 280
-#define INT 281
-#define IDENT 282
-#define OPU 283
-#define IFEND 284
+#define END_TOK 273
+#define AND 274
+#define OR 275
+#define XOR 276
+#define NOT 277
+#define DO 278
+#define OF 279
+#define TRUE 280
+#define FALSE 281
+#define INT 282
+#define IDENT 283
+#define STR_CST 284
+#define OPU 285
+#define IFEND 286
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -113,22 +117,24 @@ union YYSTYPE
 {
 #line 18 "src/grammar/grammar.y"
 
-        struct {
-                struct list_t *true;
-                struct list_t *false;
-        } cond;
-        struct list_t *pos;
-        struct {
-                struct symbol_t *ptr;
-        } var;
-        struct node_t *list;
-        int intVal;
-        char strVal[SYM_NAME_MAX_LEN];
-        struct symbol_t *sym;
-        unsigned int a_type;
-        enum operation_t operation;
+    struct list_t *pos;
+    struct {
+        struct symbol_t *ptr;
+        struct list_t *true;
+        struct list_t *false;
+    } expr_val;
+    struct {
+        struct list_t *next;
+    } instr_val;
+    struct node_t *list;
+    int quad;
+    int intVal;
+    char strVal[SYM_NAME_MAX_LEN];
+    struct symbol_t *sym;
+    unsigned int a_type;
+    enum operation_t operation;
 
-#line 132 "./include/grammar.h"
+#line 138 "./include/grammar.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

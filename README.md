@@ -9,7 +9,7 @@ Some packages are needed to compile and run the tests
 
 ## Authors
 
-Téo DUCAROUGE
-Thomas LEPINE
-Alexandre MELKONIAN
-Clément ROSSETTI
+- Téo DUCAROUGE
+- Thomas LEPINE
+- Alexandre MELKONIAN
+- Clément ROSSETTI

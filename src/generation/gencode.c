@@ -4,6 +4,7 @@
 #include "util.h"
 #include <stdarg.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 unsigned int nextquad		 = 0;
 struct quad_t tabQuad[10000] = {0};
@@ -20,6 +21,9 @@ int gencode(uint op, ...) {
 
 	switch (op) {
 	case OP_GOTO:
+		label = 1;
+		size  = 0;
+		break;
 	case OP_WRITE:
 	case OP_READ:
 		size = 0;
@@ -49,8 +53,11 @@ int gencode(uint op, ...) {
 			tabQuad[index].arg2 = va_arg(args, void *);
 		}
 	}
-	if(label) {
+	if (label) {
 		tabQuad[index].label = va_arg(args, void *);
+		if(tabQuad[index].label != NULL) {
+			tabQuad[index].label->print_label = 1;
+		}
 	} else {
 		tabQuad[index].res = va_arg(args, void *);
 	}
@@ -80,7 +87,7 @@ struct list_t *concat(struct list_t *list1, struct list_t *list2) {
 		res = NULL;
 
 	if (list1 != NULL) {
-		while (list1 != NULL)
+		while (list1->next != NULL)
 			list1 = list1->next;
 
 		list1->next = list2;
@@ -89,15 +96,14 @@ struct list_t *concat(struct list_t *list1, struct list_t *list2) {
 	return res;
 }
 
-void complete(struct list_t *list, int addr)
-{
-		if(tabQuad[list->position].op == OP_GOTO) {
-				if(tabQuad[list->position].arg1 == NULL)
-						tabQuad[list->position].arg1 = &addr;
-		} else if(tabQuad[list->position].op == IF) {
-							if(tabQuad[list->position].res == NULL)
-									tabQuad[list->position].res = &addr;
-		}
-		list = list -> next;
-		
+void complete(struct list_t *list, unsigned int pos) {
+	if (list == NULL)
+		return;
+
+	tabQuad[pos].print_label = 1;
+	
+	while (list != NULL) {
+		tabQuad[list->position].label = &tabQuad[pos];
+		list = list->next;
+	}
 }

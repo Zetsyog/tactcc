@@ -16,34 +16,39 @@ void yyerror(const char *s);
 %define parse.error verbose
 
 %union {
-        struct {
-                struct list_t *true;
-                struct list_t *false;
-        } cond;
-        struct list_t *pos;
-        struct {
-                struct symbol_t *ptr;
-        } var;
-        struct node_t *list;
-        int intVal;
-        char strVal[SYM_NAME_MAX_LEN];
-        struct symbol_t *sym;
-        unsigned int a_type;
-        enum operation_t operation;
+    struct list_t *pos;
+    struct {
+        struct symbol_t *ptr;
+        struct list_t *true;
+        struct list_t *false;
+    } expr_val;
+    struct {
+        struct list_t *next;
+    } instr_val;
+    struct node_t *list;
+    int quad;
+    int intVal;
+    char strVal[SYM_NAME_MAX_LEN];
+    struct symbol_t *sym;
+    unsigned int a_type;
+    enum operation_t operation;
 }
 
 %token PROG VAR UNIT BOOL ARRAY FUNC REF IF THEN ELSE
-%token WHILE RETURN BEGIN_TOK READ WRITE COM
-%token END AND OR XOR NOT DO OF
+%token WHILE RETURN BEGIN_TOK READ WRITE
+%token END_TOK AND OR XOR NOT DO OF
+%token TRUE FALSE
 %token <intVal> INT
 %token <strVal> IDENT
+%token <strVal> STR_CST
 
 %left XOR OR '+' '-'
 %left AND '*' '/'
 %left '^'
 %left OPU NOT
 
-%type <var> expr
+%type <expr_val> expr
+%type <instr_val> instr sequence
 %type <sym> lvalue
 %type <a_type> varsdecl atomictype typename arraytype
 %type <list> fundecllist vardeclist identlist parlist
@@ -132,31 +137,55 @@ par: IDENT ':' typename {}
    | REF IDENT ':' typename {}
    ;
 
-instr: IF expr THEN M instr { }
-     | IF expr THEN M instr ELSE N instr { }
-     | WHILE expr DO M instr {  }
+cond: IF expr THEN M instr { }
+    | IF expr THEN M instr ELSE N instr { }
+
+loop: WHILE expr DO M instr {  }
+
+instr: cond {}
+     | loop {}
      | lvalue ':' '=' expr {
-                                log_debug("calling gencode(:=, %s, %s)",
-                                        ((struct symbol_t *)$4.ptr)->name,
-                                        $1->name);
-                                gencode(OP_ASSIGNMENT, $4.ptr, $1);
-                            }
+            $$.next = NULL;
+            if(($4.ptr != NULL && $1->atomic_type != $4.ptr->atomic_type )
+                    || ($1->atomic_type == A_BOOL && $4.ptr != NULL)
+                ) {
+                log_error("incompatible types");
+            }
+            if($1->atomic_type == A_BOOL) {
+                complete($4.false, nextquad);
+                gencode(OP_ASSIGNMENT, newtemp(SYM_CST, A_BOOL, 0), $1);
+                $$.next = crelist(nextquad);
+                gencode(OP_GOTO, NULL);
+                complete($4.true, nextquad);
+                gencode(OP_ASSIGNMENT, newtemp(SYM_CST, A_BOOL, 1), $1);
+                concat($$.next, crelist(nextquad));
+                gencode(OP_GOTO, NULL);
+            } else {
+                log_debug("calling gencode(:=, %s, %s)", 
+                    ($4.ptr)->name, 
+                    $1->name);
+                gencode(OP_ASSIGNMENT, $4.ptr, $1);
+            }
+     }
      | RETURN expr
      | RETURN
      | IDENT '(' exprlist ')'
-     | IDENT '(' ')'
-     | BEGIN_TOK sequence END
-     | BEGIN_TOK END
-     | READ lvalue { gencode(OP_READ, $2); }
-     | WRITE expr { gencode(OP_WRITE, $2.ptr);  }
+     | IDENT '(' ')' 
+     | BEGIN_TOK sequence END_TOK { $$.next = NULL; }
+     | BEGIN_TOK END_TOK { $$.next = NULL; }
+     | READ lvalue { $$.next = NULL; gencode(OP_READ, $2); }
+     | WRITE expr { $$.next = NULL; gencode(OP_WRITE, $2.ptr);  }
      ;
 
-sequence: instr ';' M sequence {}
-        | instr ';' { }
-        | instr     { }
+sequence: instr ';' M sequence {
+            complete($1.next, $3);
+            $$.next = $4.next;
+        }
+        | instr ';' { $$.next = $1.next; }
+        | instr     { $$.next = $1.next; }
         ;
 
-M: /* empty */  { }
+M: /* empty */  { $$ = nextquad; }
  ;
 
 N:  /* empty */  { }
@@ -164,14 +193,14 @@ N:  /* empty */  { }
 
 
 lvalue: IDENT {
-    struct st_entry_t *e = st_get($1);
-    if(e == NULL) {
-        log_error("syntax error: ident %s not declared", $1);
-        exit(1);
-    }
-    log_debug("lvalue: %s", ((struct symbol_t *)e->value)->name);
-    $$ = e->value;
-}
+            struct st_entry_t *e = st_get($1);
+            if(e == NULL) {
+                log_error("syntax error: ident %s not declared", $1);
+                exit(1);
+            }
+            log_debug("lvalue: %s", ((struct symbol_t *)e->value)->name);
+            $$ = e->value;
+      }
       | IDENT '[' exprlist ']'  {}
       ;
 
@@ -180,18 +209,36 @@ exprlist: expr
         ;
 
 expr: INT {
-    $$.ptr = newtemp(SYM_CST, A_INT, $1);
-    log_debug("expr: %s", ((struct symbol_t *)$$.ptr)->name);
-}
+        $$.ptr = newtemp(SYM_CST, A_INT, $1);
+        log_debug("expr: %s", ((struct symbol_t *)$$.ptr)->name);
+    }
+    | STR_CST {
+        $$.ptr = newtemp(SYM_CST, A_STR, $1);
+    }
+    | TRUE {
+        $$.ptr = NULL;
+        $$.true = crelist(nextquad);
+        gencode(OP_GOTO, NULL);
+    }
+    | FALSE {
+        $$.ptr = NULL;
+        $$.false = crelist(nextquad);
+        gencode(OP_GOTO, NULL);
+    }
     | '(' expr ')'  {
                         $$ = $2;
                     }
-    | expr opb expr {}
+    | expr opb expr {
+        $$.ptr = NULL;
+    }
     | opu expr {
         if($2.ptr->atomic_type == A_INT && $1 == OP_NEGATE) {
             $$.ptr = $2.ptr;
-            $2.ptr->data *= -1;
-        } else {
+            $2.ptr->int_val *= -1;
+        } else if($2.ptr->atomic_type == A_BOOL && $1 == OP_NOT) {
+            $$.true = $2.false;
+            $$.false = $2.true;
+        }else {
             log_error("syntax: invalid operation");
         }
     }
@@ -273,4 +320,5 @@ int main(int argc, char **argv)
 void yyerror(const char *s)
 {
     fprintf(stderr,"%s\n",s);
+    exit(EXIT_FAILURE);
 }

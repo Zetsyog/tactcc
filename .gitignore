@@ -13,3 +13,6 @@ bin/*
 
 # Log files
 *.log
+
+# Tmp files
+*.tmp

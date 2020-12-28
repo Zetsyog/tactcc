@@ -10,7 +10,7 @@ char *sym_type_str[] = {[SYM_CST]	= "CONST",
 						[SYM_FUN]	= "FUNC"};
 
 char *atomic_type_str[] = {
-	[A_UNIT] = "unit", [A_INT] = "int", [A_BOOL] = "bool"};
+	[A_UNIT] = "unit", [A_INT] = "int", [A_BOOL] = "bool", [A_STR] = "str"};
 
 struct symbol_t *sym_create(char *name, enum sym_type_t sym_type,
 						  enum atomic_type_t atomic_type) {
