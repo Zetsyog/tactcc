@@ -6,6 +6,7 @@ Some packages are needed to compile and run the tests
 * _bison_, for syntactic analysis
 * _flex_, for lexical analysis
 * _spim_, to create MIPS vm
+* _doxygen_, _graphviw_, for doc generation
 
 ## Authors
 

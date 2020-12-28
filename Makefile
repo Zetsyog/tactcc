@@ -47,9 +47,15 @@ $(LBUILD): $(LSOURCES)
 	mkdir -p $(dir $@)
 	$(LEX) -o $@ $<
 
-.PHONY: clean
+.PHONY: clean doc test
 clean:
 	rm -rf $(OBJDIR)/*
 	find $(TEST_DIR)/ -name "*.tmp" -type f -delete
 	rm $(INCLUDE_PATH)/$(LEX_HDR_NAME)
 	rm -f $(BINDIR)/$(TARGET)
+
+test:
+	cd test; sh test.sh
+
+doc:
+	doxygen doxygen.conf

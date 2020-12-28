@@ -1,3 +1,7 @@
+/**
+ * @file
+ */
+
 #ifndef GEN_QUAD_H
 #define GEN_QUAD_H
 
@@ -41,8 +45,21 @@ struct quad_t {
 	};
 };
 
+/**
+ * @struct Linked list of quad positions
+ * Used for goto generation
+ * @see crelist()
+ * @see complete()
+ * @see concat()
+ */
 struct list_t {
+	/**
+	 * A quad position
+	 */
 	int position;
+	/**
+	 * The next element of the list
+	 */
 	struct list_t *next;
 };
 

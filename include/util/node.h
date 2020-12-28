@@ -1,8 +1,15 @@
+/**
+ * @file
+ */
 #ifndef UTIL_LINKED_LIST_H
 #define UTIL_LINKED_LIST_H
 
 #include "util.h"
 
+/**
+ * A linked list with a pointer value.
+ * Used for var declaration list.
+ */
 struct node_t {
 	void *data;
 	struct node_t *next;

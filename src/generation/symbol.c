@@ -22,3 +22,13 @@ struct symbol_t *sym_create(char *name, enum sym_type_t sym_type,
 
 	return s;
 }
+
+void sym_destroy(struct symbol_t *sym) {
+	if(sym == NULL)
+		return;
+	
+	if(sym->atomic_type == A_STR) {
+		free(sym->str_val);
+	}
+	free(sym);
+}
