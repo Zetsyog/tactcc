@@ -9,6 +9,6 @@ program test
 
         if b2 then
             write b2;
-        
+
         write "\n";
     end

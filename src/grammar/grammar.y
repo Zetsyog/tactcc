@@ -137,7 +137,12 @@ par: IDENT ':' typename {}
    | REF IDENT ':' typename {}
    ;
 
-loop: WHILE expr DO M instr {  }
+loop: WHILE M expr DO M instr {
+                                complete($3.true , $5);
+                                complete($6.next , $2);
+                                $$.next=$3.false;
+                                gencode(OP_GOTO,$2);
+                            }
     | IF expr THEN M instr {
         log_debug("Condition quad %u", nextquad);
         complete($2.true, $4);
@@ -145,7 +150,14 @@ loop: WHILE expr DO M instr {  }
         $$.next = concat($$.next, crelist(nextquad));
         gencode(OP_GOTO, NULL);
     }
-    | IF expr THEN M instr ELSE N instr { }
+    | IF expr THEN M instr ELSE N instr {
+            /* complete($2.true , $4);
+            complete($2.false , $7);
+            $$.next = concat($5.next , $8.next);
+            $$.next = concat($$.next , $7.next);
+            $$.next = concat($$.next , crelist(nextquad));
+            gencode(OP_GOTO , NULL); */
+    }
 
 instr: loop { $$.next = $1.next; }
      | lvalue ':' '=' expr {
@@ -165,8 +177,8 @@ instr: loop { $$.next = $1.next; }
                 concat($$.next, crelist(nextquad));
                 gencode(OP_GOTO, NULL);
             } else {
-                log_debug("calling gencode(:=, %s, %s)", 
-                    ($4.ptr)->name, 
+                log_debug("calling gencode(:=, %s, %s)",
+                    ($4.ptr)->name,
                     $1->name);
                 gencode(OP_ASSIGNMENT, $4.ptr, $1);
             }
@@ -174,11 +186,11 @@ instr: loop { $$.next = $1.next; }
      | RETURN expr
      | RETURN
      | IDENT '(' exprlist ')'
-     | IDENT '(' ')' 
+     | IDENT '(' ')'
      | BEGIN_TOK sequence END_TOK { $$.next = NULL; }
      | BEGIN_TOK END_TOK { $$.next = NULL; }
      | READ lvalue { $$.next = NULL; gencode(OP_READ, $2); }
-     | WRITE expr { 
+     | WRITE expr {
         $$.next = NULL;
         if($2.ptr->atomic_type == A_BOOL) {
             complete($2.true, nextquad);
@@ -206,7 +218,11 @@ sequence: instr ';' M sequence {
 M: /* empty */  { $$ = nextquad; }
  ;
 
-N:  /* empty */  { }
+N:  /* empty */  {
+                   /* $$.next = crelist(nextquad);
+                   gencode(OP_GOTO,NULL);
+                   $$ = nextquad; */
+                 }
  ;
 
 
@@ -269,13 +285,13 @@ expr: INT {
             log_error("syntax error: ident %s not declared", $1);
         }
         if(e->value->atomic_type == A_BOOL) {
-            $$.true = crelist(nextquad); 
+            $$.true = crelist(nextquad);
             $$.false = crelist(nextquad + 1);
             struct symbol_t *tmp = newtemp(SYM_CST, A_BOOL, 1);
             log_debug("Gen IF %s == %u", e->value->name, tmp->int_val);
             gencode(OP_EQUALS, e->value, tmp, NULL);
             gencode(OP_GOTO, NULL);
-        } 
+        }
         $$.ptr = e->value;
     }
     ;
