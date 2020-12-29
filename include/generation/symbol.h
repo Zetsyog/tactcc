@@ -27,6 +27,8 @@ extern char *atomic_type_str[];
 
 struct symbol_t {
 	char name[SYM_NAME_MAX_LEN];
+	struct symbol_t *parent;
+	unsigned int depth;
 	enum sym_type_t sym_type;
 	enum atomic_type_t atomic_type;
 	union {
@@ -34,6 +36,7 @@ struct symbol_t {
 		char *str_val;
 	};
 };
+
 
 /**
  * Create and allocate a new symbole_t

@@ -36,6 +36,9 @@ static void print_sym_name(FILE *out, struct symbol_t *sym) {
 	} else if (sym->sym_type == SYM_ARRAY) {
 		// TODO
 	}
+	if(sym->depth > 1) {
+		fprintf(out, "d%u_", sym->depth);
+	}
 	fprintf(out, "%s", sym->name);
 }
 

@@ -40,13 +40,15 @@ struct node_t *node_unshift(struct node_t *list, void *data) {
 	return tmp;
 }
 
-struct node_t *node_shift(struct node_t **list) {
+void *node_shift(struct node_t **list) {
 	if(list == NULL || *list == NULL) {
 		return NULL;
 	}
 	struct node_t *tmp = *list;
+	void *data		   = tmp->data;
 	*list			   = (*list)->next;
-	return tmp;
+	free(tmp);
+	return data;
 }
 
 struct node_t *node_append_int(struct node_t *list, int value) {

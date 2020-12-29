@@ -19,6 +19,8 @@ struct symbol_t *sym_create(char *name, enum sym_type_t sym_type,
 	strncpy(s->name, name, SYM_NAME_MAX_LEN);
 	s->sym_type = sym_type;
 	s->atomic_type = atomic_type;
+	s->parent	   = NULL;
+	s->depth	   = 0;
 
 	return s;
 }

@@ -7,12 +7,12 @@
 void gen_st(FILE *out) {
 	// Segment data
 	mips(out, TAB, RAW, ".data", END);
-	unsigned int i = 0;
 	struct symbol_t *tmp;
+	struct node_t *it = st->list;
 
-	while (i < st->size) {
-		if (st->table[i] != NULL && st->table[i] != NULL) {
-			tmp = st->table[i];
+	while (it != NULL) {
+		tmp = it->data;
+		if (tmp != NULL) {
 			if (tmp->sym_type == SYM_VAR) {
 				switch (tmp->atomic_type) {
 				case A_INT:
@@ -35,7 +35,7 @@ void gen_st(FILE *out) {
 				}
 			}
 		}
-		i++;
+		it = it->next;
 	}
 	mips(out, END);
 }

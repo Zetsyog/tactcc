@@ -62,7 +62,7 @@ extern void yylex_destroy();
 %start program
 
 %%
-program: PROG IDENT vardeclist fundecllist instr
+program: PROG IDENT { st_unshift(); } vardeclist fundecllist instr
        ;
 
 vardeclist: /*epsilon*/ { $$ = NULL; }
@@ -94,10 +94,8 @@ varsdecl: VAR identlist ':' typename {
 identlist: IDENT    {
                 log_debug("creating new identlist with %s", $1);
                 struct symbol_t *sym = sym_create($1, 0, 0);
-                log_debug("sym name: %s", sym->name);
                 $$ = node_create(sym);
                 sym = (struct symbol_t *) $$->data;
-                log_debug("sym name2: %s", sym->name);
 
             }
          | identlist ',' IDENT  {
@@ -127,7 +125,9 @@ fundecllist: /*epsilon*/              { $$ = NULL; }
            | fundecl ';' fundecllist { $$ = $3;}
            ;
 
-fundecl: FUNC IDENT '(' parlist ')' ':' atomictype vardeclist M instr
+fundecl: FUNC IDENT '(' parlist ')' ':' atomictype {  st_unshift(); } vardeclist M instr {
+            st_shift();     
+       }
        ;
 
 parlist: /*epsilon*/     {  $$ = NULL; }

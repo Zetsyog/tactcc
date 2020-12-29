@@ -88,6 +88,19 @@ void st_print();
  */
 struct symbol_t *st_put(struct symbol_t *value);
 
+/**
+ * @param sym
+ * @return a pseudo-unique index for sym
+ */
+unsigned long st_hash(struct symbol_t *sym);
+
+unsigned long st_hash_str(char *str);
+
+/**
+ * @return depth of symbol in the table of symbol
+ */
+unsigned int get_sym_depth(struct symbol_t *sym);
+
 // TODO: maybe add new functions like clear, remove, iterate
 // dunno if needed
 
