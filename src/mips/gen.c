@@ -11,8 +11,8 @@ void gen_st(FILE *out) {
 	struct symbol_t *tmp;
 
 	while (i < st->size) {
-		if (st->table[i] != NULL && st->table[i]->value != NULL) {
-			tmp = st->table[i]->value;
+		if (st->table[i] != NULL && st->table[i] != NULL) {
+			tmp = st->table[i];
 			if (tmp->sym_type == SYM_VAR) {
 				switch (tmp->atomic_type) {
 				case A_INT:

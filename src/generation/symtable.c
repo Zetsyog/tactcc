@@ -22,74 +22,73 @@ unsigned long st_hash(char *str) {
 
 struct symtable_t *st_create(unsigned int size) {
 	MCHECK(st = malloc(sizeof(struct symtable_t)));
-	if ((st->table = calloc(size, sizeof(struct st_entry_t *))) == NULL) {
+	if ((st->table = calloc(size, sizeof(struct symbol_t *))) == NULL) {
 		free(st);
 		return NULL;
 	}
 	st->size  = size;
 	st->usage = 0;
+	st->list  = NULL;
 	return st;
 }
 
-struct st_entry_t *st_get(char *key) {
-	unsigned long h		 = st_hash(key) % st->size;
-	struct st_entry_t *e = st->table[h];
-	while (e != NULL) {
-		if (!strcmp(e->key, key))
+struct symbol_t *st_get(char *key) {
+	unsigned long h	   = st_hash(key) % st->size;
+	struct symbol_t *e = st->table[h];
+	if (e != NULL) {
+		if (!strcmp(e->name, key))
 			return e;
-		e = e->next;
 	}
 
 	return NULL;
 }
 
-struct st_entry_t *st_put(char *key, struct symbol_t *value) {
+struct symbol_t *st_put(struct symbol_t *value) {
 	if (st == NULL)
 		return NULL;
 
-	log_debug("Adding entry %s (%u) in symtable", value->name,
-			  value->atomic_type);
+	unsigned long hash	 = st_hash(value->name) % st->size;
+	struct symbol_t *sym = st->table[hash];
 
-	unsigned long hash		 = st_hash(key) % st->size;
-	struct st_entry_t *entry = st->table[hash];
+	if (sym != NULL) {
+		if (!strcmp(sym->name, value->name)) { // var already declared
 
-	while (entry != NULL) {
-		if (!strcmp(entry->key, key)) {
-			entry->value = value;
-			return entry;
+		} else {
+			// collision error
+			return NULL;
 		}
-		entry = entry->next;
 	}
 
-	// Getting here means the key doesn't already exist
-	size_t len = strlen(key);
-	MCHECK(entry = calloc(1, sizeof(struct st_entry_t) + len + 1));
-	strncpy(entry->key, key, len);
-	entry->value = value;
+	// Getting here means the key doesn't already exists
 
 	// Add the element at the beginning of the linked list
-	entry->next		= st->list;
-	st->list		= entry;
-	st->table[hash] = entry;
+	// entry->next		= st->list;
+	// st->list		= entry;
+	log_debug("Adding entry %s (%u) in symtable at idx %i", value->name,
+			  value->atomic_type, hash);
+	st->list		= node_unshift(st->list, value);
+	st->table[hash] = value;
 	st->usage++;
 
 	return NULL;
 }
 
+void st_unshift() {
+
+}
+
+void st_shift() {
+}
+
 void st_destroy() {
 	if (st->usage != 0) {
-		unsigned int idx = 0;
-		while (idx < st->size) {
-			if (st->table[idx] != NULL) {
-				if(st->table[idx]->value != NULL) {
-					sym_destroy(st->table[idx]->value);
-				}
-				free(st->table[idx]);
-				st->table[idx] = NULL;
-			}
-			idx++;
+		struct node_t *it = st->list;
+		while (it != NULL) {
+			sym_destroy(it->data);
+			it = it->next;
 		}
 	}
+	node_destroy(st->list, 0);
 	free(st->table);
 	free(st);
 }
@@ -102,12 +101,11 @@ void st_print() {
 	printf("%-9s%-8s%-15s %-5s %s\n", "SymType", "Type", "Name", "", "Value");
 	while (idx < st->size) {
 		if (st->table[idx] != NULL) {
-			tmp = st->table[idx]->value;
+			tmp = st->table[idx];
 			printf("%-9s%-8s%-15s", sym_type_str[tmp->sym_type],
 				   atomic_type_str[tmp->atomic_type], tmp->name);
 			printf("=%-5s", "");
-			switch (tmp->atomic_type)
-			{
+			switch (tmp->atomic_type) {
 			case A_INT:
 			case A_BOOL:
 				if (tmp->int_val >= 0)

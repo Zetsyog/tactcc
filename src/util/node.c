@@ -34,6 +34,21 @@ struct node_t *node_append(struct node_t *list, void *data) {
 	return list->next;
 }
 
+struct node_t *node_unshift(struct node_t *list, void *data) {
+	struct node_t *tmp = node_create(data);
+	tmp->next = list;
+	return tmp;
+}
+
+struct node_t *node_shift(struct node_t **list) {
+	if(list == NULL || *list == NULL) {
+		return NULL;
+	}
+	struct node_t *tmp = *list;
+	*list			   = (*list)->next;
+	return tmp;
+}
+
 struct node_t *node_append_int(struct node_t *list, int value) {
 	if (list == NULL)
 		return NULL;

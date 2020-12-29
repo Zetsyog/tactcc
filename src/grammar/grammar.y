@@ -80,7 +80,7 @@ varsdecl: VAR identlist ':' typename {
                 tmp->atomic_type = $4;
                 tmp->sym_type = SYM_VAR;
 
-                st_put(tmp->name, tmp);
+                st_put(tmp);
 
                 list = list->next;
                 if(list == NULL)
@@ -229,13 +229,13 @@ N:  /* empty */  {
 
 
 lvalue: IDENT {
-            struct st_entry_t *e = st_get($1);
-            if(e == NULL) {
+            struct symbol_t *sym = st_get($1);
+            if(sym == NULL) {
                 log_error("syntax error: ident %s not declared", $1);
                 exit(1);
             }
-            log_debug("lvalue: %s", ((struct symbol_t *)e->value)->name);
-            $$ = e->value;
+            log_debug("lvalue: %s", sym->name);
+            $$ = sym;
       }
       | IDENT '[' exprlist ']'  {}
       ;
@@ -282,19 +282,19 @@ expr: INT {
     | IDENT '(' ')'
     | IDENT '[' exprlist ']'
     | IDENT {
-        struct st_entry_t *e = st_get($1);
-        if(e == NULL) {
+        struct symbol_t *sym = st_get($1);
+        if(sym == NULL) {
             log_error("syntax error: ident %s not declared", $1);
         }
-        if(e->value->atomic_type == A_BOOL) {
+        if(sym->atomic_type == A_BOOL) {
             $$.true = crelist(nextquad);
             $$.false = crelist(nextquad + 1);
             struct symbol_t *tmp = newtemp(SYM_CST, A_BOOL, 1);
-            log_debug("Gen IF %s == %u", e->value->name, tmp->int_val);
-            gencode(OP_EQUALS, e->value, tmp, NULL);
+            log_debug("Gen IF %s == %u", sym->name, tmp->int_val);
+            gencode(OP_EQUALS, sym, tmp, NULL);
             gencode(OP_GOTO, NULL);
         }
-        $$.ptr = e->value;
+        $$.ptr = sym;
     }
     ;
 

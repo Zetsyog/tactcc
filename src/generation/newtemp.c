@@ -40,7 +40,7 @@ struct symbol_t *newtemp(enum sym_type_t sym_type,
 		log_error("Unsupported cst var type");
 	}
 
-	st_put(sym->name, sym);
+	st_put(sym);
 
 	va_end(args);
 
