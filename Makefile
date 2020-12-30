@@ -6,6 +6,14 @@ CFLAGS    ?= -Wall -Wextra -g
 LDLIBS    ?= 
 YACCFLAGS ?= -v
 
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Linux)
+		LDLIBS += -lfl
+endif
+ifeq ($(UNAME_S),Darwin)
+		LDLIBS += -ll
+endif
+
 INCLUDE_PATH = ./include
 TEST_DIR = test
 TARGET   = scalpa

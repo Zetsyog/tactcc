@@ -125,8 +125,9 @@ fundecllist: /*epsilon*/              { $$ = NULL; }
            ;
 
 K: /* epsilon */ {
-}
-
+ }
+ ;
+ 
 fundecl: FUNC IDENT K {  
             $3 = sym_create($2, SYM_FUN, 0); 
             st_put($3);
