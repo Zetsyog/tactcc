@@ -132,12 +132,13 @@ test_in_file ()
         success
     fi
     printf "\n" >> $LOG
+    printf "\n"
 }
 
 run_test_simple ()
 {
     echo "# Test (exitcode):" >> $LOG
-    printf "${PREFIX}/$1..."
+    printf "${PREFIX}/$1 "
     STDIN="${PREFIX}/$1"
     test_in_file "$STDIN" "$2"
 }
@@ -164,12 +165,12 @@ test_compil_exec_in()
     TEST_FUNC=$3
     TEST_NB=$((TEST_NB+1))
 
-    printf "Compiling $IN_CODE..."
+    printf "Compiling test/$IN_CODE "
     # On compile le code scalpa
     echo "# Test (compilation & execution):" >> $LOG
     echo "cat $IN_CODE | $TARGET -o $ASM_FILE" >> $LOG
     echo "#### Output" >> $LOG
-    cat "$IN_CODE" | ./$TARGET 2>&1 -o "$ASM_FILE" >> $LOG
+    cat "$IN_CODE" | ./$TARGET -o "$ASM_FILE" 2>&1 >> $LOG
     EXITCODE=$?
 
     if [ $EXITCODE -ne 0 ]
@@ -183,8 +184,8 @@ test_compil_exec_in()
         echo "${Green}OK${Reset}"
     fi
 
-    printf "spim -file $ASM_FILE > $OUT..." >> $LOG
-    printf "Testing execution..."
+    echo "spim -file $ASM_FILE > $OUT" >> $LOG
+    printf "Exec test/$ASM_FILE "
     $2 | spim -file $ASM_FILE | tail -n +6 > $OUT
 
     echo "" >> $LOG

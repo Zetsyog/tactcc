@@ -27,6 +27,7 @@ string \"(\\.|[^"\\])*\"
 <COMMENT>.    {}
 
 [;,:().]  return(yytext[0]);
+[+\-*/<>^] return(yytext[0]);
 
 "program"  return(PROG);
 "var"      return(VAR);
@@ -53,6 +54,7 @@ string \"(\\.|[^"\\])*\"
 "not"      return(NOT);
 "true"     return(TRUE);
 "false"    return(FALSE);
+
 {string}   {
     memset(yylval.strVal, 0, SYM_NAME_MAX_LEN);
     unsigned int len = strlen(yytext);
@@ -65,7 +67,12 @@ string \"(\\.|[^"\\])*\"
     return(STR_CST);
 }
 
-"+"|"-"|"*"|"/"|"<"|"<="|">"|">="|"="|"<>"  {return yytext[0];}
+":="    return(ASSIGN);
+"=="    return(EQUAL);
+"<>"    return(NOT_EQUAL);
+"<="    return(LOWER_EQUAL);
+">="    return(UPPER_EQUAL);
+
 {ident} {
     memset(yylval.strVal, 0, SYM_NAME_MAX_LEN);
     strncpy(yylval.strVal, yytext, SYM_NAME_MAX_LEN);

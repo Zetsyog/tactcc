@@ -15,7 +15,7 @@ extern int yylineno;
 void yyerror(const char *s);
 extern void yylex_destroy();
 %}
-
+%define parse.error verbose
 %union {
     struct list_t *pos;
     struct expr_val_t expr_val;
@@ -31,26 +31,31 @@ extern void yylex_destroy();
     enum operation_t operation;
 }
 
-%token PROG VAR UNIT BOOL ARRAY FUNC REF IF THEN ELSE
-%token WHILE RETURN BEGIN_TOK READ WRITE
-%token END_TOK AND OR XOR NOT DO OF
+%token PROG VAR REF BEGIN_TOK END_TOK ASSIGN
+%token ARRAY OF FUNC RETURN
+%token WHILE IF THEN ELSE DO READ WRITE
+%token AND OR XOR NOT
 %token TRUE FALSE
-%token <intVal> INT 
+%token EQUAL NOT_EQUAL LOWER_EQUAL UPPER_EQUAL
+%token UNIT BOOL
+%token <intVal> INT
 %token <strVal> IDENT STR_CST
 
-%left XOR OR '+' '-'
-%left AND '*' '/'
-%left '^'
-%left OPU NOT
-
-%type <expr_val> expr
+%type <expr_val> expr op
 %type <instr_val> instr sequence loop
 %type <sym> lvalue fundecl par K
 %type <a_type> varsdecl atomictype typename arraytype
 %type <list> fundecllist vardeclist identlist parlist exprlist funexprlist
 %type <quad> M N
-%type <operation> opu opb
 
+%left XOR OR '+' '-'
+%left AND '*' '/'
+%left '^'
+%left '<' UPPER_EQUAL '>' LOWER_EQUAL
+%left EQUAL NOT_EQUAL
+%left OPU NOT
+
+%nonassoc NO_ELSE
 %nonassoc ELSE
 
 %start program
@@ -170,7 +175,7 @@ loop: WHILE M expr DO M instr {
         $$.next=$3.false;
         gencode(OP_GOTO,$2);
     }
-    | IF expr THEN M instr {
+    | IF expr THEN M instr %prec NO_ELSE {
         complete($2.true, $4);
         $$.next = concat($2.false, $5.next);
         $$.next = concat($$.next, crelist(nextquad));
@@ -186,8 +191,8 @@ loop: WHILE M expr DO M instr {
     }
 
 instr: loop { $$.next = $1.next; }
-     | lvalue ':' '=' expr {
-            $$.next = action_assign($1, $4);
+     | lvalue ASSIGN expr {
+            $$.next = action_assign($1, $3);
      }
      | RETURN expr {
             struct symbol_t *sym = action_eval_par($2);
@@ -195,7 +200,9 @@ instr: loop { $$.next = $1.next; }
             $$.next = crelist(nextquad);
             gencode(OP_GOTO, NULL);
      }
-     | RETURN
+     | RETURN {
+            $$.next = NULL;
+     }
      | IDENT '(' funexprlist ')' {
             $$.next = NULL;
             struct symbol_t *sym = st_get($1);
@@ -327,56 +334,7 @@ expr: INT {
     | '(' expr ')'  {
             $$ = $2;
         }
-    | expr opb M expr {
-        if($1.a_type == A_INT && $4.a_type == A_INT) {
-            switch($2) {
-            case OP_ADD:
-            case OP_MINUS:
-            case OP_MULTIPLIES:
-            case OP_DIVIDES:
-            case OP_POWER:
-                $$.ptr = newtemp(SYM_VAR, A_INT);
-                $$.a_type = A_INT;
-                gencode($2,$1.ptr,$4.ptr,$$.ptr);
-                break;
-            case OP_LOWER:
-            case OP_LOWER_OR_EQUAL:
-            case OP_SUPERIOR:
-            case OP_SUPERIOR_OR_EQUAL:
-            case OP_EQUALS:
-            case OP_DIFFERENT:
-                $$.a_type = A_BOOL;
-                $$.true = crelist(nextquad);
-                $$.false = crelist(nextquad + 1);
-                gencode($2, $1.ptr, $4.ptr, NULL);
-                gencode(OP_GOTO, NULL);
-                break;
-            default :
-                break;
-            }
-        } else if ($1.a_type == A_BOOL && $4.a_type == A_BOOL) {
-            if($2 == OP_AND) {
-                complete($1.true, $3);
-                $$.false = concat($1.false,$4.false);
-                $$.true = $4.true;
-                $$.a_type = A_BOOL;
-            }
-            // TODO: or & xor          
-        }
-    }
-    | opu expr {
-        if($2.ptr->atomic_type == A_INT && $1 == OP_NEGATE) {
-            $$.ptr = newtemp(SYM_VAR, A_INT);
-            $$.a_type = A_INT;
-            gencode(OP_NEGATE, $2.ptr, $$.ptr);
-        } else if($2.ptr->atomic_type == A_BOOL && $1 == OP_NOT) {
-            $$.true = $2.false;
-            $$.false = $2.true;
-            $$.a_type = A_BOOL;
-        }else {
-            log_error("syntax: invalid operation");
-        }
-    }
+    | op { $$ = $1; }
     | IDENT '(' funexprlist ')' {
         struct symbol_t *sym = st_get($1);
         if(sym == NULL) {
@@ -420,7 +378,7 @@ expr: INT {
         $$.ptr = ret;
         $$.a_type = sym->atomic_type;
     }
-    | IDENT '[' exprlist ']'
+    | IDENT '[' exprlist ']' { log_error("TODO: array"); }
     | IDENT {
         struct symbol_t *sym = st_get($1);
         if(sym == NULL) {
@@ -439,24 +397,37 @@ expr: INT {
     }
     ;
 
-opb:'+'    { $$ = OP_ADD; }
-   |'-'    { $$ = OP_MINUS; }
-   |'*'    { $$ = OP_MULTIPLIES; }
-   |'/'    { $$ = OP_DIVIDES; }
-   |'^'    { $$ = OP_POWER; }
-   |'<'    { $$ = OP_LOWER; }
-   |'<''=' { $$ = OP_LOWER_OR_EQUAL; }
-   |'>'    { $$ = OP_SUPERIOR; }
-   |'>''=' { $$ = OP_SUPERIOR_OR_EQUAL; }
-   |'=''=' { $$ = OP_EQUALS; }
-   |'<''>' { $$ = OP_DIFFERENT; }
-   | AND   { $$ = OP_AND; }
-   | OR    { $$ = OP_OR; }
-   | XOR   { $$ = OP_XOR; }
-   ;
-
-opu: '-' %prec OPU{ $$ = OP_NEGATE;  }
-   | NOT { $$ = OP_NOT; }
+op: expr '+' M expr { $$ = action_opb($1, OP_ADD, $4, $3); }
+   | expr '-' M expr { $$ = action_opb($1, OP_MINUS, $4, $3); }
+   | expr '*' M expr { $$ = action_opb($1, OP_MULTIPLIES, $4, $3); }
+   | expr '/' M expr { $$ = action_opb($1, OP_DIVIDES, $4, $3); }
+   | expr '^' M expr { $$ = action_opb($1, OP_POWER, $4, $3); }
+   | expr '<' M expr { $$ = action_opb($1, OP_LOWER, $4, $3); }
+   | expr LOWER_EQUAL M expr { $$ = action_opb($1, OP_LOWER_OR_EQUAL, $4, $3); }
+   | expr '>' M expr { $$ = action_opb($1, OP_MINUS, $4, $3); }
+   | expr UPPER_EQUAL M expr { $$ = action_opb($1, OP_SUPERIOR_OR_EQUAL, $4, $3); }
+   | expr EQUAL M expr { $$ = action_opb($1, OP_EQUALS, $4, $3); }
+   | expr NOT_EQUAL M expr { $$ = action_opb($1, OP_DIFFERENT, $4, $3); }
+   | expr AND M expr { $$ = action_opb($1, OP_AND, $4, $3); }
+   | expr OR M expr { $$ = action_opb($1, OP_OR, $4, $3); }
+   | expr XOR M expr { $$ = action_opb($1, OP_XOR, $4, $3); }
+   | '-' expr %prec OPU { 
+        if($2.ptr->atomic_type == A_INT) {
+            $$.ptr = newtemp(SYM_VAR, A_INT);
+            $$.true = NULL;
+            $$.false = NULL;
+            $$.a_type = A_INT;
+            gencode(OP_NEGATE, $2.ptr, $$.ptr);
+        } 
+   }
+   | NOT expr {
+        if($2.ptr->atomic_type == A_BOOL) {
+            $$.ptr = NULL;
+            $$.true = $2.false;
+            $$.false = $2.true;
+            $$.a_type = A_BOOL;
+        }
+   }
    ;
 
 %%
@@ -495,7 +466,6 @@ int main(int argc, char **argv)
     if(options.output_path != NULL) {
         fclose(out);
     }
-
 
     st_destroy();
     yylex_destroy();
