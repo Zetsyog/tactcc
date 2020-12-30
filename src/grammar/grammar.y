@@ -342,7 +342,7 @@ expr: INT {
                 $$.true = $4.true;
                 $$.a_type = A_BOOL;
             }
-          
+            // TODO: or & xor          
         }
     }
     | opu expr {
