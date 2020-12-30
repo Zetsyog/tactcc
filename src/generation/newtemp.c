@@ -11,13 +11,14 @@ struct symbol_t *newtemp(enum sym_type_t sym_type,
 	char name[SYM_NAME_MAX_LEN] = {0};
 	va_list args;
 	va_start(args, atomic_type);
-
+	int n;
 	do {
 		if(sym_type == SYM_CST) {
-			snprintf(name, SYM_NAME_MAX_LEN - 1, "%s%u", CONST_PREFIX, nextTmp);
+			n = snprintf(name, SYM_NAME_MAX_LEN - 1, "%s%u", CONST_PREFIX, nextTmp);
 		} else {
-			snprintf(name, SYM_NAME_MAX_LEN - 1, "%s%u", TMP_VAR_PREFIX, nextTmp);
+			n = snprintf(name, SYM_NAME_MAX_LEN - 1, "%s%u", TMP_VAR_PREFIX, nextTmp);
 		}
+		name[n] = 0;
 		nextTmp++;
 	} while (st_get(name) != NULL);
 

@@ -306,66 +306,44 @@ expr: INT {
         gencode(OP_GOTO, NULL);
     }
     | '(' expr ')'  {
-                        $$ = $2;
-                    }
+            $$ = $2;
+        }
     | expr opb M expr {
-      if($1.ptr->atomic_type != A_BOOL && $4.ptr->atomic_type != A_BOOL) {
-          $$.ptr = newtemp(SYM_VAR, A_INT);
-          $$.a_type = A_INT;
-          switch($2) {
-            case OP_ADD :
-                gencode(OP_ADD,$1.ptr,$4.ptr,$$.ptr);
-                break;
-            case OP_MINUS :
-                gencode(OP_MINUS,$1.ptr,$4.ptr,$$.ptr);
-                break;
-            case OP_MULTIPLIES :
-                gencode(OP_MULTIPLIES,$1.ptr,$4.ptr,$$.ptr);
-                break;
-            case OP_DIVIDES :
-                gencode(OP_DIVIDES,$1.ptr,$4.ptr,$$.ptr);
-                break;
+        if($1.a_type == A_INT && $4.a_type == A_INT) {
+            switch($2) {
+            case OP_ADD:
+            case OP_MINUS:
+            case OP_MULTIPLIES:
+            case OP_DIVIDES:
             case OP_POWER:
-                gencode(OP_POWER,$1.ptr,$4.ptr,$$.ptr);
+                $$.ptr = newtemp(SYM_VAR, A_INT);
+                $$.a_type = A_INT;
+                gencode($2,$1.ptr,$4.ptr,$$.ptr);
                 break;
             case OP_LOWER:
-                gencode(OP_LOWER,$1.ptr,$4.ptr,$$.ptr);
-                break;
             case OP_LOWER_OR_EQUAL:
-                gencode(OP_LOWER_OR_EQUAL,$1.ptr,$4.ptr,$$.ptr);
-                break;
             case OP_SUPERIOR:
-                gencode(OP_SUPERIOR,$1.ptr,$4.ptr,$$.ptr);
-                break;
             case OP_SUPERIOR_OR_EQUAL:
-                gencode(OP_SUPERIOR_OR_EQUAL,$1.ptr,$4.ptr,$$.ptr);
-                break;
             case OP_EQUALS:
-                gencode(OP_EQUALS,$1.ptr,$4.ptr,$$.ptr);
-                break;
             case OP_DIFFERENT:
-                gencode(OP_DIFFERENT,$1.ptr,$4.ptr,$$.ptr);
+                $$.a_type = A_BOOL;
+                $$.true = crelist(nextquad);
+                $$.false = crelist(nextquad + 1);
+                gencode($2, $1.ptr, $4.ptr, NULL);
+                gencode(OP_GOTO, NULL);
                 break;
             default :
                 break;
-          }
-      } else if ($1.ptr->atomic_type == A_BOOL && $4.ptr->atomic_type == A_BOOL
-          && $2==OP_AND){
-          $$.ptr = newtemp(SYM_VAR, A_BOOL);
-          complete($1.true,$3);
-          $$.false = concat($1.false,$4.false);
-          $$.true = $4.true;
-          $$.a_type = A_BOOL;
-      } else if ($1.ptr->atomic_type == A_BOOL && $4.ptr->atomic_type == A_BOOL
-          && $2==OP_OR){
-                $$.ptr = newtemp(SYM_VAR, A_BOOL);
-                $$.true = concat($1.true,$4.true);
-                complete($1.false,$3);
-                $$.false = $4.false;
+            }
+        } else if ($1.a_type == A_BOOL && $4.a_type == A_BOOL) {
+            if($2 == OP_AND) {
+                complete($1.true, $3);
+                $$.false = concat($1.false,$4.false);
+                $$.true = $4.true;
                 $$.a_type = A_BOOL;
-      }
-      // TODO XOR
-
+            }
+          
+        }
     }
     | opu expr {
         if($2.ptr->atomic_type == A_INT && $1 == OP_NEGATE) {
