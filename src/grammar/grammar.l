@@ -8,7 +8,7 @@
 %}
 
 integer [0-9]+
-ident [A-Za-z][A-Za-z0-9]*
+ident [A-Za-z][A-Za-z0-9'_]*
 string \"(\\.|[^"\\])*\"
 
 %x COMMENT

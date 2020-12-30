@@ -1,0 +1,14 @@
+program test
+    var a, b, c: int
+    function read_val(): int
+        var i: int
+        begin
+            read i;
+            return i;
+        end;
+    begin
+        a := read_val();
+        write a;
+        write "\n";
+        write "FIN\n";
+    end

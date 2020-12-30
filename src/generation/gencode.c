@@ -28,8 +28,10 @@ int gencode(uint op, ...) {
 	case OP_WRITE:
 	case OP_READ:
 	case OP_PUSH_ARG:
-	case OP_RETURN:
 	case OP_POP_ARG:
+	case OP_RETURN:
+	case OP_PUSH_RET:
+	case OP_POP_RET:
 		size = 0;
 		break;
 	case OP_ASSIGNMENT:

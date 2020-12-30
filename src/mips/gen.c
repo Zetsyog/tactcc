@@ -76,6 +76,13 @@ void gen_write(FILE *out, struct quad_t *quad) {
 	}
 }
 
+void gen_read(FILE *out, struct quad_t *quad) {
+	if(quad->res->atomic_type == A_INT) {
+		gen_syscall(out, SYS_READ_INT);
+		mips(out, SW, REG, "v0", SYM, quad->res, END);
+	}
+}
+
 void gen_assign(FILE *out, struct quad_t *quad) {
 	mips(out, LOAD, REG, "t0", SYM, quad->arg1, END);
 	mips(out, SW, REG, "t0", SYM, quad->res, END);
@@ -135,6 +142,14 @@ void gen_pop_arg(FILE *out, struct quad_t *quad) {
 	}
 }
 
+void gen_push_ret(FILE *out, struct quad_t *quad) {
+	mips(out, LOAD, REG, "v0", SYM, quad->res, END);
+}
+
+void gen_pop_ret(FILE *out, struct quad_t *quad) {
+	mips(out, SW, REG, "v0", SYM, quad->res, END);
+}
+
 void gen_quad(FILE *out, struct quad_t *quad) {
 	if (quad->print_label) {
 		mips(out, TAB, QLABEL, quad, COLON, END);
@@ -146,6 +161,9 @@ void gen_quad(FILE *out, struct quad_t *quad) {
 		break;
 	case OP_WRITE:
 		gen_write(out, quad);
+		break;
+	case OP_READ:
+		gen_read(out, quad);
 		break;
 	case OP_GOTO:
 		mips(out, BRANCH, QLABEL, quad->label, END);
@@ -186,42 +204,42 @@ void gen_quad(FILE *out, struct quad_t *quad) {
 		mips(out, BNE, REG, "t0", REG, "t1", QLABEL, quad->label, END);
 		break;
 	case OP_ADD:
-		mips(out,LOAD,REG,"t0",SYM,quad->arg1,END);
-		mips(out,LOAD,REG,"t1",SYM,quad->arg2,END);
-		mips(out,INSTR_ADD,REG,"t2",REG,"t0",REG,"t1",END);
+		mips(out, LOAD, REG, "t0", SYM, quad->arg1, END);
+		mips(out, LOAD, REG, "t1", SYM, quad->arg2, END);
+		mips(out, INSTR_ADD, REG, "t2", REG, "t0", REG, "t1", END);
 		mips(out, SW, REG, "t2", SYM, quad->res, END);
 		break;
 	case OP_MINUS:
-		mips(out,LOAD,REG,"t0",SYM,quad->arg1,END);
-		mips(out,LOAD,REG,"t1",SYM,quad->arg2,END);
-		mips(out,INSTR_SUB,REG,"t2",REG,"t0",REG,"t1",END);
+		mips(out, LOAD, REG, "t0", SYM, quad->arg1, END);
+		mips(out, LOAD, REG, "t1", SYM, quad->arg2, END);
+		mips(out, INSTR_SUB, REG, "t2", REG, "t0", REG, "t1", END);
 		mips(out, SW, REG, "t2", SYM, quad->res, END);
 		break;
-	case OP_MULTIPLIES :
-		mips(out,LOAD,REG,"t0",SYM,quad->arg1,END);
-		mips(out,LOAD,REG,"t1",SYM,quad->arg2,END);
-		mips(out,INSTR_MULT,REG,"t2",REG,"t0",REG,"t1",END);
+	case OP_MULTIPLIES:
+		mips(out, LOAD, REG, "t0", SYM, quad->arg1, END);
+		mips(out, LOAD, REG, "t1", SYM, quad->arg2, END);
+		mips(out, INSTR_MULT, REG, "t2", REG, "t0", REG, "t1", END);
 		mips(out, SW, REG, "t2", SYM, quad->res, END);
 		break;
-	case OP_DIVIDES :
-		mips(out,LOAD,REG,"t0",SYM,quad->arg1,END);
-		mips(out,LOAD,REG,"t1",SYM,quad->arg2,END);
-		mips(out,INSTR_DIV,REG,"t2",REG,"t0",REG,"t1",END);
+	case OP_DIVIDES:
+		mips(out, LOAD, REG, "t0", SYM, quad->arg1, END);
+		mips(out, LOAD, REG, "t1", SYM, quad->arg2, END);
+		mips(out, INSTR_DIV, REG, "t2", REG, "t0", REG, "t1", END);
 		mips(out, SW, REG, "t2", SYM, quad->res, END);
 		break;
 	case OP_AND:
-		mips(out,LOAD,REG,"t0",SYM,quad->arg1,END);
-		mips(out,LOAD,REG,"t1",SYM,quad->arg2,END);
-		mips(out,INSTR_AND,REG,"t2",REG,"t0",REG,"t1",END);
+		mips(out, LOAD, REG, "t0", SYM, quad->arg1, END);
+		mips(out, LOAD, REG, "t1", SYM, quad->arg2, END);
+		mips(out, INSTR_AND, REG, "t2", REG, "t0", REG, "t1", END);
 		mips(out, SW, REG, "t2", SYM, quad->res, END);
 		break;
 	case OP_OR:
-		mips(out,LOAD,REG,"t0",SYM,quad->arg1,END);
-		mips(out,LOAD,REG,"t1",SYM,quad->arg2,END);
-		mips(out,INSTR_OR,REG,"t2",REG,"t0",REG,"t1",END);
+		mips(out, LOAD, REG, "t0", SYM, quad->arg1, END);
+		mips(out, LOAD, REG, "t1", SYM, quad->arg2, END);
+		mips(out, INSTR_OR, REG, "t2", REG, "t0", REG, "t1", END);
 		mips(out, SW, REG, "t2", SYM, quad->res, END);
 		break;
-case OP_PUSH_ARG:
+	case OP_PUSH_ARG:
 		gen_push_arg(out, quad);
 		break;
 	case OP_CALL:
@@ -232,6 +250,12 @@ case OP_PUSH_ARG:
 		break;
 	case OP_POP_ARG:
 		gen_pop_arg(out, quad);
+		break;
+	case OP_PUSH_RET:
+		gen_push_ret(out, quad);
+		break;
+	case OP_POP_RET:
+		gen_pop_ret(out, quad);
 		break;
 	default:
 		break;

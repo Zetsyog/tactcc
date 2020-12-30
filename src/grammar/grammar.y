@@ -185,7 +185,12 @@ instr: loop { $$.next = $1.next; }
      | lvalue ':' '=' expr {
             $$.next = action_assign($1, $4);
      }
-     | RETURN expr
+     | RETURN expr {
+            struct symbol_t *sym = action_eval_par($2);
+            gencode(OP_PUSH_RET, sym);
+            $$.next = crelist(nextquad);
+            gencode(OP_GOTO, NULL);
+     }
      | RETURN
      | IDENT '(' funexprlist ')' {
             $$.next = NULL;
@@ -211,14 +216,21 @@ instr: loop { $$.next = $1.next; }
             if(sym->fun_desc->par_nb != 0) {
                 log_error("syntax error: not_enough arguments for func %s", sym->name);
             }
-            gencode(OP_CALL, sym->fun_desc->quad);
+            action_call(sym, NULL);
      }
      | BEGIN_TOK sequence END_TOK { $$.next = $2.next; }
      | BEGIN_TOK END_TOK { $$.next = NULL; }
-     | READ lvalue { $$.next = NULL; gencode(OP_READ, $2); }
+     | READ lvalue { 
+            $$.next = NULL; 
+            if($2->atomic_type != A_INT) {
+                log_error("syntax error: invalid write of type %s", 
+                        atomic_type_str[$2->atomic_type]);
+            }
+            gencode(OP_READ, $2); 
+     }
      | WRITE expr {
         $$.next = NULL;
-        if($2.ptr->atomic_type == A_BOOL) {
+        if($2.a_type == A_BOOL) {
             complete($2.true, nextquad);
             gencode(OP_WRITE, newtemp(SYM_CST, A_STR, "true"));
             $$.next = crelist(nextquad);
@@ -227,8 +239,11 @@ instr: loop { $$.next = $1.next; }
             gencode(OP_WRITE, newtemp(SYM_CST, A_STR, "false"));
             $$.next = concat($$.next, crelist(nextquad));
             gencode(OP_GOTO, NULL);
-        } else {
+        } else if($2.a_type == A_INT || $2.a_type == A_STR) {
             gencode(OP_WRITE, $2.ptr);
+        } else {
+            log_error("syntax error: invalid write of type %s", 
+                    atomic_type_str[$2.a_type]);
         }
      }
      ;
@@ -358,8 +373,35 @@ expr: INT {
             log_error("syntax: invalid operation");
         }
     }
-    | IDENT '('exprlist ')'
-    | IDENT '(' ')'
+    | IDENT '(' funexprlist ')' {
+        struct symbol_t *sym = st_get($1);
+        if(sym == NULL) {
+            log_error("syntax error: function %s is not declared", $1);
+        }
+        if(node_length($3) != sym->fun_desc->par_nb) {
+            log_error("syntax error: wrong number of args");
+        }
+        action_call(sym, $3);
+        node_destroy($3, 0);
+        struct symbol_t *ret = newtemp(SYM_VAR, sym->atomic_type);
+        gencode(OP_POP_RET, ret);
+        $$.ptr = ret;
+        $$.a_type = sym->atomic_type;
+    }
+    | IDENT '(' ')' {
+        struct symbol_t *sym = st_get($1);
+        if(sym == NULL) {
+            log_error("syntax error: function %s is not declared", $1);
+        }
+        if(sym->fun_desc->par_nb != 0) {
+            log_error("syntax error: wrong number of args");
+        }
+        action_call(sym, NULL);
+        struct symbol_t *ret = newtemp(SYM_VAR, sym->atomic_type);
+        gencode(OP_POP_RET, ret);
+        $$.ptr = ret;
+        $$.a_type = sym->atomic_type;
+    }
     | IDENT '[' exprlist ']'
     | IDENT {
         struct symbol_t *sym = st_get($1);
