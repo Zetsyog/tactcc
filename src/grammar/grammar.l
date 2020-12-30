@@ -12,6 +12,7 @@ ident [A-Za-z][A-Za-z0-9]*
 string \"(\\.|[^"\\])*\"
 
 %x COMMENT
+%option yylineno
 
 %option nounput
 %option noinput

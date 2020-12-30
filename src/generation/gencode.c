@@ -3,8 +3,8 @@
 #include "logger.h"
 #include "util.h"
 #include <stdarg.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 unsigned int nextquad		 = 0;
 struct quad_t tabQuad[10000] = {0};
@@ -21,28 +21,32 @@ int gencode(uint op, ...) {
 
 	switch (op) {
 	case OP_GOTO:
+	case OP_CALL:
 		label = 1;
 		size  = 0;
 		break;
 	case OP_WRITE:
 	case OP_READ:
+	case OP_PUSH_ARG:
+	case OP_RETURN:
+	case OP_POP_ARG:
 		size = 0;
 		break;
 	case OP_ASSIGNMENT:
+	case OP_NEGATE:
 		size = 1;
 		break;
-	case OP_NEGATE:
 	case OP_ADD:
 	case OP_MINUS:
 	case OP_MULTIPLIES:
 	case OP_DIVIDES:
 	case OP_POWER:
-		size = 2;
+		size  = 2;
 		label = 0;
 		break;
 	default:
 		label = 1;
-		size = 2;
+		size  = 2;
 		break;
 	}
 
@@ -60,15 +64,16 @@ int gencode(uint op, ...) {
 	}
 	if (label) {
 		tabQuad[index].label = va_arg(args, void *);
-		if(tabQuad[index].label != NULL) {
+		if (tabQuad[index].label != NULL) {
 			tabQuad[index].label->print_label = 1;
 		}
 	} else {
 		tabQuad[index].res = va_arg(args, void *);
 	}
 
-	tabQuad[index].op = op;
-	tabQuad[index].id = index;
+	tabQuad[index].op	   = op;
+	tabQuad[index].id	   = index;
+	tabQuad[index].is_main = 0;
 	va_end(args);
 	nextquad++;
 	return index;
@@ -110,14 +115,14 @@ void complete(struct list_t *list, unsigned int pos) {
 
 	while (list != NULL) {
 		tabQuad[list->position].label = &tabQuad[pos];
-		list = list->next;
+		list						  = list->next;
 	}
 	destroy_list(orig);
 }
 
 void destroy_list(struct list_t *list) {
 	struct list_t *tmp;
-	while(list != NULL) {
+	while (list != NULL) {
 		tmp = list->next;
 		free(list);
 		list = tmp;

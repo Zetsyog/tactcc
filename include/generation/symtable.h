@@ -77,6 +77,7 @@ void st_shift();
  * Print the symbol table in stdout
  */
 void st_print();
+void st_print_scope();
 
 /**
  * Store a value in the table with the given key \n

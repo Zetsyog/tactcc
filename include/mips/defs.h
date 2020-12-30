@@ -11,6 +11,7 @@
 #define LOOP_LABEL_PREFIX "__loop"
 #define ASSIGN_LABEL_PREFIX "__assign"
 #define DEFAULT_LABEL_PREFIX "__label"
+#define PAR_PREFIX "__par"
 
 /**
  * Syscall mips constants
@@ -46,7 +47,8 @@ enum mips_helper_op_t {
 			 // It will be printed with register format (with a '$' before)
 	IMM_STR = 4, // Print next arg as an immediate string (surrounded by '"')
 	QLABEL	= 5, // Next arg must be a pointer to a quad
-				 // Generate and print the quad label
+				// Generate and print the quad label
+	ADDR = 6,
 	// TODO
 	// Instructions :
 	// Following args simply print the correspoding mips instruction
@@ -70,6 +72,8 @@ enum mips_helper_op_t {
 	INSTR_MULT = 26,
 	BRANCH	   = 27,
 	BEQ		   = 28,
+	JAL		   = 29,
+	JR		   = 30,
 	// Char
 	TAB	  = 100, // Print tab char
 	COLON = 101, // Print colon char
