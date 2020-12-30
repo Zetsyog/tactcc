@@ -14,6 +14,8 @@ string \"(\\.|[^"\\])*\"
 %x COMMENT
 %option yylineno
 
+%option noyywrap
+
 %option nounput
 %option noinput
 

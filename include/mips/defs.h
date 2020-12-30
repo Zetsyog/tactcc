@@ -101,6 +101,8 @@ enum mips_helper_op_t {
  */
 void mips(FILE *out, ...);
 
+void get_sym_name(char *dest, struct symbol_t *sym);
+
 /**
  * Generate mips code for the symbol table
  * @param out

@@ -3,10 +3,25 @@
 #include "util.h"
 #include <stdarg.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 static unsigned int current_arg_pos = 0;
 
+static struct node_t *declared_var = NULL;
+
 static void gen_var_decl(FILE *out, struct symbol_t *sym) {
+	char *name = malloc(SYM_NAME_MAX_LEN * sizeof(char));
+
+	struct node_t *it = declared_var;
+	get_sym_name(name, sym);
+
+	while (it != NULL) {
+		if(!strcmp(it->data, name))
+			return;
+		it = it->next;
+	}
+
 	switch (sym->atomic_type) {
 	case A_INT:
 	case A_BOOL:
@@ -21,6 +36,8 @@ static void gen_var_decl(FILE *out, struct symbol_t *sym) {
 	default:
 		break;
 	}
+
+	declared_var = node_unshift(declared_var, name);
 }
 
 void gen_st(FILE *out) {
@@ -77,7 +94,7 @@ void gen_write(FILE *out, struct quad_t *quad) {
 }
 
 void gen_read(FILE *out, struct quad_t *quad) {
-	if(quad->res->atomic_type == A_INT) {
+	if (quad->res->atomic_type == A_INT) {
 		gen_syscall(out, SYS_READ_INT);
 		mips(out, SW, REG, "v0", SYM, quad->res, END);
 	}
@@ -279,4 +296,6 @@ void gen_mips(FILE *out) {
 	}
 
 	gen_exit(out);
+
+	node_destroy(declared_var, 1);
 }

@@ -3,8 +3,8 @@ YACC ?= yacc
 LEX  ?= lex
 
 CFLAGS    ?= -Wall -Wextra -g
-LDLIBS    ?= -lfl
-YACCFLAGS ?= -v -Wno-yacc
+LDLIBS    ?= 
+YACCFLAGS ?= -v
 
 INCLUDE_PATH = ./include
 TEST_DIR = test
