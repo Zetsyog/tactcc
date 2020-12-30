@@ -1,22 +1,52 @@
-#ifndef UTIL_HASHTABLE_H
-#define UTIL_HASHTABLE_H
+/**
+ * @file
+ */
+#ifndef GEN_SYMTABLE_H
+#define GEN_SYMTABLE_H
 
 #include "generation/symbol.h"
+#include "util.h"
 
-struct st_entry_t {
-	struct symbol_t *value;
-	struct st_entry_t *next;
-	char key[];
-};
+#define TMP_VAR_PREFIX "__tmp__"
+#define CONST_PREFIX "__const__"
 
+/**
+ * Default size for a new symtable
+ */
+#define DEFAULT_ST_SIZE 10000
+
+/**
+ * @struct
+ * A struct representing a table of symbol
+ */
 struct symtable_t {
-	unsigned int size; // current size of symtable
-	unsigned int usage; // number of elements in the table
-	struct st_entry_t *list;
-	struct st_entry_t **table; // the table where entries are stored
+	/**
+	 * Maximum size of symtable
+	 */
+	unsigned int size;
+	/**
+	 * Number of elements in the table
+	 */
+	unsigned int usage;
+	/**
+	 * Pointer to the last entry
+	 */
+	struct node_t *list;
+	/**
+	 * Table of size symtable_t::size \n
+	 * Store all the registred symbols
+	 */
+	struct symbol_t **table;
 };
 
+/**
+ * The main table of symbol
+ */
 extern struct symtable_t *st;
+
+extern struct node_t *cur_block;
+
+extern struct node_t *sym_stack;
 
 /**
  * Create a new symbol table
@@ -31,23 +61,46 @@ struct symtable_t *st_create(unsigned int size);
  * @param key the key to search for
  * @return the data looked for, else return NULL
  */
-struct st_entry_t *st_get(char *key);
+struct symbol_t *st_get(char *key);
+
+/**
+ * Stack a new local table of symbol
+ */
+void st_unshift();
+
+/**
+ * Pop the current local table of symbol
+ */
+void st_shift();
 
 /**
  * Print the symbol table in stdout
  */
 void st_print();
+void st_print_scope();
 
 /**
- * Store a value in the table with the given key
- * If data is already store with the same key it will be replaced
+ * Store a value in the table with the given key \n
+ * If data is already store with the same key it will be replaced \n
  * TODO : check if it is not better to use symbol_t * as value
  * @param key
  * @param value
- * @return NULL on success
+ * @return NULL on error
  */
-struct st_entry_t *st_put(char *key,
-						  struct symbol_t *value);
+struct symbol_t *st_put(struct symbol_t *value);
+
+/**
+ * @param sym
+ * @return a pseudo-unique index for sym
+ */
+unsigned long st_hash(struct symbol_t *sym);
+
+unsigned long st_hash_str(char *str);
+
+/**
+ * @return depth of symbol in the table of symbol
+ */
+unsigned int get_sym_depth(struct symbol_t *sym);
 
 // TODO: maybe add new functions like clear, remove, iterate
 // dunno if needed

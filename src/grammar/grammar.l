@@ -12,6 +12,10 @@ ident [A-Za-z][A-Za-z0-9]*
 string \"(\\.|[^"\\])*\"
 
 %x COMMENT
+%option yylineno
+
+%option nounput
+%option noinput
 
 %%
 
@@ -63,12 +67,11 @@ string \"(\\.|[^"\\])*\"
 {ident} {
     memset(yylval.strVal, 0, SYM_NAME_MAX_LEN);
     strncpy(yylval.strVal, yytext, SYM_NAME_MAX_LEN);
-    log_debug("[LEX] (ident): %s", yylval.strVal);
-    return(IDENT); 
+    return(IDENT);
 }
-{integer} { 
-    yylval.intVal=atoi(yytext); 
-    return(INT); 
+{integer} {
+    yylval.intVal=atoi(yytext);
+    return(INT);
 }
-[[:space:]]+       ;
+[[:space:]]+
 %%

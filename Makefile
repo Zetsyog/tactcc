@@ -4,9 +4,10 @@ LEX  ?= lex
 
 CFLAGS    ?= -Wall -Wextra -g
 LDLIBS    ?= -lfl
-YACCFLAGS ?= -v
+YACCFLAGS ?= -v -Wno-yacc
 
 INCLUDE_PATH = ./include
+TEST_DIR = test
 TARGET   = scalpa
 SRCDIR   = src
 OBJDIR   = build
@@ -46,8 +47,15 @@ $(LBUILD): $(LSOURCES)
 	mkdir -p $(dir $@)
 	$(LEX) -o $@ $<
 
-.PHONY: clean
+.PHONY: clean doc test
 clean:
 	rm -rf $(OBJDIR)/*
+	find $(TEST_DIR)/ -name "*.tmp" -type f -delete
 	rm $(INCLUDE_PATH)/$(LEX_HDR_NAME)
 	rm -f $(BINDIR)/$(TARGET)
+
+test: $(BINDIR)/$(TARGET)
+	cd test; sh test.sh
+
+doc:
+	doxygen doxygen.conf

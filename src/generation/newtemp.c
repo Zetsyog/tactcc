@@ -5,8 +5,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define TMP_VAR_PREFIX "__tmp__"
-
 struct symbol_t *newtemp(enum sym_type_t sym_type,
 						 enum atomic_type_t atomic_type, ...) {
 	static unsigned int nextTmp = 0;
@@ -15,7 +13,11 @@ struct symbol_t *newtemp(enum sym_type_t sym_type,
 	va_start(args, atomic_type);
 
 	do {
-		snprintf(name, SYM_NAME_MAX_LEN - 1, "%s%u", TMP_VAR_PREFIX, nextTmp);
+		if(sym_type == SYM_CST) {
+			snprintf(name, SYM_NAME_MAX_LEN - 1, "%s%u", CONST_PREFIX, nextTmp);
+		} else {
+			snprintf(name, SYM_NAME_MAX_LEN - 1, "%s%u", TMP_VAR_PREFIX, nextTmp);
+		}
 		nextTmp++;
 	} while (st_get(name) != NULL);
 
@@ -33,12 +35,12 @@ struct symbol_t *newtemp(enum sym_type_t sym_type,
 					  atomic_type_str[atomic_type]);
 		}
 	} else if (sym_type == SYM_VAR) {
-		log_error("TODO: tmp var support");
+		
 	} else {
 		log_error("Unsupported cst var type");
 	}
 
-	st_put(sym->name, sym);
+	st_put(sym);
 
 	va_end(args);
 
