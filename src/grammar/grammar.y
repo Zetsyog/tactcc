@@ -16,8 +16,6 @@ void yyerror(const char *s);
 extern void yylex_destroy();
 %}
 
-%define parse.error verbose
-
 %union {
     struct list_t *pos;
     struct expr_val_t expr_val;
@@ -47,7 +45,7 @@ extern void yylex_destroy();
 
 %type <expr_val> expr
 %type <instr_val> instr sequence loop
-%type <sym> lvalue fundecl par
+%type <sym> lvalue fundecl par K
 %type <a_type> varsdecl atomictype typename arraytype
 %type <list> fundecllist vardeclist identlist parlist exprlist funexprlist
 %type <quad> M N
@@ -126,19 +124,26 @@ fundecllist: /*epsilon*/              { $$ = NULL; }
            | fundecl ';' fundecllist { }
            ;
 
-fundecl: FUNC IDENT <sym>{  
-            $$ = sym_create($2, SYM_FUN, 0); st_put($$); st_unshift();
+K: /* epsilon */ {
+
+ }
+ ;
+ 
+fundecl: FUNC IDENT K {  
+            $3 = sym_create($2, SYM_FUN, 0); 
+            st_put($3);
+            st_unshift();
        } '(' parlist ')' ':' atomictype vardeclist M {
-           gencode(OP_POP_ARG, $3);
+            gencode(OP_POP_ARG, $3);
        } instr {
-            $3->atomic_type = $8;
-            $3->fun_desc = fun_desc_create($10, $5);
-            struct node_t *it = $5;
+            $3->atomic_type = $9;
+            $3->fun_desc = fun_desc_create($11, $6);
+            struct node_t *it = $6;
             while (it != NULL) {
                 ((struct symbol_t *)it->data)->str_val = $3->name;
                 it = it->next;
             }
-            complete($12.next, nextquad);
+            complete($13.next, nextquad);
             gencode(OP_RETURN, NULL);
             st_shift();
             log_debug("HEY");
