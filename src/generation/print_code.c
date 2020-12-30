@@ -17,6 +17,8 @@ static void print_sym_val(struct symbol_t *sym) {
 		default:
 			break;
 		}
+	} else if (sym->sym_type == SYM_PAR) {
+		printf("%s::%s", sym->str_val, sym->name);
 	}
 }
 
@@ -32,7 +34,6 @@ void print_op_cond(unsigned int i, const char *op) {
 		printf(" GOTO ");
 		printf("%i", quad.label->id);
 	}
-	printf("\n");
 }
 
 void print_intermediate_code() {
@@ -46,7 +47,6 @@ void print_intermediate_code() {
 			print_sym_val(quad.res);
 			printf(" := ");
 			print_sym_val(quad.arg1);
-			printf("\n");
 			break;
 		case OP_ADD:
 			print_sym_val(quad.res);
@@ -54,7 +54,6 @@ void print_intermediate_code() {
 			print_sym_val(quad.arg1);
 			printf(" + ");
 			print_sym_val(quad.arg2);
-			printf("\n");
 			break;
 		case OP_MINUS:
 			print_sym_val(quad.res);
@@ -62,7 +61,6 @@ void print_intermediate_code() {
 			print_sym_val(quad.arg1);
 			printf(" - ");
 			print_sym_val(quad.arg2);
-			printf("\n");
 			break;
 		case OP_MULTIPLIES:
 			print_sym_val(quad.res);
@@ -70,7 +68,6 @@ void print_intermediate_code() {
 			print_sym_val(quad.arg1);
 			printf(" * ");
 			print_sym_val(quad.arg2);
-			printf("\n");
 			break;
 		case OP_DIVIDES:
 			print_sym_val(quad.res);
@@ -78,7 +75,6 @@ void print_intermediate_code() {
 			print_sym_val(quad.arg1);
 			printf(" / ");
 			print_sym_val(quad.arg2);
-			printf("\n");
 			break;
 		case OP_POWER:
 			print_sym_val(quad.res);
@@ -86,7 +82,6 @@ void print_intermediate_code() {
 			print_sym_val(quad.arg1);
 			printf(" ^ ");
 			print_sym_val(quad.arg2);
-			printf("\n");
 			break;
 		case OP_LOWER:
 			print_op_cond(i, "<");
@@ -108,11 +103,10 @@ void print_intermediate_code() {
 			break;
 		case OP_GOTO:
 			if (quad.label == NULL) {
-				printf("GOTO ?\n");
+				printf("GOTO ?");
 			} else {
 				printf("GOTO ");
 				printf("%i", quad.label->id);
-				printf("\n");
 			}
 			break;
 		case OP_NEGATE:
@@ -120,7 +114,6 @@ void print_intermediate_code() {
 			printf(" := ");
 			printf(" - ");
 			print_sym_val(quad.arg1);
-			printf("\n");
 			break;
 		case OP_AND:
 			print_sym_val(quad.res);
@@ -128,7 +121,6 @@ void print_intermediate_code() {
 			print_sym_val(quad.arg1);
 			printf(" AND ");
 			print_sym_val(quad.arg2);
-			printf("\n");
 			break;
 		case OP_OR:
 			print_sym_val(quad.res);
@@ -136,7 +128,6 @@ void print_intermediate_code() {
 			print_sym_val(quad.arg1);
 			printf(" OR ");
 			print_sym_val(quad.arg2);
-			printf("\n");
 			break;
 		case OP_XOR:
 			print_sym_val(quad.res);
@@ -144,27 +135,45 @@ void print_intermediate_code() {
 			print_sym_val(quad.arg1);
 			printf(" XOR ");
 			print_sym_val(quad.arg2);
-			printf("\n");
 			break;
 		case OP_NOT:
 			print_sym_val(quad.res);
 			printf(" := ");
 			printf(" NOT ");
 			print_sym_val(quad.arg1);
-			printf("\n");
 			break;
 		case OP_WRITE:
 			printf("%s ", "write");
 			print_sym_val(quad.res);
-			printf("\n");
 			break;
 		case OP_READ:
 			printf("%s ", "read");
 			print_sym_val(quad.res);
-			printf("\n");
+			break;
+		case OP_CALL:
+			printf("%s ", "call");
+			printf("%i", quad.label->id);
+			break;
+		case OP_RETURN:
+			printf("return ");
+			if (quad.res != NULL) {
+				print_sym_val(quad.res);
+			}
+			break;
+		case OP_PUSH_ARG:
+			printf("push arg ");
+			print_sym_val(quad.res);
+			break;
+		case OP_POP_ARG:
+			printf("pop arg");
 			break;
 		default:
+			printf("???");
 			break;
 		}
+		if(quad.is_main) {
+			printf(" <----- main");
+		}
+		printf("\n");
 	}
 }

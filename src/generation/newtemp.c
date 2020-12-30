@@ -35,12 +35,12 @@ struct symbol_t *newtemp(enum sym_type_t sym_type,
 					  atomic_type_str[atomic_type]);
 		}
 	} else if (sym_type == SYM_VAR) {
-		log_error("TODO: tmp var support");
+		
 	} else {
 		log_error("Unsupported cst var type");
 	}
 
-	st_put(sym->name, sym);
+	st_put(sym);
 
 	va_end(args);
 

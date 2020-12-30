@@ -1,0 +1,19 @@
+program test
+    var a, b, c: int
+    function j(p1: int, p2: bool): unit
+        var c, d: int
+        begin
+            if(p2) then
+                begin
+                    write p1;
+                end;
+        end;
+    begin
+        write "hello world\n";
+        j(5, true);
+        write "\n";
+        j(3, false);
+        write "\n";
+        j(1, true);
+        write "\n";
+    end

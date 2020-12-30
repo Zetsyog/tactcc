@@ -22,7 +22,7 @@ struct node_t *node_create_int(int value) {
 
 struct node_t *node_append(struct node_t *list, void *data) {
 	if (list == NULL)
-		return NULL;
+		return node_create(data);
 		
 	while (list->next != NULL) {
 		list = list->next;
@@ -34,6 +34,33 @@ struct node_t *node_append(struct node_t *list, void *data) {
 	return list->next;
 }
 
+struct node_t *node_last(struct node_t *list) {
+	if(list == NULL)
+		return NULL;
+
+	while (list->next != NULL) {
+		list = list->next;
+	}
+	return list;
+}
+
+struct node_t *node_unshift(struct node_t *list, void *data) {
+	struct node_t *tmp = node_create(data);
+	tmp->next = list;
+	return tmp;
+}
+
+void *node_shift(struct node_t **list) {
+	if(list == NULL || *list == NULL) {
+		return NULL;
+	}
+	struct node_t *tmp = *list;
+	void *data		   = tmp->data;
+	*list			   = (*list)->next;
+	free(tmp);
+	return data;
+}
+
 struct node_t *node_append_int(struct node_t *list, int value) {
 	if (list == NULL)
 		return NULL;
@@ -41,6 +68,15 @@ struct node_t *node_append_int(struct node_t *list, int value) {
 	MCHECK(data = malloc(sizeof(int)));
 	*data = value;
 	return node_append(list, data);
+}
+
+unsigned int node_length(struct node_t *list) {
+	unsigned int len = 0;
+	while(list != NULL) {
+		len++;
+		list = list->next;
+	}
+	return len;
 }
 
 void node_destroy(struct node_t *node, int free_mem) {

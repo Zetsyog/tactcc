@@ -5,6 +5,7 @@
 #define GEN_SYMTABLE_H
 
 #include "generation/symbol.h"
+#include "util.h"
 
 #define TMP_VAR_PREFIX "__tmp__"
 #define CONST_PREFIX "__const__"
@@ -13,25 +14,6 @@
  * Default size for a new symtable
  */
 #define DEFAULT_ST_SIZE 10000
-
-/**
- * A symtable entry
- */
-struct st_entry_t {
-	/**
-	 * Value of the entry, a pointer to a symbolt
-	 * @see symbol_t
-	 */
-	struct symbol_t *value;
-	/**
-	 * Pointer to the next entry of the table
-	 */
-	struct st_entry_t *next;
-	/**
-	 * A string containing the name of the entry
-	 */
-	char key[];
-};
 
 /**
  * @struct
@@ -49,18 +31,22 @@ struct symtable_t {
 	/**
 	 * Pointer to the last entry
 	 */
-	struct st_entry_t *list;
+	struct node_t *list;
 	/**
 	 * Table of size symtable_t::size \n
 	 * Store all the registred symbols
 	 */
-	struct st_entry_t **table; 
+	struct symbol_t **table; 
 };
 
 /**
  * The main table of symbol
  */
 extern struct symtable_t *st;
+
+extern struct node_t *cur_block;
+
+extern struct node_t *sym_stack;
 
 /**
  * Create a new symbol table
@@ -75,12 +61,23 @@ struct symtable_t *st_create(unsigned int size);
  * @param key the key to search for
  * @return the data looked for, else return NULL
  */
-struct st_entry_t *st_get(char *key);
+struct symbol_t *st_get(char *key);
+
+/**
+ * Stack a new local table of symbol
+ */
+void st_unshift();
+
+/**
+ * Pop the current local table of symbol
+ */
+void st_shift();
 
 /**
  * Print the symbol table in stdout
  */
 void st_print();
+void st_print_scope();
 
 /**
  * Store a value in the table with the given key \n
@@ -88,10 +85,22 @@ void st_print();
  * TODO : check if it is not better to use symbol_t * as value
  * @param key
  * @param value
- * @return NULL on success
+ * @return NULL on error
  */
-struct st_entry_t *st_put(char *key,
-						  struct symbol_t *value);
+struct symbol_t *st_put(struct symbol_t *value);
+
+/**
+ * @param sym
+ * @return a pseudo-unique index for sym
+ */
+unsigned long st_hash(struct symbol_t *sym);
+
+unsigned long st_hash_str(char *str);
+
+/**
+ * @return depth of symbol in the table of symbol
+ */
+unsigned int get_sym_depth(struct symbol_t *sym);
 
 // TODO: maybe add new functions like clear, remove, iterate
 // dunno if needed

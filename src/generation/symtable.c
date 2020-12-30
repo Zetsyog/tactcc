@@ -7,10 +7,16 @@
 
 struct symtable_t *st;
 
+struct node_t *cur_block	  = NULL;
+unsigned int block_stack_size = 0;
+
+struct node_t *sym_stack	  = NULL;
+struct node_t *sym_stack_root = NULL;
+
 /**
  * djb2 hash function by Dan Bernstein.
  */
-unsigned long st_hash(char *str) {
+unsigned long djb42(char *str) {
 	unsigned long hash = 5381;
 	int c;
 
@@ -20,109 +26,205 @@ unsigned long st_hash(char *str) {
 	return hash;
 }
 
+unsigned long st_hash_str(char *str) {
+	return djb42(str) % st->size;
+}
+
+unsigned long st_hash(struct symbol_t *sym) {
+	return st_hash_str(sym->name);
+}
+
 struct symtable_t *st_create(unsigned int size) {
-	MCHECK(st = malloc(sizeof(struct symtable_t)));
-	if ((st->table = calloc(size, sizeof(struct st_entry_t *))) == NULL) {
+	MCHECK(st = calloc(1, sizeof(struct symtable_t)));
+	if ((st->table = calloc(size, sizeof(struct symbol_t *))) == NULL) {
 		free(st);
 		return NULL;
 	}
 	st->size  = size;
 	st->usage = 0;
+	st->list  = NULL;
 	return st;
 }
 
-struct st_entry_t *st_get(char *key) {
-	unsigned long h		 = st_hash(key) % st->size;
-	struct st_entry_t *e = st->table[h];
+struct symbol_t *st_get(char *key) {
+	unsigned long h	   = st_hash_str(key);
+	struct symbol_t *e = st->table[h];
 	while (e != NULL) {
-		if (!strcmp(e->key, key))
+		if (!strcmp(e->name, key))
 			return e;
-		e = e->next;
+		h++;
+		if (h >= st->size)
+			log_error("st hash collision / table full");
+		e = st->table[h];
 	}
 
 	return NULL;
 }
 
-struct st_entry_t *st_put(char *key, struct symbol_t *value) {
+unsigned int get_sym_depth(struct symbol_t *sym) {
+	return sym->depth;
+}
+
+struct symbol_t *st_put(struct symbol_t *value) {
 	if (st == NULL)
 		return NULL;
 
-	log_debug("Adding entry %s (%u) in symtable", value->name,
-			  value->atomic_type);
+	unsigned long hash	 = st_hash(value);
+	struct symbol_t *sym = st->table[hash];
 
-	unsigned long hash		 = st_hash(key) % st->size;
-	struct st_entry_t *entry = st->table[hash];
-
-	while (entry != NULL) {
-		if (!strcmp(entry->key, key)) {
-			entry->value = value;
-			return entry;
+	while (sym != NULL) {
+		log_debug("st conflict %s <> %s", sym->name, value->name);
+		if (!strcmp(sym->name, value->name)) { // var already declared
+			if (get_sym_depth(sym) ==
+				block_stack_size) { // already declared in same scope
+				log_error(
+					"syntax error : var %s already declared in this scope",
+					value->name);
+			} else {
+				value->parent = sym;
+				break;
+			}
+		} else {
+			// TODO: fix this kind of error
+			hash++;
+			if (hash >= st->size) {
+				log_error("st full");
+			}
+			sym = st->table[hash];
 		}
-		entry = entry->next;
 	}
 
-	// Getting here means the key doesn't already exist
-	size_t len = strlen(key);
-	MCHECK(entry = calloc(1, sizeof(struct st_entry_t) + len + 1));
-	strncpy(entry->key, key, len);
-	entry->value = value;
+	// Getting here means the key doesn't already exists
 
 	// Add the element at the beginning of the linked list
-	entry->next		= st->list;
-	st->list		= entry;
-	st->table[hash] = entry;
+	// entry->next		= st->list;
+	// st->list		= entry;
+
+	value->depth = block_stack_size;
+	// add the symbol in the list of all symbols
+	st->list		= node_unshift(st->list, value);
+	st->table[hash] = value;
 	st->usage++;
+	// add the symbol in the symbol stack
+	if (sym_stack_root == NULL) {
+		sym_stack_root = node_create(value);
+		sym_stack	   = sym_stack_root;
+	} else {
+		sym_stack = node_append(sym_stack_root, value);
+	}
+
+	log_debug("Added entry %s (%i) in symtable at idx %i (depth: %i)",
+			  value->name, value->atomic_type, hash, value->depth);
 
 	return NULL;
+}
+
+void st_unshift() {
+	cur_block = node_unshift(cur_block, sym_stack);
+	block_stack_size++;
+}
+
+void st_shift() {
+	// shift all symbols from this block
+	struct symbol_t *sym;
+	struct node_t *it = node_shift(&cur_block);
+	sym_stack		  = it;
+	it				  = it->next;
+	while (it != NULL) {
+		sym				   = it->data;
+		unsigned long hash = st_hash(sym);
+		st->table[hash]	   = sym->parent;
+		it				   = it->next;
+	}
+	node_destroy(sym_stack->next, 0);
+	sym_stack->next = NULL;
+	if (block_stack_size > 0) {
+		block_stack_size--;
+	}
 }
 
 void st_destroy() {
 	if (st->usage != 0) {
-		unsigned int idx = 0;
-		while (idx < st->size) {
-			if (st->table[idx] != NULL) {
-				if(st->table[idx]->value != NULL) {
-					sym_destroy(st->table[idx]->value);
-				}
-				free(st->table[idx]);
-				st->table[idx] = NULL;
-			}
-			idx++;
+		struct node_t *it = st->list;
+		while (it != NULL) {
+			sym_destroy(it->data);
+			it = it->next;
 		}
 	}
+	node_destroy(st->list, 0);
+	node_destroy(cur_block, 0);
+	node_destroy(sym_stack_root, 0);
 	free(st->table);
 	free(st);
 }
 
-void st_print() {
-	unsigned int idx = 0;
-	struct symbol_t *tmp;
+void st_print_scope() {
+	struct symbol_t *sym;
 
 	printf("=============== SYMBOL TABLE ===============\n");
-	printf("%-9s%-8s%-15s %-5s %s\n", "SymType", "Type", "Name", "", "Value");
-	while (idx < st->size) {
-		if (st->table[idx] != NULL) {
-			tmp = st->table[idx]->value;
-			printf("%-9s%-8s%-15s", sym_type_str[tmp->sym_type],
-				   atomic_type_str[tmp->atomic_type], tmp->name);
-			printf("=%-5s", "");
-			switch (tmp->atomic_type)
-			{
+	printf("%-9s%-8s%-15s %-5s %-15s%s\n", "SymType", "Type", "Name", "",
+		   "Value", "Depth");
+	for (unsigned int i = 0; i < st->size; i++) {
+		sym = st->table[i];
+		if (sym == NULL)
+			continue;
+
+		printf("%-9s%-8s%-15s", sym_type_str[sym->sym_type],
+			   atomic_type_str[sym->atomic_type], sym->name);
+		printf("=%-5s", "");
+		if (sym->sym_type == SYM_CST) {
+			switch (sym->atomic_type) {
 			case A_INT:
 			case A_BOOL:
-				if (tmp->int_val >= 0)
+				if (sym->int_val >= 0)
 					printf(" ");
-				printf("%i", tmp->int_val);
+				printf("%-15i", sym->int_val);
 				break;
 			case A_STR:
-				printf("\"%s\"", tmp->str_val);
+				printf(" %-15s", sym->str_val);
 				break;
 			default:
-				printf("no display");
 				break;
 			}
-			printf("\n");
+		} else {
+			printf(" %-15s", "no display");
 		}
-		idx++;
+		printf("%u", get_sym_depth(sym));
+		printf("\n");
+	}
+}
+
+void st_print() {
+	struct node_t *it = st->list;
+	struct symbol_t *sym;
+
+	printf("=============== SYMBOL TABLE ===============\n");
+	printf("%-9s%-8s%-15s %-5s %-15s%s\n", "SymType", "Type", "Name", "",
+		   "Value", "Depth");
+	while (it != NULL) {
+		sym = it->data;
+		printf("%-9s%-8s%-15s", sym_type_str[sym->sym_type],
+			   atomic_type_str[sym->atomic_type], sym->name);
+		printf("=%-5s", "");
+		if (sym->sym_type == SYM_CST) {
+			switch (sym->atomic_type) {
+			case A_INT:
+			case A_BOOL:
+				if (sym->int_val >= 0)
+					printf(" ");
+				printf("%-15i", sym->int_val);
+				break;
+			case A_STR:
+				printf(" %-15s", sym->str_val);
+				break;
+			default:
+				break;
+			}
+		} else {
+			printf(" %-15s", "no display");
+		}
+		printf("%u", get_sym_depth(sym));
+		printf("\n");
+		it = it->next;
 	}
 }

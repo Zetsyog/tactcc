@@ -76,8 +76,7 @@ extern int yydebug;
     INT = 282,
     IDENT = 283,
     STR_CST = 284,
-    OPU = 285,
-    IFEND = 286
+    OPU = 285
   };
 #endif
 /* Tokens.  */
@@ -109,32 +108,27 @@ extern int yydebug;
 #define IDENT 283
 #define STR_CST 284
 #define OPU 285
-#define IFEND 286
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 19 "src/grammar/grammar.y"
+#line 21 "src/grammar/grammar.y"
 
     struct list_t *pos;
-    struct {
-        struct symbol_t *ptr;
-        struct list_t *true;
-        struct list_t *false;
-    } expr_val;
+    struct expr_val_t expr_val;
     struct {
         struct list_t *next;
     } instr_val;
     struct node_t *list;
-    int quad;
+    unsigned int quad;
     int intVal;
     char strVal[SYM_NAME_MAX_LEN];
     struct symbol_t *sym;
     unsigned int a_type;
     enum operation_t operation;
 
-#line 138 "./include/grammar.h"
+#line 132 "./include/grammar.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

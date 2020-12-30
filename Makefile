@@ -4,7 +4,7 @@ LEX  ?= lex
 
 CFLAGS    ?= -Wall -Wextra -g
 LDLIBS    ?= -lfl
-YACCFLAGS ?= -v
+YACCFLAGS ?= -v -Wno-yacc
 
 INCLUDE_PATH = ./include
 TEST_DIR = test
