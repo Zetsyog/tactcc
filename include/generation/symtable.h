@@ -27,7 +27,7 @@ struct symtable_t {
 	/**
 	 * Number of elements in the table
 	 */
-	unsigned int usage; 
+	unsigned int usage;
 	/**
 	 * Pointer to the last entry
 	 */
@@ -36,7 +36,7 @@ struct symtable_t {
 	 * Table of size symtable_t::size \n
 	 * Store all the registred symbols
 	 */
-	struct symbol_t **table; 
+	struct symbol_t **table;
 };
 
 /**

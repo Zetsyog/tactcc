@@ -30,7 +30,11 @@ static const char *op_str[SYSCALL] = {
 	[INSTR_TO_STR_IDX(BEQ)]		   = "beq",
 	[INSTR_TO_STR_IDX(JAL)]		   = "jal",
 	[INSTR_TO_STR_IDX(JR)]		   = "jr",
-
+	[INSTR_TO_STR_IDX(BLT)]		   = "blt",
+	[INSTR_TO_STR_IDX(BGT)]		   = "bgt",
+	[INSTR_TO_STR_IDX(BLE)]		   = "ble",
+	[INSTR_TO_STR_IDX(BGE)]		   = "bge",
+	[INSTR_TO_STR_IDX(BNE)]		   = "bne",
 };
 
 static void print_sym_name(FILE *out, struct symbol_t *sym) {
@@ -46,6 +50,7 @@ static void print_sym_name(FILE *out, struct symbol_t *sym) {
 	if (sym->depth > 1) {
 		fprintf(out, "d%u_", sym->depth);
 	}
+	
 	fprintf(out, "%s", sym->name);
 }
 

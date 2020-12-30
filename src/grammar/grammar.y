@@ -127,7 +127,7 @@ fundecllist: /*epsilon*/              { $$ = NULL; }
            ;
 
 fundecl: FUNC IDENT <sym>{  
-            $$ = sym_create($2, SYM_FUN, 0); st_put($$); st_unshift(); 
+            $$ = sym_create($2, SYM_FUN, 0); st_put($$); st_unshift();
        } '(' parlist ')' ':' atomictype vardeclist M {
            gencode(OP_POP_ARG, $3);
        } instr {
@@ -147,13 +147,13 @@ fundecl: FUNC IDENT <sym>{
 
 parlist: /*epsilon*/     { $$ = NULL; }
        | par             { $$ = node_create($1); }
-       | parlist ',' par { 
-           node_append($1, $3); 
+       | parlist ',' par {
+           node_append($1, $3);
            $$ = $1;
        }
        ;
 
-par: IDENT ':' typename { 
+par: IDENT ':' typename {
         $$ = sym_create($1, SYM_PAR, $3);
         st_put($$);
    }
@@ -233,10 +233,10 @@ instr: loop { $$.next = $1.next; }
      }
      ;
 
-funexprlist: expr { 
+funexprlist: expr {
             $$ = node_create(action_eval_par($1));
         }
-        | funexprlist ',' expr { 
+        | funexprlist ',' expr {
             node_append($1, action_eval_par($3));
             $$ = $1;
             ;
@@ -306,10 +306,44 @@ expr: INT {
         gencode(OP_GOTO, NULL);
     }
     | '(' expr ')'  {
-                        $$ = $2;
-                    }
-    | expr opb expr {
-        $$.ptr = NULL;
+            $$ = $2;
+        }
+    | expr opb M expr {
+        if($1.a_type == A_INT && $4.a_type == A_INT) {
+            switch($2) {
+            case OP_ADD:
+            case OP_MINUS:
+            case OP_MULTIPLIES:
+            case OP_DIVIDES:
+            case OP_POWER:
+                $$.ptr = newtemp(SYM_VAR, A_INT);
+                $$.a_type = A_INT;
+                gencode($2,$1.ptr,$4.ptr,$$.ptr);
+                break;
+            case OP_LOWER:
+            case OP_LOWER_OR_EQUAL:
+            case OP_SUPERIOR:
+            case OP_SUPERIOR_OR_EQUAL:
+            case OP_EQUALS:
+            case OP_DIFFERENT:
+                $$.a_type = A_BOOL;
+                $$.true = crelist(nextquad);
+                $$.false = crelist(nextquad + 1);
+                gencode($2, $1.ptr, $4.ptr, NULL);
+                gencode(OP_GOTO, NULL);
+                break;
+            default :
+                break;
+            }
+        } else if ($1.a_type == A_BOOL && $4.a_type == A_BOOL) {
+            if($2 == OP_AND) {
+                complete($1.true, $3);
+                $$.false = concat($1.false,$4.false);
+                $$.true = $4.true;
+                $$.a_type = A_BOOL;
+            }
+            // TODO: or & xor          
+        }
     }
     | opu expr {
         if($2.ptr->atomic_type == A_INT && $1 == OP_NEGATE) {
@@ -362,7 +396,7 @@ opb:'+'    { $$ = OP_ADD; }
    ;
 
 opu: '-' %prec OPU{ $$ = OP_NEGATE;  }
-   | NOT { $$ = NOT; }
+   | NOT { $$ = OP_NOT; }
    ;
 
 %%

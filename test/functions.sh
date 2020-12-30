@@ -89,7 +89,7 @@ success ()
     printf "${Green}"
     echo "OK" | tee -a $LOG
     printf "${Reset}"
-    
+
 }
 
 fail ()
@@ -143,7 +143,7 @@ run_test_simple ()
 }
 
 # test_comp_exec <scalpa_file> <expected_out> <comp_func>
-test_comp_exec() 
+test_comp_exec()
 {
     DIR="${PREFIX}/$1"
     ASM_FILE="${DIR}/mips.asm.tmp"
@@ -190,7 +190,7 @@ test_comp_exec()
     echo ""
 }
 
-show_result () 
+show_result ()
 {
     title "Result"
     echo "$TEST_NB tests"

@@ -2,8 +2,7 @@
 #include <stdlib.h>
 
 struct list_t *action_assign(struct symbol_t *sym, struct expr_val_t expr) {
-	if ((expr.ptr != NULL && sym->atomic_type != expr.ptr->atomic_type) ||
-		(sym->atomic_type == A_BOOL && expr.ptr != NULL)) {
+	if (expr.a_type != sym->atomic_type) {
 		log_error("incompatible types");
 	}
 	if (sym->atomic_type == A_BOOL) {

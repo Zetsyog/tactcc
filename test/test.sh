@@ -14,4 +14,7 @@ title "MIPS execution tests"
 title "Func tests"
 . ./func/test.sh
 
+title "Operations tests"
+. ./op/test.sh
+
 show_result

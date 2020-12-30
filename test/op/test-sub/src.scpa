@@ -1,11 +1,14 @@
 program test
-    var i,j: int
+    var i,j,k: int
     begin
-        i := 4;
-        j := -5;
+        i := 8;
+        j := 9;
+	k := i-j;
         write i;
         write "\n";
-        write j;
+	write j;
+        write "\n";
+	write k;
         write "\n";
 	write "Fin du programme\n";
     end

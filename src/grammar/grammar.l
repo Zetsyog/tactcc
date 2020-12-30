@@ -67,11 +67,11 @@ string \"(\\.|[^"\\])*\"
 {ident} {
     memset(yylval.strVal, 0, SYM_NAME_MAX_LEN);
     strncpy(yylval.strVal, yytext, SYM_NAME_MAX_LEN);
-    return(IDENT); 
+    return(IDENT);
 }
-{integer} { 
-    yylval.intVal=atoi(yytext); 
-    return(INT); 
+{integer} {
+    yylval.intVal=atoi(yytext);
+    return(INT);
 }
 [[:space:]]+
 %%

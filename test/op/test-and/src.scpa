@@ -1,11 +1,14 @@
 program test
-    var i,j: int
+    var i,j,k: bool
     begin
-        i := 4;
-        j := -5;
-        write i;
+        i := true;
+        j := true;
+	k := i and j;
+	write i;
         write "\n";
         write j;
         write "\n";
+	write k;
+	write "\n";
 	write "Fin du programme\n";
     end
