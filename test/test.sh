@@ -16,4 +16,5 @@ title "Func tests"
 
 title "Operations tests"
 . ./op/test.sh
+
 show_result

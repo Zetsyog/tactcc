@@ -59,3 +59,4 @@ test: $(BINDIR)/$(TARGET)
 
 doc:
 	doxygen doxygen.conf
+

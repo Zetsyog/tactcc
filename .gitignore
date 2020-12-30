@@ -16,3 +16,6 @@ bin/*
 
 # Tmp files
 *.tmp
+
+# Doc files
+doc/

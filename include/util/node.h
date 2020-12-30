@@ -61,4 +61,34 @@ unsigned int node_length(struct node_t *list);
  */
 void node_destroy(struct node_t *list, int free_mem);
 
+/**
+ * Add a new node with the given data at the beginning of the list
+ * @param list The list
+ * @param data The new node data
+ * @return The new beginning of the list
+ */
+struct node_t *node_unshift(struct node_t *list, void *data);
+
+/**
+ * Remove the first element of the list and return its value \n
+ * Free the node memory but not the value
+ * @param list Pointer to the list (Be careful: pointer of pointer)
+ * @return The data of the removed node
+ */
+void *node_shift(struct node_t **list);
+
+/**
+ * @param list
+ * @return The length of the given list
+ */
+unsigned int node_length(struct node_t *list);
+
+/**
+ * Destroy and free memory of list and all its children \n
+ * If free_mem is != 0, it will call free on all the node_t::data elements
+ * @param list
+ * @param free_mem
+ */
+void node_destroy(struct node_t *list, int free_mem);
+
 #endif

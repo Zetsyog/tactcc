@@ -40,14 +40,14 @@ enum syscall_svc_t {
 enum mips_helper_op_t {
 	END = 0,
 	// Data Formats
-	IMM = 1, // Print the next arg as an int immediate value
-	SYM = 2, // Next arg must be a pointer to a symbol_t
-			 // Print its value if its a const, or its name if its a var
-	REG = 3, // Next arg must be a string refering to a register
-			 // It will be printed with register format (with a '$' before)
+	IMM = 1,	 // Print the next arg as an int immediate value
+	SYM = 2,	 // Next arg must be a pointer to a symbol_t
+				 // Print its value if its a const, or its name if its a var
+	REG = 3,	 // Next arg must be a string refering to a register
+				 // It will be printed with register format (with a '$' before)
 	IMM_STR = 4, // Print next arg as an immediate string (surrounded by '"')
 	QLABEL	= 5, // Next arg must be a pointer to a quad
-				// Generate and print the quad label
+				 // Generate and print the quad label
 	ADDR = 6,
 	// TODO
 	// Instructions :
@@ -74,11 +74,11 @@ enum mips_helper_op_t {
 	BEQ		   = 28,
 	JAL		   = 29,
 	JR		   = 30,
-	BLT			 = 31,
-	BGT			 = 32,
-	BLE			 = 33,
-	BGE			 = 34,
-	BNE			 = 35,
+	BLT		   = 31,
+	BGT		   = 32,
+	BLE		   = 33,
+	BGE		   = 34,
+	BNE		   = 35,
 	// Char
 	TAB	  = 100, // Print tab char
 	COLON = 101, // Print colon char

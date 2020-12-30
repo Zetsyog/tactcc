@@ -185,18 +185,6 @@ void gen_quad(FILE *out, struct quad_t *quad) {
 		mips(out, LOAD, REG, "t1", SYM, quad->arg2, END);
 		mips(out, BNE, REG, "t0", REG, "t1", QLABEL, quad->label, END);
 		break;
-	case OP_PUSH_ARG:
-		gen_push_arg(out, quad);
-		break;
-	case OP_CALL:
-		gen_call(out, quad);
-		break;
-	case OP_RETURN:
-		mips(out, JR, REG, "ra", END);
-		break;
-	case OP_POP_ARG:
-		gen_pop_arg(out, quad);
-		break;
 	case OP_ADD:
 		mips(out,LOAD,REG,"t0",SYM,quad->arg1,END);
 		mips(out,LOAD,REG,"t1",SYM,quad->arg2,END);
@@ -232,6 +220,18 @@ void gen_quad(FILE *out, struct quad_t *quad) {
 		mips(out,LOAD,REG,"t1",SYM,quad->arg2,END);
 		mips(out,INSTR_OR,REG,"t2",REG,"t0",REG,"t1",END);
 		mips(out, SW, REG, "t2", SYM, quad->res, END);
+		break;
+case OP_PUSH_ARG:
+		gen_push_arg(out, quad);
+		break;
+	case OP_CALL:
+		gen_call(out, quad);
+		break;
+	case OP_RETURN:
+		mips(out, JR, REG, "ra", END);
+		break;
+	case OP_POP_ARG:
+		gen_pop_arg(out, quad);
 		break;
 	default:
 		break;

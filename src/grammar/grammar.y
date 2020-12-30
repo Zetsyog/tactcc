@@ -37,7 +37,7 @@ extern void yylex_destroy();
 %token WHILE RETURN BEGIN_TOK READ WRITE
 %token END_TOK AND OR XOR NOT DO OF
 %token TRUE FALSE
-%token <intVal> INT
+%token <intVal> INT 
 %token <strVal> IDENT STR_CST
 
 %left XOR OR '+' '-'
@@ -126,7 +126,7 @@ fundecllist: /*epsilon*/              { $$ = NULL; }
            | fundecl ';' fundecllist { }
            ;
 
-fundecl: FUNC IDENT <sym>{
+fundecl: FUNC IDENT <sym>{  
             $$ = sym_create($2, SYM_FUN, 0); st_put($$); st_unshift();
        } '(' parlist ')' ':' atomictype vardeclist M {
            gencode(OP_POP_ARG, $3);
