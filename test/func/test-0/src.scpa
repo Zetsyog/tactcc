@@ -1,0 +1,10 @@
+program test
+    var a, b, c: int
+    function j(): unit
+        var c, d: int
+        begin
+            
+        end;
+    begin
+        write "hello world\n"
+    end

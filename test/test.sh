@@ -11,4 +11,9 @@ title "Lexical analysis tests "
 title "MIPS execution tests"
 . ./mips/test.sh
 
+title "Func tests"
+. ./func/test.sh
+
+title "Operations tests"
+. ./op/test.sh
 show_result

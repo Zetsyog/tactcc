@@ -2,7 +2,6 @@ program test
     var b: bool
     begin
         b := true;
-
         write b;
         write "\n";
     end

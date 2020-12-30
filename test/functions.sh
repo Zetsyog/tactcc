@@ -89,7 +89,7 @@ success ()
     printf "${Green}"
     echo "OK" | tee -a $LOG
     printf "${Reset}"
-    
+
 }
 
 fail ()
@@ -131,6 +131,7 @@ test_in_file ()
     else
         success
     fi
+    printf "\n" >> $LOG
 }
 
 run_test_simple ()
@@ -142,13 +143,14 @@ run_test_simple ()
 }
 
 # test_comp_exec <scalpa_file> <expected_out> <comp_func>
-test_comp_exec() 
+test_comp_exec()
 {
-    ASM_FILE=/tmp/mips-test.asm.$$
+    DIR="${PREFIX}/$1"
+    ASM_FILE="${DIR}/mips.asm.tmp"
     OUT=/tmp/mips-test.out.$$
-    STDIN="${PREFIX}/$1"
-    EXPECTED="${PREFIX}/$2"
-    TEST_FUNC=$3
+    STDIN="${DIR}/src.scpa"
+    EXPECTED="${DIR}/out"
+    TEST_FUNC=$2
     TEST_NB=$((TEST_NB+1))
 
     printf "Compiling $STDIN..."
@@ -164,6 +166,7 @@ test_comp_exec()
         # conserve la sorte dans le log
         echo "==> compilation failed" >> $LOG
         fail
+        echo -e "\n" >> $LOG
         return
     else
         echo "${Green}OK${Reset}"
@@ -180,15 +183,14 @@ test_comp_exec()
 
     if [ $? -ne 0 ]; then
         fail
-        return
     else
         success
     fi
-    echo "" >> $LOG
+    printf "\n" >> $LOG
     echo ""
 }
 
-show_result () 
+show_result ()
 {
     title "Result"
     echo "$TEST_NB tests"
