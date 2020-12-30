@@ -19,3 +19,5 @@ bin/*
 
 # Doc files
 doc/
+
+.DS_Store
