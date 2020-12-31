@@ -167,6 +167,12 @@ void gen_pop_ret(FILE *out, struct quad_t *quad) {
 	mips(out, SW, REG, "v0", SYM, quad->res, END);
 }
 
+void gen_exit(FILE *out) {
+	fprintf(out, "\n");
+	mips(out, TAB, RAW, "exit", COLON, END);
+	gen_syscall(out, SYS_EXIT);
+}
+
 void gen_quad(FILE *out, struct quad_t *quad) {
 	if (quad->print_label) {
 		mips(out, TAB, QLABEL, quad, COLON, END);
@@ -274,16 +280,12 @@ void gen_quad(FILE *out, struct quad_t *quad) {
 	case OP_POP_RET:
 		gen_pop_ret(out, quad);
 		break;
+	case OP_EXIT:
+		gen_exit(out);
 	default:
 		break;
 	}
 	mips(out, END);
-}
-
-void gen_exit(FILE *out) {
-	fprintf(out, "\n");
-	mips(out, TAB, RAW, "exit", COLON, END);
-	gen_syscall(out, SYS_EXIT);
 }
 
 void gen_mips(FILE *out) {
@@ -294,8 +296,6 @@ void gen_mips(FILE *out) {
 	for (i = 0; i < nextquad; i++) {
 		gen_quad(out, &tabQuad[i]);
 	}
-
-	gen_exit(out);
-
+	
 	node_destroy(declared_var, 1);
 }

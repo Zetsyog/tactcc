@@ -8,7 +8,7 @@ YACCFLAGS ?= -v
 
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)
-		LDLIBS += -lfl
+		LDLIBS += -ll
 endif
 ifeq ($(UNAME_S),Darwin)
 		LDLIBS += -ll

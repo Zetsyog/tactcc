@@ -17,3 +17,10 @@
 	} while (0)
 
 #endif
+
+extern struct node_t *garbage;
+
+int get_next_char(char *b);
+void print_scanner_current_line();
+void destroy_scanner();
+void clean_exit(int exitcode);

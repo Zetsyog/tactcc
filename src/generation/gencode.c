@@ -32,6 +32,7 @@ int gencode(uint op, ...) {
 	case OP_RETURN:
 	case OP_PUSH_RET:
 	case OP_POP_RET:
+	case OP_EXIT:
 		size = 0;
 		break;
 	case OP_ASSIGNMENT:

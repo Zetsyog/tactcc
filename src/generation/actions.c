@@ -3,7 +3,7 @@
 
 struct list_t *action_assign(struct symbol_t *sym, struct expr_val_t expr) {
 	if (expr.a_type != sym->atomic_type) {
-		log_error("incompatible types");
+		log_syntax_error("syntax error: incompatible types");
 	}
 	if (sym->atomic_type == A_BOOL) {
 		struct list_t *ret;
@@ -43,7 +43,7 @@ void action_call(struct symbol_t *func, struct node_t *arg_it) {
 		arg	 = arg_it->data;
 
 		if (desc->atomic_type != arg->atomic_type) {
-			log_error("syntax error: incompatible types");
+			log_syntax_error("syntax error: incompatible types");
 		}
 		gencode(OP_PUSH_ARG, arg);
 

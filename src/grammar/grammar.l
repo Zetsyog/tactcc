@@ -5,6 +5,12 @@
     #include "generation/defs.h"
     #include "grammar.h"
     #include "util.h"
+
+    #define YY_INPUT(buf,result,max_size)  {\
+        result = get_next_char(buf); \
+        if (result <= 0) \
+            result = YY_NULL; \
+        }
 %}
 
 integer [0-9]+
@@ -14,6 +20,7 @@ string \"(\\.|[^"\\])*\"
 %x COMMENT
 %option yylineno
 
+%option nodefault
 %option noyywrap
 
 %option nounput
@@ -83,4 +90,6 @@ string \"(\\.|[^"\\])*\"
     return(INT);
 }
 [[:space:]]+
+
+.   return(yytext[0]);
 %%

@@ -32,13 +32,13 @@ struct symbol_t *newtemp(enum sym_type_t sym_type,
 			MCHECK(sym->str_val = calloc(1, len + 1));
 			strncpy(sym->str_val, str, len);
 		} else {
-			log_error("Unsupported constant type %s",
+			log_syntax_error("syntax error: unsupported constant type %s",
 					  atomic_type_str[atomic_type]);
 		}
 	} else if (sym_type == SYM_VAR) {
 		
 	} else {
-		log_error("Unsupported cst var type");
+		log_syntax_error("syntax error: unsupported tmp var type");
 	}
 
 	st_put(sym);

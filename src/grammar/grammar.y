@@ -1,21 +1,22 @@
 %{
+
+#include "generation/defs.h"
+#include "generation/print_code.h"
+#include "grammar.h"
+#include "options.h"
+#include "mips/defs.h"
+#include "util.h"
+#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "generation/defs.h"
-#include "grammar.h"
-#include "util.h"
-#include "mips/defs.h"
-#include "generation/print_code.h"
-#include "options.h"
-#include <string.h>
+
+#define YYERROR_VERBOSE 1
 
 int yylex();
 int yyparse();
 extern int yylineno;
 void yyerror(const char *s);
-extern void yylex_destroy();
 %}
-%define parse.error verbose
 %union {
     struct list_t *pos;
     struct expr_val_t expr_val;
@@ -61,13 +62,13 @@ extern void yylex_destroy();
 %start program
 
 %%
-program: PROG IDENT P vardeclist fundecllist M instr {
+program: PROG IDENT { st_unshift(); } vardeclist fundecllist M instr {
             tabQuad[$6].is_main = 1;
             tabQuad[$6].print_label = 1;
+            complete($7.next, nextquad);
+            gencode(OP_EXIT, NULL);
        }
        ;
-
-P: /* epsilon */ { st_unshift(); }
 
 vardeclist: /*epsilon*/ { $$ = NULL; }
           | varsdecl {}
@@ -76,7 +77,7 @@ vardeclist: /*epsilon*/ { $$ = NULL; }
 
 varsdecl: VAR identlist ':' typename {
             if($4 == A_UNIT)
-                log_error("syntax error: var cannot be of type UNIT");
+                log_syntax_error("syntax error: var cannot be of type UNIT");
 
             struct node_t *list = $2;
             struct symbol_t *tmp = (struct symbol_t *)list->data;
@@ -150,12 +151,12 @@ fundecl: FUNC IDENT K {
             complete($13.next, nextquad);
             gencode(OP_RETURN, NULL);
             st_shift();
-            log_debug("HEY");
+            node_shift(&garbage);
        }
        ;
 
 parlist: /*epsilon*/     { $$ = NULL; }
-       | par             { $$ = node_create($1); }
+       | par             { $$ = node_create($1); garbage = node_unshift(garbage, $$); }
        | parlist ',' par {
            node_append($1, $3);
            $$ = $1;
@@ -207,10 +208,10 @@ instr: loop { $$.next = $1.next; }
             $$.next = NULL;
             struct symbol_t *sym = st_get($1);
             if(sym == NULL) {
-                log_error("syntax error: function %s is not declared", $1);
+                log_syntax_error("syntax error: function %s is not declared", $1);
             }
             if(node_length($3) != sym->fun_desc->par_nb) {
-                log_error("syntax error: wrong number of args");
+                log_syntax_error("syntax error: wrong number of args");
             }
             action_call(sym, $3);
             node_destroy($3, 0);
@@ -219,13 +220,13 @@ instr: loop { $$.next = $1.next; }
             $$.next = NULL;
             struct symbol_t *sym = st_get($1);
             if(sym == NULL) {
-                log_error("syntax error: undefined function %s", $1);
+                log_syntax_error("syntax error: undefined function %s", $1);
             }
             if(sym->sym_type != SYM_FUN) {
-                log_error("syntax error: %s is not a function", sym->name);
+                log_syntax_error("syntax error: %s is not a function", sym->name);
             }
             if(sym->fun_desc->par_nb != 0) {
-                log_error("syntax error: not_enough arguments for func %s", sym->name);
+                log_syntax_error("syntax error: not_enough arguments for func %s", sym->name);
             }
             action_call(sym, NULL);
      }
@@ -234,7 +235,7 @@ instr: loop { $$.next = $1.next; }
      | READ lvalue { 
             $$.next = NULL; 
             if($2->atomic_type != A_INT) {
-                log_error("syntax error: invalid write of type %s", 
+                log_syntax_error("syntax error: invalid write of type %s", 
                         atomic_type_str[$2->atomic_type]);
             }
             gencode(OP_READ, $2); 
@@ -253,7 +254,7 @@ instr: loop { $$.next = $1.next; }
         } else if($2.a_type == A_INT || $2.a_type == A_STR) {
             gencode(OP_WRITE, $2.ptr);
         } else {
-            log_error("syntax error: invalid write of type %s", 
+            log_syntax_error("syntax error: invalid write of type %s", 
                     atomic_type_str[$2.a_type]);
         }
      }
@@ -291,7 +292,7 @@ N:  /* empty */  {
 lvalue: IDENT {
             struct symbol_t *sym = st_get($1);
             if(sym == NULL) {
-                log_error("syntax error: ident %s not declared", $1);
+                log_syntax_error("syntax error: ident %s not declared", $1);
                 exit(1);
             }
             log_debug("lvalue: %s", sym->name);
@@ -338,10 +339,10 @@ expr: INT {
     | IDENT '(' funexprlist ')' {
         struct symbol_t *sym = st_get($1);
         if(sym == NULL) {
-            log_error("syntax error: function %s is not declared", $1);
+            log_syntax_error("syntax error: function %s is not declared", $1);
         }
         if(node_length($3) != sym->fun_desc->par_nb) {
-            log_error("syntax error: wrong number of args");
+            log_syntax_error("syntax error: wrong number of args");
         }
         action_call(sym, $3);
         node_destroy($3, 0);
@@ -360,10 +361,10 @@ expr: INT {
     | IDENT '(' ')' {
         struct symbol_t *sym = st_get($1);
         if(sym == NULL) {
-            log_error("syntax error: function %s is not declared", $1);
+            log_syntax_error("syntax error: function %s is not declared", $1);
         }
         if(sym->fun_desc->par_nb != 0) {
-            log_error("syntax error: wrong number of args");
+            log_syntax_error("syntax error: wrong number of args");
         }
         action_call(sym, NULL);
         struct symbol_t *ret = newtemp(SYM_VAR, sym->atomic_type);
@@ -378,11 +379,11 @@ expr: INT {
         $$.ptr = ret;
         $$.a_type = sym->atomic_type;
     }
-    | IDENT '[' exprlist ']' { log_error("TODO: array"); }
+    | IDENT '[' exprlist ']' { log_syntax_error("TODO: array"); }
     | IDENT {
         struct symbol_t *sym = st_get($1);
         if(sym == NULL) {
-            log_error("syntax error: ident %s not declared", $1);
+            log_syntax_error("syntax error: ident %s not declared", $1);
         }
         if(sym->atomic_type == A_BOOL) {
             $$.true = crelist(nextquad);
@@ -455,6 +456,9 @@ int main(int argc, char **argv)
         log_debug("Sym table :");
         st_print();
     }
+    if(syntax_error) {
+        clean_exit(EXIT_FAILURE);
+    }
     log_debug("Result :");
     print_intermediate_code();
     if(options.output_path != NULL) {
@@ -467,12 +471,11 @@ int main(int argc, char **argv)
         fclose(out);
     }
 
-    st_destroy();
-    yylex_destroy();
+    clean_exit(0);
     return 0;
 }
 
 void yyerror(const char *s)
 {
-    log_error("at line %i:\n\t%s", yylineno, s);
+    log_syntax_error("At line %i:\n\t%s", yylineno, s);
 }

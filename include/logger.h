@@ -13,6 +13,8 @@
 #define LOG_LEVEL_DEBUG 500
 #define LOG_LEVEL_ALL __INT_MAX__
 
+extern int syntax_error;
+
 /**
  *  Initialize logger data
  *  Must be called before using any log function
@@ -49,5 +51,7 @@ void log_info(const char *message, ...);
  * @param message a formatable string to log
  */
 void log_debug(const char *message, ...);
+
+void log_syntax_error(const char *message, ...);
 
 #endif
