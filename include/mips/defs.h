@@ -49,7 +49,6 @@ enum mips_helper_op_t {
 	QLABEL	= 5, // Next arg must be a pointer to a quad
 				 // Generate and print the quad label
 	ADDR = 6,
-	// TODO
 	// Instructions :
 	// Following args simply print the correspoding mips instruction
 	// no args are needed
@@ -93,7 +92,7 @@ enum mips_helper_op_t {
 #define LAST_INSTR_IDX SYSCALL - LI
 
 /**
- * A helper function to generate mips assembly in a file
+ * @brief A helper function to generate mips assembly in a file
  * The last param MUST be END
  * @see mips_helper_op_t
  *
@@ -101,6 +100,12 @@ enum mips_helper_op_t {
  */
 void mips(FILE *out, ...);
 
+/**
+ * @brief Get the name of a symbol
+ * 
+ * @param dest The string where to write the name
+ * @param sym 
+ */
 void get_sym_name(char *dest, struct symbol_t *sym);
 
 /**

@@ -207,27 +207,13 @@ instr: loop { $$.next = $1.next; }
      | IDENT '(' funexprlist ')' {
             $$.next = NULL;
             struct symbol_t *sym = st_get($1);
-            if(sym == NULL) {
-                log_syntax_error("syntax error: function %s is not declared", $1);
-            }
-            if(node_length($3) != sym->fun_desc->par_nb) {
-                log_syntax_error("syntax error: wrong number of args");
-            }
+            
             action_call(sym, $3);
-            node_destroy($3, 0);
      }
      | IDENT '(' ')' {
             $$.next = NULL;
             struct symbol_t *sym = st_get($1);
-            if(sym == NULL) {
-                log_syntax_error("syntax error: undefined function %s", $1);
-            }
-            if(sym->sym_type != SYM_FUN) {
-                log_syntax_error("syntax error: %s is not a function", sym->name);
-            }
-            if(sym->fun_desc->par_nb != 0) {
-                log_syntax_error("syntax error: not_enough arguments for func %s", sym->name);
-            }
+            
             action_call(sym, NULL);
      }
      | BEGIN_TOK sequence END_TOK { $$.next = $2.next; }
@@ -338,14 +324,9 @@ expr: INT {
     | op { $$ = $1; }
     | IDENT '(' funexprlist ')' {
         struct symbol_t *sym = st_get($1);
-        if(sym == NULL) {
-            log_syntax_error("syntax error: function %s is not declared", $1);
-        }
-        if(node_length($3) != sym->fun_desc->par_nb) {
-            log_syntax_error("syntax error: wrong number of args");
-        }
+        
         action_call(sym, $3);
-        node_destroy($3, 0);
+
         struct symbol_t *ret = newtemp(SYM_VAR, sym->atomic_type);
         gencode(OP_POP_RET, ret);
         $$.ptr = ret;
@@ -360,13 +341,8 @@ expr: INT {
     }
     | IDENT '(' ')' {
         struct symbol_t *sym = st_get($1);
-        if(sym == NULL) {
-            log_syntax_error("syntax error: function %s is not declared", $1);
-        }
-        if(sym->fun_desc->par_nb != 0) {
-            log_syntax_error("syntax error: wrong number of args");
-        }
         action_call(sym, NULL);
+        
         struct symbol_t *ret = newtemp(SYM_VAR, sym->atomic_type);
         gencode(OP_POP_RET, ret);
         if(ret->atomic_type == A_BOOL) {

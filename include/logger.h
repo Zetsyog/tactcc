@@ -16,42 +16,56 @@
 extern int syntax_error;
 
 /**
- *  Initialize logger data
+ *  @brief Initialize logger data
  *  Must be called before using any log function
  */
 void log_init();
 
 /**
- *  Define the current log level
+ *  @brief Define the current log level
  *  Every logged message at a level above will be ignored
  */
 void set_log_level(int level);
 
 /**
- * Log a message at a given level
+ * @brief Log a message at a given level
  * @param level the message log level
  * @param message a formatable string to log
+ * @param ...
  */
 void log_level(int level, const char *message, ...);
 
 /**
- * Log at level DEBUG a message
+ * @brief Log at level ERROR a message
+ * Output in stderr
  * @param message a formatable string to log
+ * @param ...
  */
 void log_error(const char *message, ...);
 
 /**
- * Log at level DEBUG a message
+ * @brief Log at level INFO a message
  * @param message a formatable string to log
+ * @param ...
  */
 void log_info(const char *message, ...);
 
 /**
- * Log at level DEBUG a message
+ * @brief Log at level DEBUG a message
  * @param message a formatable string to log
+ * @param ...
  */
 void log_debug(const char *message, ...);
 
+/**
+ * @brief Print a syntax error in stderr
+ * Calls first print_scanner_current_line() and then write the error
+ * 
+ * @see print_scanner_current_line()
+ * 
+ * @param message 
+ * @param ... 
+ */
 void log_syntax_error(const char *message, ...);
 
 #endif
