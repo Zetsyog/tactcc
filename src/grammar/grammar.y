@@ -178,8 +178,11 @@ loop: WHILE M expr DO M instr {
         complete($3.true , $5);
         complete($6.next , $2);
         $$.next=$3.false;
-        gencode(OP_GOTO,$2);
+        int* value = malloc(sizeof(int*));
+        *value = $2;
+        gencode(OP_GOTO, value);
     }
+
     | IF expr THEN M instr %prec NO_ELSE {
         complete($2.true, $4);
         $$.next = concat($2.false, $5.next);
@@ -194,7 +197,7 @@ loop: WHILE M expr DO M instr {
             $$.next = concat($$.next , crelist(nextquad));
             gencode(OP_GOTO , NULL); */
     }
-
+    ;
 instr: loop { $$.next = $1.next; }
      | lvalue ASSIGN expr {
             $$.next = action_assign($1, $3);
