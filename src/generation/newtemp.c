@@ -11,13 +11,14 @@ struct symbol_t *newtemp(enum sym_type_t sym_type,
 	char name[SYM_NAME_MAX_LEN] = {0};
 	va_list args;
 	va_start(args, atomic_type);
-
+	int n;
 	do {
 		if(sym_type == SYM_CST) {
-			snprintf(name, SYM_NAME_MAX_LEN - 1, "%s%u", CONST_PREFIX, nextTmp);
+			n = snprintf(name, SYM_NAME_MAX_LEN - 1, "%s%u", CONST_PREFIX, nextTmp);
 		} else {
-			snprintf(name, SYM_NAME_MAX_LEN - 1, "%s%u", TMP_VAR_PREFIX, nextTmp);
+			n = snprintf(name, SYM_NAME_MAX_LEN - 1, "%s%u", TMP_VAR_PREFIX, nextTmp);
 		}
+		name[n] = 0;
 		nextTmp++;
 	} while (st_get(name) != NULL);
 
@@ -31,13 +32,13 @@ struct symbol_t *newtemp(enum sym_type_t sym_type,
 			MCHECK(sym->str_val = calloc(1, len + 1));
 			strncpy(sym->str_val, str, len);
 		} else {
-			log_error("Unsupported constant type %s",
+			log_syntax_error("syntax error: unsupported constant type %s",
 					  atomic_type_str[atomic_type]);
 		}
 	} else if (sym_type == SYM_VAR) {
-		
+
 	} else {
-		log_error("Unsupported cst var type");
+		log_syntax_error("syntax error: unsupported tmp var type");
 	}
 
 	st_put(sym);

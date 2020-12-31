@@ -3,8 +3,16 @@ YACC ?= yacc
 LEX  ?= lex
 
 CFLAGS    ?= -Wall -Wextra -g
-LDLIBS    ?= -lfl
-YACCFLAGS ?= -v -Wno-yacc
+LDLIBS    ?=
+YACCFLAGS ?= -v
+
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Linux)
+		LDLIBS += -ll
+endif
+ifeq ($(UNAME_S),Darwin)
+		LDLIBS += -ll
+endif
 
 INCLUDE_PATH = ./include
 TEST_DIR = test

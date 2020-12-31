@@ -23,7 +23,7 @@ struct node_t *node_create_int(int value) {
 struct node_t *node_append(struct node_t *list, void *data) {
 	if (list == NULL)
 		return node_create(data);
-		
+
 	while (list->next != NULL) {
 		list = list->next;
 	}
@@ -35,7 +35,7 @@ struct node_t *node_append(struct node_t *list, void *data) {
 }
 
 struct node_t *node_last(struct node_t *list) {
-	if(list == NULL)
+	if (list == NULL)
 		return NULL;
 
 	while (list->next != NULL) {
@@ -46,12 +46,12 @@ struct node_t *node_last(struct node_t *list) {
 
 struct node_t *node_unshift(struct node_t *list, void *data) {
 	struct node_t *tmp = node_create(data);
-	tmp->next = list;
+	tmp->next		   = list;
 	return tmp;
 }
 
 void *node_shift(struct node_t **list) {
-	if(list == NULL || *list == NULL) {
+	if (list == NULL || *list == NULL) {
 		return NULL;
 	}
 	struct node_t *tmp = *list;
@@ -72,7 +72,7 @@ struct node_t *node_append_int(struct node_t *list, int value) {
 
 unsigned int node_length(struct node_t *list) {
 	unsigned int len = 0;
-	while(list != NULL) {
+	while (list != NULL) {
 		len++;
 		list = list->next;
 	}
@@ -88,4 +88,27 @@ void node_destroy(struct node_t *node, int free_mem) {
 		free(node);
 		node = tmp;
 	}
+}
+
+void *node_remove_last(struct node_t **list) {
+	if((*list) == NULL)
+		return NULL;
+
+	void *data;
+	if ((*list)->next == NULL) {
+		data = (*list)->data;
+		*list = NULL;
+		node_destroy(*list, 0);
+		return data;
+	}
+
+	struct node_t *second_last = *list;
+	while(second_last->next->next != NULL) {
+		second_last = second_last->next;
+	}
+	data = second_last->next->data;
+	node_destroy(second_last->next, 0);
+	second_last->next = NULL;
+
+	return data;
 }

@@ -132,33 +132,45 @@ test_in_file ()
         success
     fi
     printf "\n" >> $LOG
+    printf "\n"
 }
 
 run_test_simple ()
 {
     echo "# Test (exitcode):" >> $LOG
-    printf "${PREFIX}/$1..."
+    printf "${PREFIX}/$1 "
     STDIN="${PREFIX}/$1"
     test_in_file "$STDIN" "$2"
 }
 
-# test_comp_exec <scalpa_file> <expected_out> <comp_func>
-test_comp_exec()
+test_compil_exec()
+{
+    test_compil_exec_in $1 "echo" $2
+}
+
+test_compil_exec_in_file()
+{
+    test_compil_exec_in $1 "cat ${PREFIX}/$1/in" $2
+}
+
+# test_compil_exec_in <test_dir> <spim_input> <comp_func>
+test_compil_exec_in()
 {
     DIR="${PREFIX}/$1"
     ASM_FILE="${DIR}/mips.asm.tmp"
     OUT=/tmp/mips-test.out.$$
-    STDIN="${DIR}/src.scpa"
+    IN_CODE="${DIR}/src.scpa"
+    IN_SPIM="$2"
     EXPECTED="${DIR}/out"
-    TEST_FUNC=$2
+    TEST_FUNC=$3
     TEST_NB=$((TEST_NB+1))
 
-    printf "Compiling $STDIN..."
+    printf "Compiling test/$IN_CODE "
     # On compile le code scalpa
     echo "# Test (compilation & execution):" >> $LOG
-    echo "cat $STDIN | $TARGET -o $ASM_FILE" >> $LOG
+    echo "cat $IN_CODE | $TARGET -o $ASM_FILE" >> $LOG
     echo "#### Output" >> $LOG
-    cat "$STDIN" | ./$TARGET 2>&1 -o "$ASM_FILE" >> $LOG
+    cat "$IN_CODE" | ./$TARGET -o "$ASM_FILE" 2>&1 >> $LOG
     EXITCODE=$?
 
     if [ $EXITCODE -ne 0 ]
@@ -172,9 +184,9 @@ test_comp_exec()
         echo "${Green}OK${Reset}"
     fi
 
-    printf "spim -file $ASM_FILE > $OUT..." >> $LOG
-    printf "Testing execution..."
-    spim -file $ASM_FILE | tail -n +6 > $OUT
+    echo "spim -file $ASM_FILE > $OUT" >> $LOG
+    printf "Exec test/$ASM_FILE "
+    $2 | spim -file $ASM_FILE | tail -n +6 > $OUT
 
     echo "" >> $LOG
     echo "#### Comp" >> $LOG

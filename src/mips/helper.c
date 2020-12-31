@@ -37,20 +37,28 @@ static const char *op_str[SYSCALL] = {
 	[INSTR_TO_STR_IDX(BNE)]		   = "bne",
 };
 
-static void print_sym_name(FILE *out, struct symbol_t *sym) {
+void get_sym_name(char *dest, struct symbol_t *sym) {
 	if (sym->sym_type == SYM_VAR) {
-		fprintf(out, VAR_PREFIX);
+		dest += sprintf(dest, VAR_PREFIX);
 	} else if (sym->sym_type == SYM_FUN) {
 		// TODO
 	} else if (sym->sym_type == SYM_ARRAY) {
 		// TODO
 	} else if (sym->sym_type == SYM_PAR) {
-		fprintf(out, "%s_%s_", PAR_PREFIX, sym->str_val);
+		dest += sprintf(dest, "%s_%s_", PAR_PREFIX, sym->str_val);
 	}
 	if (sym->depth > 1) {
-		fprintf(out, "d%u_", sym->depth);
+		dest += sprintf(dest, "d%u_", sym->depth);
 	}
-	fprintf(out, "%s", sym->name);
+	
+	dest += sprintf(dest, "%s", sym->name);
+}
+
+static void print_sym_name(FILE *out, struct symbol_t *sym) {
+	char name[SYM_NAME_MAX_LEN] = {0};
+	get_sym_name(name, sym);
+	fprintf(out, "%s", name);
+	
 }
 
 static void print_quad_label(FILE *out, struct quad_t *quad) {

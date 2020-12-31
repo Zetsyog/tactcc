@@ -1,4 +1,4 @@
-#include "logger.h"
+#include "util.h"
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -11,6 +11,7 @@
 	}
 
 static int _log_level = LOG_LEVEL_ALL;
+int syntax_error = 0;
 
 void set_log_level(int level) {
 	_log_level = level;
@@ -61,6 +62,22 @@ void log_error(const char *message, ...) {
 	// fprintf(stderr, "\033[0m");
 	va_end(args);
 	exit(1);
+}
+
+void log_syntax_error(const char *message, ...) {
+	syntax_error = 1;
+
+	can_log(LOG_LEVEL_ERROR);
+	fprintf(stderr, "\n");
+	print_scanner_current_line();
+	fprintf(stderr, "[ERROR] ");
+	va_list args;
+	va_start(args, message);
+	// fprintf(stderr, "\033[1;31m");
+	vfprintf(stderr, message, args);
+	// fprintf(stderr, "\033[0m");
+	va_end(args);
+	fprintf(stderr, "\n");
 }
 
 void log_init() {

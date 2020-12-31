@@ -40,16 +40,15 @@ enum syscall_svc_t {
 enum mips_helper_op_t {
 	END = 0,
 	// Data Formats
-	IMM = 1, // Print the next arg as an int immediate value
-	SYM = 2, // Next arg must be a pointer to a symbol_t
-			 // Print its value if its a const, or its name if its a var
-	REG = 3, // Next arg must be a string refering to a register
-			 // It will be printed with register format (with a '$' before)
+	IMM = 1,	 // Print the next arg as an int immediate value
+	SYM = 2,	 // Next arg must be a pointer to a symbol_t
+				 // Print its value if its a const, or its name if its a var
+	REG = 3,	 // Next arg must be a string refering to a register
+				 // It will be printed with register format (with a '$' before)
 	IMM_STR = 4, // Print next arg as an immediate string (surrounded by '"')
 	QLABEL	= 5, // Next arg must be a pointer to a quad
-				// Generate and print the quad label
+				 // Generate and print the quad label
 	ADDR = 6,
-	// TODO
 	// Instructions :
 	// Following args simply print the correspoding mips instruction
 	// no args are needed
@@ -74,11 +73,11 @@ enum mips_helper_op_t {
 	BEQ		   = 28,
 	JAL		   = 29,
 	JR		   = 30,
-	BLT			 = 31,
-	BGT			 = 32,
-	BLE			 = 33,
-	BGE			 = 34,
-	BNE			 = 35,
+	BLT		   = 31,
+	BGT		   = 32,
+	BLE		   = 33,
+	BGE		   = 34,
+	BNE		   = 35,
 	// Char
 	TAB	  = 100, // Print tab char
 	COLON = 101, // Print colon char
@@ -93,13 +92,21 @@ enum mips_helper_op_t {
 #define LAST_INSTR_IDX SYSCALL - LI
 
 /**
- * A helper function to generate mips assembly in a file
+ * @brief A helper function to generate mips assembly in a file
  * The last param MUST be END
  * @see mips_helper_op_t
  *
  * @param out the file to print to
  */
 void mips(FILE *out, ...);
+
+/**
+ * @brief Get the name of a symbol
+ *
+ * @param dest The string where to write the name
+ * @param sym
+ */
+void get_sym_name(char *dest, struct symbol_t *sym);
 
 /**
  * Generate mips code for the symbol table

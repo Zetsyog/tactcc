@@ -51,69 +51,81 @@ extern int yydebug;
   {
     PROG = 258,
     VAR = 259,
-    UNIT = 260,
-    BOOL = 261,
-    ARRAY = 262,
-    FUNC = 263,
-    REF = 264,
-    IF = 265,
-    THEN = 266,
-    ELSE = 267,
+    REF = 260,
+    BEGIN_TOK = 261,
+    END_TOK = 262,
+    ASSIGN = 263,
+    ARRAY = 264,
+    OF = 265,
+    FUNC = 266,
+    RETURN = 267,
     WHILE = 268,
-    RETURN = 269,
-    BEGIN_TOK = 270,
-    READ = 271,
-    WRITE = 272,
-    END_TOK = 273,
-    AND = 274,
-    OR = 275,
-    XOR = 276,
-    NOT = 277,
-    DO = 278,
-    OF = 279,
-    TRUE = 280,
-    FALSE = 281,
-    INT = 282,
-    IDENT = 283,
-    STR_CST = 284,
-    OPU = 285
+    IF = 269,
+    THEN = 270,
+    ELSE = 271,
+    DO = 272,
+    READ = 273,
+    WRITE = 274,
+    AND = 275,
+    OR = 276,
+    XOR = 277,
+    NOT = 278,
+    TRUE = 279,
+    FALSE = 280,
+    EQUAL = 281,
+    NOT_EQUAL = 282,
+    LOWER_EQUAL = 283,
+    UPPER_EQUAL = 284,
+    UNIT = 285,
+    BOOL = 286,
+    INT = 287,
+    IDENT = 288,
+    STR_CST = 289,
+    OPU = 290,
+    NO_ELSE = 291
   };
 #endif
 /* Tokens.  */
 #define PROG 258
 #define VAR 259
-#define UNIT 260
-#define BOOL 261
-#define ARRAY 262
-#define FUNC 263
-#define REF 264
-#define IF 265
-#define THEN 266
-#define ELSE 267
+#define REF 260
+#define BEGIN_TOK 261
+#define END_TOK 262
+#define ASSIGN 263
+#define ARRAY 264
+#define OF 265
+#define FUNC 266
+#define RETURN 267
 #define WHILE 268
-#define RETURN 269
-#define BEGIN_TOK 270
-#define READ 271
-#define WRITE 272
-#define END_TOK 273
-#define AND 274
-#define OR 275
-#define XOR 276
-#define NOT 277
-#define DO 278
-#define OF 279
-#define TRUE 280
-#define FALSE 281
-#define INT 282
-#define IDENT 283
-#define STR_CST 284
-#define OPU 285
+#define IF 269
+#define THEN 270
+#define ELSE 271
+#define DO 272
+#define READ 273
+#define WRITE 274
+#define AND 275
+#define OR 276
+#define XOR 277
+#define NOT 278
+#define TRUE 279
+#define FALSE 280
+#define EQUAL 281
+#define NOT_EQUAL 282
+#define LOWER_EQUAL 283
+#define UPPER_EQUAL 284
+#define UNIT 285
+#define BOOL 286
+#define INT 287
+#define IDENT 288
+#define STR_CST 289
+#define OPU 290
+#define NO_ELSE 291
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 21 "src/grammar/grammar.y"
+#line 20 "src/grammar/grammar.y"
 
     struct list_t *pos;
     struct expr_val_t expr_val;
@@ -128,7 +140,7 @@ union YYSTYPE
     unsigned int a_type;
     enum operation_t operation;
 
-#line 132 "./include/grammar.h"
+#line 144 "./include/grammar.h"
 
 };
 typedef union YYSTYPE YYSTYPE;
