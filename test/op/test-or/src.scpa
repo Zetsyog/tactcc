@@ -3,12 +3,12 @@ program test
     begin
         i := true;
         j := false;
-	k := i or j;
-	write i;
+	      k := i or j;
+	      write i;
         write "\n";
         write j;
         write "\n";
-	write k;
-	write "\n";
-	write "Fin du programme\n";
+      	write k;
+      	write "\n";
+      	write "Fin du programme\n";
     end

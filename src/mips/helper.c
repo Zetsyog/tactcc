@@ -50,7 +50,7 @@ void get_sym_name(char *dest, struct symbol_t *sym) {
 	if (sym->depth > 1) {
 		dest += sprintf(dest, "d%u_", sym->depth);
 	}
-	
+
 	dest += sprintf(dest, "%s", sym->name);
 }
 
@@ -58,7 +58,7 @@ static void print_sym_name(FILE *out, struct symbol_t *sym) {
 	char name[SYM_NAME_MAX_LEN] = {0};
 	get_sym_name(name, sym);
 	fprintf(out, "%s", name);
-	
+
 }
 
 static void print_quad_label(FILE *out, struct quad_t *quad) {
