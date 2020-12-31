@@ -1,5 +1,12 @@
 # 2A Projet Compilation
 
+## Usage
+
+Use `make` to generate the executable `bin/scalpa`
+Use `make clean` to delete temporary files
+Use `make doc` to generate the doxygen html pages (in _doc/_)
+Use `make test` to run the tests.
+
 ## Requirements
 
 Some packages are needed to compile and run the tests
