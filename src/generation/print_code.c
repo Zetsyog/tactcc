@@ -166,6 +166,7 @@ void print_intermediate_code() {
 			break;
 		case OP_POP_ARG:
 			printf("pop arg");
+			print_sym_val(quad.res);
 			break;
 		case OP_PUSH_RET:
 			printf("push ret ");
@@ -174,6 +175,9 @@ void print_intermediate_code() {
 		case OP_POP_RET:
 			printf("pop ret ");
 			print_sym_val(quad.res);
+			break;
+		case OP_EXIT:
+			printf("EXIT");
 			break;
 		default:
 			printf("???");

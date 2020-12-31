@@ -54,6 +54,14 @@ void *node_shift(struct node_t **list);
 unsigned int node_length(struct node_t *list);
 
 /**
+ * @brief Removed the last element of the list
+ * 
+ * @param list 
+ * @return void* the removed element
+ */
+void *node_remove_last(struct node_t **list);
+
+/**
  * Destroy and free memory of list and all its children \n
  * If free_mem is != 0, it will call free on all the node_t::data elements
  * @param list
@@ -82,13 +90,5 @@ void *node_shift(struct node_t **list);
  * @return The length of the given list
  */
 unsigned int node_length(struct node_t *list);
-
-/**
- * Destroy and free memory of list and all its children \n
- * If free_mem is != 0, it will call free on all the node_t::data elements
- * @param list
- * @param free_mem
- */
-void node_destroy(struct node_t *list, int free_mem);
 
 #endif

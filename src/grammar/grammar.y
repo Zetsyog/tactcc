@@ -139,7 +139,11 @@ fundecl: FUNC IDENT K {
             st_put($3);
             st_unshift();
        } '(' parlist ')' ':' atomictype vardeclist M {
-            gencode(OP_POP_ARG, $3);
+            struct node_t *it = $6;
+            while(it != NULL) {
+                gencode(OP_POP_ARG, it->data);
+                it = it->next;
+            }
        } instr {
             $3->atomic_type = $9;
             $3->fun_desc = fun_desc_create($11, $6);
@@ -202,7 +206,8 @@ instr: loop { $$.next = $1.next; }
             gencode(OP_GOTO, NULL);
      }
      | RETURN {
-            $$.next = NULL;
+            $$.next = crelist(nextquad);
+            gencode(OP_GOTO, NULL);
      }
      | IDENT '(' funexprlist ')' {
             $$.next = NULL;

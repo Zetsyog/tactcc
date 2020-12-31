@@ -6,9 +6,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-static unsigned int current_arg_pos = 0;
-
 static struct node_t *declared_var = NULL;
+static int pop_arg_idx			   = 0;
+static int push_arg_idx			   = -1;
+static unsigned int current_quad   = 0;
 
 static void gen_var_decl(FILE *out, struct symbol_t *sym) {
 	char *name = malloc(SYM_NAME_MAX_LEN * sizeof(char));
@@ -17,7 +18,7 @@ static void gen_var_decl(FILE *out, struct symbol_t *sym) {
 	get_sym_name(name, sym);
 
 	while (it != NULL) {
-		if(!strcmp(it->data, name))
+		if (!strcmp(it->data, name))
 			return;
 		it = it->next;
 	}
@@ -106,17 +107,23 @@ void gen_assign(FILE *out, struct quad_t *quad) {
 }
 
 void gen_call(FILE *out, struct quad_t *quad) {
-	current_arg_pos = 0;
+	push_arg_idx = -1;
+
+	// save registers t0-2
+	mips(out, INSTR_SUB, REG, "sp", REG, "sp", IMM, 12, END);
+	mips(out, SW, REG, "t0", RAW, "8($sp)", END);
+	mips(out, SW, REG, "t1", RAW, "4($sp)", END);
+	mips(out, SW, REG, "t2", RAW, "0($sp)", END);
 
 	mips(out, JAL, QLABEL, quad->label, END);
+
+	// restore registers after jump
+	mips(out, LW, REG, "t0", RAW, "8($sp)", END);
+	mips(out, LW, REG, "t1", RAW, "4($sp)", END);
+	mips(out, LW, REG, "t2", RAW, "0($sp)", END);
+	mips(out, INSTR_ADDI, REG, "sp", REG, "sp", IMM, 12, END);
 }
 
-/**
- * @brief Stack sym value
- *
- * @param out
- * @param sym
- */
 void gen_push(FILE *out, struct symbol_t *sym) {
 	mips(out, LOAD, REG, "t0", SYM, sym, END);
 	mips(out, INSTR_SUB, REG, "sp", REG, "sp", IMM, 4, END);
@@ -124,16 +131,23 @@ void gen_push(FILE *out, struct symbol_t *sym) {
 }
 
 void gen_push_arg(FILE *out, struct quad_t *quad) {
-	if (current_arg_pos < 4) {
-		char *reg = current_arg_pos == 0
-						? "a0"
-						: current_arg_pos == 1
-							  ? "a1"
-							  : current_arg_pos == 2 ? "a2" : "a3";
+	if (push_arg_idx == -1) {
+		unsigned int i = current_quad;
+		while(tabQuad[i].op != OP_CALL) {
+			i++;
+		}
+		push_arg_idx = i - current_quad - 1;
+	}
+	if (push_arg_idx < 4) {
+		char *reg =
+			push_arg_idx == 0
+				? "a0"
+				: push_arg_idx == 1 ? "a1" : push_arg_idx == 2 ? "a2" : "a3";
 		mips(out, LOAD, REG, reg, SYM, quad->res, END);
 	} else {
+		gen_push(out, quad->res);
 	}
-	current_arg_pos++;
+	push_arg_idx--;
 }
 
 void gen_pop(FILE *out, struct symbol_t *sym) {
@@ -143,23 +157,21 @@ void gen_pop(FILE *out, struct symbol_t *sym) {
 }
 
 void gen_pop_arg(FILE *out, struct quad_t *quad) {
-	unsigned int i;
-	struct node_t *it = quad->res->fun_desc->par_sym_list;
-	struct symbol_t *s;
+	struct symbol_t *s = quad->res;
+	char *reg		   = pop_arg_idx == 0
+					? "a0"
+					: pop_arg_idx == 1 ? "a1" : pop_arg_idx == 2 ? "a2" : "a3";
 
-	for (i = 0; i < quad->res->fun_desc->par_nb; i++) {
-		s		  = it->data;
-		char *reg = i == 0 ? "a0" : i == 1 ? "a1" : i == 2 ? "a2" : "a3";
-		if (i < 4) {
-			mips(out, SW, REG, reg, SYM, s, END);
-		} else {
-			gen_pop(out, s);
-		}
-		it = it->next;
+	if (pop_arg_idx < 4) {
+		mips(out, SW, REG, reg, SYM, s, END);
+	} else {
+		gen_pop(out, s);
 	}
+	pop_arg_idx++;
 }
 
 void gen_push_ret(FILE *out, struct quad_t *quad) {
+	pop_arg_idx = 0;
 	mips(out, LOAD, REG, "v0", SYM, quad->res, END);
 }
 
@@ -290,12 +302,11 @@ void gen_quad(FILE *out, struct quad_t *quad) {
 
 void gen_mips(FILE *out) {
 	gen_st(out);
-	unsigned int i;
 	fprintf(out, "\t.text\n");
 	fprintf(out, "\t.globl main\n");
-	for (i = 0; i < nextquad; i++) {
-		gen_quad(out, &tabQuad[i]);
+	for (current_quad = 0; current_quad < nextquad; current_quad++) {
+		gen_quad(out, &tabQuad[current_quad]);
 	}
-	
+
 	node_destroy(declared_var, 1);
 }

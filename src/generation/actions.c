@@ -39,7 +39,9 @@ struct symbol_t *action_eval_par(struct expr_val_t expr) {
 	return tmp;
 }
 
-void action_call(struct symbol_t *sym, struct node_t *arg_it) {
+void action_call(struct symbol_t *sym, struct node_t *arg_list) {
+	// List of var passed to function in call
+	struct node_t *arg_it = arg_list;
 	if (sym == NULL) { // symbol not found in st
 		log_syntax_error("syntax error: undefined function %s", sym);
 	}
@@ -52,10 +54,12 @@ void action_call(struct symbol_t *sym, struct node_t *arg_it) {
 						 sym->name);
 	}
 
+	// List of declared arguments
 	struct node_t *desc_it = sym->fun_desc->par_sym_list;
 	struct symbol_t *desc, *arg;
 
 	// We know here that arg list and desc list have the same size
+	// This first while check that passed args match the function definition
 	while (arg_it != NULL) {
 		desc = desc_it->data;
 		arg	 = arg_it->data;
@@ -64,14 +68,16 @@ void action_call(struct symbol_t *sym, struct node_t *arg_it) {
 		if (desc->atomic_type != arg->atomic_type) {
 			log_syntax_error("syntax error: incompatible types");
 		}
-		// Push arg
-		gencode(OP_PUSH_ARG, arg);
 
 		desc_it = desc_it->next;
 		arg_it	= arg_it->next;
 	}
+
+	while ((arg = node_remove_last(&arg_list)) != NULL) {
+		gencode(OP_PUSH_ARG, arg);
+	}
+
 	gencode(OP_CALL, sym->fun_desc->quad);
-	node_destroy(arg_it, 0);
 }
 
 struct expr_val_t action_opb(struct expr_val_t arg1, enum operation_t op,
