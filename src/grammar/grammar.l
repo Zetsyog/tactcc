@@ -5,14 +5,23 @@
     #include "generation/defs.h"
     #include "grammar.h"
     #include "util.h"
+
+    #define YY_INPUT(buf,result,max_size)  {\
+        result = get_next_char(buf); \
+        if (result <= 0) \
+            result = YY_NULL; \
+        }
 %}
 
 integer [0-9]+
-ident [A-Za-z][A-Za-z0-9]*
+ident [A-Za-z][A-Za-z0-9'_]*
 string \"(\\.|[^"\\])*\"
 
 %x COMMENT
 %option yylineno
+
+%option nodefault
+%option noyywrap
 
 %option nounput
 %option noinput
@@ -25,6 +34,7 @@ string \"(\\.|[^"\\])*\"
 <COMMENT>.    {}
 
 [;,:().]  return(yytext[0]);
+[+\-*/<>^] return(yytext[0]);
 
 "program"  return(PROG);
 "var"      return(VAR);
@@ -51,6 +61,7 @@ string \"(\\.|[^"\\])*\"
 "not"      return(NOT);
 "true"     return(TRUE);
 "false"    return(FALSE);
+
 {string}   {
     memset(yylval.strVal, 0, SYM_NAME_MAX_LEN);
     unsigned int len = strlen(yytext);
@@ -63,7 +74,12 @@ string \"(\\.|[^"\\])*\"
     return(STR_CST);
 }
 
-"+"|"-"|"*"|"/"|"<"|"<="|">"|">="|"="|"<>"  {return yytext[0];}
+":="    return(ASSIGN);
+"=="    return(EQUAL);
+"<>"    return(NOT_EQUAL);
+"<="    return(LOWER_EQUAL);
+">="    return(UPPER_EQUAL);
+
 {ident} {
     memset(yylval.strVal, 0, SYM_NAME_MAX_LEN);
     strncpy(yylval.strVal, yytext, SYM_NAME_MAX_LEN);
@@ -74,4 +90,6 @@ string \"(\\.|[^"\\])*\"
     return(INT);
 }
 [[:space:]]+
+
+.   return(yytext[0]);
 %%

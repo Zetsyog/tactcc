@@ -4,6 +4,7 @@
 # Build files
 *.o
 build/*
+include/grammar.h
 
 # Executable files
 bin/*
@@ -20,4 +21,5 @@ bin/*
 # Doc files
 doc/
 
+# Other
 .DS_Store

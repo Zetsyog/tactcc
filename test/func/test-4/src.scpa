@@ -1,0 +1,31 @@
+program test
+    var a, b: int;
+    var c: bool
+    function read_val(): int
+        var i: int
+        begin
+            read i;
+            return i;
+        end;
+    function comp_assign(a: int, b: int): bool
+        var i: int;
+        var c: bool
+        begin
+            i := a;
+            c := false;
+            if a < b then
+                begin
+                    c := true;
+                    i := i + 1;
+                end;
+            write i;
+            write "\n";
+            return c;
+        end;
+    begin
+        a := read_val();
+        c := comp_assign(a, 50);
+        write c;
+        write "\n";
+        write "FIN\n";
+    end

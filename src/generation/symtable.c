@@ -77,15 +77,17 @@ struct symbol_t *st_put(struct symbol_t *value) {
 		if (!strcmp(sym->name, value->name)) { // var already declared
 			if (get_sym_depth(sym) ==
 				block_stack_size) { // already declared in same scope
-				log_error(
+				log_syntax_error(
 					"syntax error : var %s already declared in this scope",
 					value->name);
-			} else {
+			} else { // Redfine var in upper scope
 				value->parent = sym;
 				break;
 			}
 		} else {
-			// TODO: fix this kind of error
+			// Tmp fix in case of collision : increment hash until we find free
+			// space
+			// Not really performance friendly
 			hash++;
 			if (hash >= st->size) {
 				log_error("st full");
@@ -105,6 +107,7 @@ struct symbol_t *st_put(struct symbol_t *value) {
 	st->list		= node_unshift(st->list, value);
 	st->table[hash] = value;
 	st->usage++;
+	
 	// add the symbol in the symbol stack
 	if (sym_stack_root == NULL) {
 		sym_stack_root = node_create(value);

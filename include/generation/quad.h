@@ -35,6 +35,9 @@ enum operation_t {
 	OP_RETURN	= 21, /** return from function */
 	OP_PUSH_ARG = 22,
 	OP_POP_ARG	= 23,
+	OP_PUSH_RET = 24,
+	OP_POP_RET  = 25,
+	OP_EXIT     = 26
 };
 
 struct quad_t {
