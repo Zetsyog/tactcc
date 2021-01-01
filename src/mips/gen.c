@@ -189,7 +189,6 @@ void gen_quad(FILE *out, struct quad_t *quad) {
 	if (quad->print_label) {
 		mips(out, TAB, QLABEL, quad, COLON, END);
 	}
-
 	switch (quad->op) {
 	case OP_ASSIGNMENT:
 		gen_assign(out, quad);
@@ -261,6 +260,14 @@ void gen_quad(FILE *out, struct quad_t *quad) {
 		mips(out, LOAD, REG, "t1", SYM, quad->arg2, END);
 		mips(out, INSTR_DIV, REG, "t2", REG, "t0", REG, "t1", END);
 		mips(out, SW, REG, "t2", SYM, quad->res, END);
+		break;
+	case OP_POWER :
+		mips(out, LOAD, REG, "t0", SYM, quad->arg1, END);
+		mips(out, INSTR_MULT, REG, "t1", REG, "t0", REG, "t0", END);
+		for(int i = 1 ; i < quad->arg2->int_val-1; i++) {
+			mips(out, INSTR_MULT, REG, "t1", REG, "t1", REG, "t0", END);
+			mips(out, SW, REG, "t1", SYM, quad->res, END);
+		}
 		break;
 	case OP_AND:
 		mips(out, LOAD, REG, "t0", SYM, quad->arg1, END);

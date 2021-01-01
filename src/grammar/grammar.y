@@ -126,7 +126,7 @@ rangelist: INT '.' '.' INT
          | INT '.''.' INT ',' rangelist
          ;
 
-fundecllist: /*epsilon*/              { $$ = NULL; }
+fundecllist: /*epsilon*/             { $$ = NULL; }
            | fundecl ';' fundecllist { }
            ;
 
@@ -178,9 +178,9 @@ loop: WHILE M expr DO M instr {
         complete($3.true , $5);
         complete($6.next , $2);
         $$.next=$3.false;
-        int* value = malloc(sizeof(int*));
+        /* int* value = malloc(sizeof(int *));
         *value = $2;
-        gencode(OP_GOTO, value);
+        gencode(OP_GOTO, value); */
     }
 
     | IF expr THEN M instr %prec NO_ELSE {
@@ -193,7 +193,7 @@ loop: WHILE M expr DO M instr {
             /* complete($2.true , $4);
             complete($2.false , $7);
             $$.next = concat($5.next , $8.next);
-            $$.next = concat($$.next , $7.next);
+            $$.next = concat($$.next , $7);
             $$.next = concat($$.next , crelist(nextquad));
             gencode(OP_GOTO , NULL); */
     }

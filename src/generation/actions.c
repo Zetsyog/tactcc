@@ -132,7 +132,7 @@ struct expr_val_t action_opb(struct expr_val_t arg1, enum operation_t op,
 			ret.true   = concat(arg1.true, arg2.true);
 			ret.false	 = arg2.false;
 			ret.a_type = A_BOOL;
-		}
+		} 
 		// TODO: xor
 	}
 	return ret;
