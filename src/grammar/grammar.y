@@ -160,12 +160,13 @@ fundecl: FUNC IDENT K {
             complete($13.next, nextquad);
             gencode(OP_RETURN, NULL);
             st_shift();
-            node_shift(&garbage);
+            gb_set(GB_PARLIST, NULL);
+            gb_set(GB_VARDECLIST, NULL);
        }
        ;
 
 parlist: /*epsilon*/     { $$ = NULL; }
-       | par             { $$ = node_create($1); garbage = node_unshift(garbage, $$); }
+       | par             { $$ = node_create($1); gb_set(GB_PARLIST, $$); }
        | parlist ',' par {
            node_append($1, $3);
            $$ = $1;
@@ -220,6 +221,7 @@ instr: loop { $$.next = $1.next; }
             struct symbol_t *sym = st_get($1);
 
             action_call(sym, $3);
+            gb_set(GB_EXPRLIST, NULL);
      }
      | IDENT '(' ')' {
             $$.next = NULL;
@@ -258,6 +260,7 @@ instr: loop { $$.next = $1.next; }
 
 funexprlist: expr {
             $$ = node_create(action_eval_par($1));
+            gb_set(GB_EXPRLIST, $$);
         }
         | funexprlist ',' expr {
             node_append($1, action_eval_par($3));

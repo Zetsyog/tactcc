@@ -8,6 +8,12 @@
 #include "logger.h"
 #include "util/node.h"
 
+#define GB_FUNDECLLIST 0
+#define GB_VARDECLIST 1
+#define GB_IDENTLIST 2
+#define GB_PARLIST 3
+#define GB_EXPRLIST 4
+
 /**
  * @brief Check macro for memory allocation
  * On error, it writes in stderr and then exit the program
@@ -23,7 +29,6 @@
 
 #endif
 
-extern struct node_t *garbage;
 /**
  * @brief Get the next char object from yyin
  * Read a char and put it in b
@@ -47,6 +52,14 @@ void print_scanner_current_line();
  *
  */
 void destroy_scanner();
+
+/**
+ * @brief Set memory to free for given type
+ *
+ * @param id
+ * @param list
+ */
+void gb_set(int id, struct node_t *list);
 
 /**
  * @brief Free allocated memory and call exit()
