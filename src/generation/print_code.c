@@ -161,19 +161,19 @@ void print_intermediate_code() {
 			}
 			break;
 		case OP_PUSH_ARG:
-			printf("push arg ");
+			printf("push_arg ");
 			print_sym_val(quad.res);
 			break;
 		case OP_POP_ARG:
-			printf("pop arg");
+			printf("pop_arg ");
 			print_sym_val(quad.res);
 			break;
 		case OP_PUSH_RET:
-			printf("push ret ");
+			printf("push_ret ");
 			print_sym_val(quad.res);
 			break;
 		case OP_POP_RET:
-			printf("pop ret ");
+			printf("pop_ret ");
 			print_sym_val(quad.res);
 			break;
 		case OP_EXIT:

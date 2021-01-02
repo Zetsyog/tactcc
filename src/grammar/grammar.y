@@ -143,24 +143,26 @@ fundecl: FUNC IDENT K {
             $3 = sym_create($2, SYM_FUN, 0);
             st_put($3);
             st_unshift();
-       } '(' parlist ')' ':' atomictype vardeclist M {
+       } '(' parlist ')' ':' atomictype {
+            $3->atomic_type = $9;
+            $3->fun_desc = fun_desc_create(0, $6);
+            struct node_t *it = $6;
+            while (it != NULL) {
+                ((struct symbol_t *)it->data)->str_val = $3->name;
+                it = it->next;
+            }
+            node_shift(&garbage);
+       } vardeclist M {
             struct node_t *it = $6;
             while(it != NULL) {
                 gencode(OP_POP_ARG, it->data);
                 it = it->next;
             }
        } instr {
-            $3->atomic_type = $9;
-            $3->fun_desc = fun_desc_create($11, $6);
-            struct node_t *it = $6;
-            while (it != NULL) {
-                ((struct symbol_t *)it->data)->str_val = $3->name;
-                it = it->next;
-            }
-            complete($13.next, nextquad);
+            $3->fun_desc->quad = &tabQuad[$12];
+            complete($14.next, nextquad);
             gencode(OP_RETURN, NULL);
             st_shift();
-            node_shift(&garbage);
        }
        ;
 
@@ -206,14 +208,14 @@ instr: loop { $$.next = $1.next; }
             $$.next = action_assign($1, $3);
      }
      | RETURN expr {
+            $$.next = NULL;
             struct symbol_t *sym = action_eval_par($2);
             gencode(OP_PUSH_RET, sym);
-            $$.next = crelist(nextquad);
-            gencode(OP_GOTO, NULL);
+            gencode(OP_RETURN, NULL);
      }
      | RETURN {
-            $$.next = crelist(nextquad);
-            gencode(OP_GOTO, NULL);
+            $$.next = NULL;
+            gencode(OP_RETURN, NULL);
      }
      | IDENT '(' funexprlist ')' {
             $$.next = NULL;

@@ -10,3 +10,4 @@ test_compil_exec "test-sup" test_diff
 test_compil_exec "test-sup-eq" test_diff
 test_compil_exec "test-eq" test_diff
 test_compil_exec "test-diff" test_diff
+test_compil_exec "test-pow" test_diff
