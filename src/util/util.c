@@ -3,17 +3,19 @@
 #include <string.h>
 #include <stdlib.h>
 
+
 extern void yylex_destroy();
 
-struct node_t *garbage = NULL;
+static struct node_t *garbage[GB_EXPRLIST + 1];
+
+void gb_set(int id, struct node_t *list) {
+	garbage[id] = list;
+}
 
 void clean_exit(int exitcode) {
-	struct node_t *it = garbage;
-	while(it != NULL) {
-		node_destroy(it->data, 0);
-		it = it->next;
+	for(int id = 0; id<GB_EXPRLIST + 1; id++){
+		node_destroy(garbage[id], 0);
 	}
-	node_destroy(garbage, 0);
 
 	st_destroy();
 	yylex_destroy();
