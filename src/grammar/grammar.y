@@ -30,6 +30,10 @@ void yyerror(const char *s);
     struct symbol_t *sym;
     unsigned int a_type;
     enum operation_t operation;
+    struct {
+        struct list_t *next;
+        unsigned int quad;
+    } marker_n;
 }
 
 %token PROG VAR REF BEGIN_TOK END_TOK ASSIGN
@@ -47,7 +51,8 @@ void yyerror(const char *s);
 %type <sym> lvalue fundecl par K
 %type <a_type> varsdecl atomictype typename arraytype
 %type <list> fundecllist vardeclist identlist parlist exprlist funexprlist
-%type <quad> M N
+%type <quad> M
+%type <marker_n> N
 
 %left XOR OR '+' '-'
 %left AND '*' '/'
@@ -178,7 +183,7 @@ loop: WHILE M expr DO M instr {
         complete($3.true , $5);
         complete($6.next , $2);
         $$.next=$3.false;
-        gencode(OP_GOTO, $2);
+        gencode(OP_GOTO, &tabQuad[$2]);
     }
 
     | IF expr THEN M instr %prec NO_ELSE {
@@ -188,12 +193,12 @@ loop: WHILE M expr DO M instr {
         gencode(OP_GOTO, NULL);
     }
     | IF expr THEN M instr ELSE N instr {
-            /* complete($2.true , $4);
-            complete($2.false , $7);
+            complete($2.true , $4);
+            complete($2.false , $7.quad);
             $$.next = concat($5.next , $8.next);
-            $$.next = concat($$.next , $7);
+            $$.next = concat($$.next , $7.next);
             $$.next = concat($$.next , crelist(nextquad));
-            gencode(OP_GOTO , NULL); */
+            gencode(OP_GOTO, NULL); 
     }
     ;
 instr: loop { $$.next = $1.next; }
@@ -273,9 +278,9 @@ M: /* empty */  { $$ = nextquad; }
  ;
 
 N:  /* empty */  {
-    /* $$ = crelist(nextquad);
+    $$.next = crelist(nextquad);
     gencode(OP_GOTO,NULL);
-    $$ = nextquad; */
+    $$.quad = nextquad;
  }
  ;
 

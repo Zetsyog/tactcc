@@ -3,7 +3,9 @@ program test
     begin
         b2 := 1;
         while b2 == 1 do
+        begin
             write b2 ;
             b2 := 2;
+        end;
         write "\n";
     end

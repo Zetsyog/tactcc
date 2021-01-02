@@ -1,0 +1,16 @@
+program test
+    var b1, b2: bool
+    begin
+        b1 := false;
+        b2 := true;
+
+        if b1 then
+            write b1
+        else
+            write "else\n";
+
+        if b2 then
+            write b2;
+
+        write "\n";
+    end
