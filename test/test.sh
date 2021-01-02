@@ -6,15 +6,18 @@ export LOG_LEVEL=100
 rm test.log
 
 title "Lexical analysis tests "
-. ./lexical/test.sh
+. ./lexical/run_tests.sh
 
 title "MIPS execution tests"
-. ./mips/test.sh
+. ./mips/run_tests.sh
 
 title "Func tests"
-. ./func/test.sh
+. ./func/run_tests.sh
 
 title "Operations tests"
-. ./op/test.sh
+. ./op/run_tests.sh
+
+title "Valgrind tests"
+. ./memory/run_tests.sh
 
 show_result

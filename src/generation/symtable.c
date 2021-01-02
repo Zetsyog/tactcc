@@ -107,7 +107,6 @@ struct symbol_t *st_put(struct symbol_t *value) {
 	st->list		= node_unshift(st->list, value);
 	st->table[hash] = value;
 	st->usage++;
-
 	// add the symbol in the symbol stack
 	if (sym_stack_root == NULL) {
 		sym_stack_root = node_create(value);

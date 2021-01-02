@@ -133,7 +133,7 @@ fundecllist: /*epsilon*/             { $$ = NULL; }
 K: /* epsilon */ {
  }
  ;
-
+ 
 fundecl: FUNC IDENT K {
             $3 = sym_create($2, SYM_FUN, 0);
             st_put($3);
@@ -178,9 +178,7 @@ loop: WHILE M expr DO M instr {
         complete($3.true , $5);
         complete($6.next , $2);
         $$.next=$3.false;
-        /* int* value = malloc(sizeof(int *));
-        *value = $2;
-        gencode(OP_GOTO, value); */
+        gencode(OP_GOTO, $2);
     }
 
     | IF expr THEN M instr %prec NO_ELSE {
@@ -221,7 +219,6 @@ instr: loop { $$.next = $1.next; }
      | IDENT '(' ')' {
             $$.next = NULL;
             struct symbol_t *sym = st_get($1);
-
             action_call(sym, NULL);
      }
      | BEGIN_TOK sequence END_TOK { $$.next = $2.next; }
@@ -248,7 +245,7 @@ instr: loop { $$.next = $1.next; }
         } else if($2.a_type == A_INT || $2.a_type == A_STR) {
             gencode(OP_WRITE, $2.ptr);
         } else {
-            log_syntax_error("syntax error: invalid write of type %s",
+            log_syntax_error("syntax error: invalid write of type %s", 
                     atomic_type_str[$2.a_type]);
         }
      }
@@ -332,7 +329,6 @@ expr: INT {
     | op { $$ = $1; }
     | IDENT '(' funexprlist ')' {
         struct symbol_t *sym = st_get($1);
-
         action_call(sym, $3);
 
         struct symbol_t *ret = newtemp(SYM_VAR, sym->atomic_type);
@@ -350,7 +346,6 @@ expr: INT {
     | IDENT '(' ')' {
         struct symbol_t *sym = st_get($1);
         action_call(sym, NULL);
-
         struct symbol_t *ret = newtemp(SYM_VAR, sym->atomic_type);
         gencode(OP_POP_RET, ret);
         if(ret->atomic_type == A_BOOL) {

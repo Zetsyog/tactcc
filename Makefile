@@ -3,7 +3,7 @@ YACC ?= yacc
 LEX  ?= lex
 
 CFLAGS    ?= -Wall -Wextra -g
-LDLIBS    ?=
+LDLIBS    ?= 
 YACCFLAGS ?= -v
 
 UNAME_S := $(shell uname -s)
