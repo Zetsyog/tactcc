@@ -60,11 +60,11 @@ void log_debug(const char *message, ...);
 /**
  * @brief Print a syntax error in stderr
  * Calls first print_scanner_current_line() and then write the error
- * 
+ *
  * @see print_scanner_current_line()
- * 
- * @param message 
- * @param ... 
+ *
+ * @param message
+ * @param ...
  */
 void log_syntax_error(const char *message, ...);
 

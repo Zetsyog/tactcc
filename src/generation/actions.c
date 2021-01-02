@@ -126,8 +126,14 @@ struct expr_val_t action_opb(struct expr_val_t arg1, enum operation_t op,
 			ret.false  = concat(arg1.false, arg2.false);
 			ret.true   = arg2.true;
 			ret.a_type = A_BOOL;
-		}
-		// TODO: or & xor
+		} else if (op == OP_OR) {
+			complete(arg1.false, marker);
+			ret.ptr		 = NULL;
+			ret.true   = concat(arg1.true, arg2.true);
+			ret.false	 = arg2.false;
+			ret.a_type = A_BOOL;
+		} 
+		// TODO: xor
 	}
 	return ret;
 }

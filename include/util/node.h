@@ -55,8 +55,8 @@ unsigned int node_length(struct node_t *list);
 
 /**
  * @brief Removed the last element of the list
- * 
- * @param list 
+ *
+ * @param list
  * @return void* the removed element
  */
 void *node_remove_last(struct node_t **list);

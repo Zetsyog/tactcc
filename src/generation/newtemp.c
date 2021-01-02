@@ -36,7 +36,7 @@ struct symbol_t *newtemp(enum sym_type_t sym_type,
 					  atomic_type_str[atomic_type]);
 		}
 	} else if (sym_type == SYM_VAR) {
-		
+
 	} else {
 		log_syntax_error("syntax error: unsupported tmp var type");
 	}

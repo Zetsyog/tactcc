@@ -52,7 +52,7 @@ struct fun_desc_t *fun_desc_create(unsigned int quad,
 
 void fun_desc_destroy(struct fun_desc_t *desc) {
 	if(desc == NULL)
-		return; 
+		return;
 	node_destroy(desc->par_sym_list, 0);
 	free(desc);
 }

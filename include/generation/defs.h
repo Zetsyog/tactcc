@@ -67,78 +67,106 @@ int gencode(uint op, ...);
 
 /**
  * @brief Perform function call action
+<<<<<<< HEAD
+ *
+ * @param func
+ * @param expr_list
+=======
  * 
  * @param func 
  * @param expr_list 
+>>>>>>> 4581b455d87ada067c72ee6a28249812a420b1e9
  */
 void action_call(struct symbol_t *func, struct node_t *expr_list);
 
 /**
  * @brief evaluate an expression and save it in a tmp symbol
+<<<<<<< HEAD
+ *
+ * @param expr
+ * @return struct symbol_t*
+=======
  * 
  * @param expr 
  * @return struct symbol_t* 
+>>>>>>> 4581b455d87ada067c72ee6a28249812a420b1e9
  */
 struct symbol_t *action_eval_par(struct expr_val_t expr);
 
 /**
  * @brief Perform assignment action
+<<<<<<< HEAD
+ *
+ * @param sym
+ * @param expr
+ * @return struct list_t*
+=======
  * 
  * @param sym 
  * @param expr 
  * @return struct list_t* 
+>>>>>>> 4581b455d87ada067c72ee6a28249812a420b1e9
  */
 struct list_t *action_assign(struct symbol_t *sym, struct expr_val_t expr);
 
 /**
  * @brief Perform binary operation between arg1 and arg2
+<<<<<<< HEAD
+ *
+ * @param arg1
+ * @param op
+ * @param arg2
+ * @param marker index of the first quad of arg2
+ * @return struct expr_val_t
+=======
  * 
  * @param arg1 
  * @param op 
  * @param arg2 
  * @param marker index of the first quad of arg2
  * @return struct expr_val_t 
+>>>>>>> 4581b455d87ada067c72ee6a28249812a420b1e9
  */
 struct expr_val_t action_opb(struct expr_val_t arg1, enum operation_t op,
 							 struct expr_val_t arg2, unsigned int marker);
 
 /**
  * @brief Create a new linked list of quad index
- * 
- * @param pos 
- * @return struct list_t* 
+ *
+ * @param pos
+ * @return struct list_t*
  */
 struct list_t *crelist(int pos);
 
 /**
  * @brief Concat two lists
- * 
- * @param list1 
- * @param list2 
- * @return struct list_t* 
+ *
+ * @param list1
+ * @param list2
+ * @return struct list_t*
  */
 struct list_t *concat(struct list_t *list1, struct list_t *list2);
 
 /**
  * @brief Create a new temporary symbol
- * 
- * @param ... 
- * @return struct symbol_t* 
+ *
+ * @param ...
+ * @return struct symbol_t*
  */
 struct symbol_t *newtemp(enum sym_type_t, enum atomic_type_t, ...);
 
 /**
  * @brief Complete a list of quads with the given quad index
- * 
- * @param list 
- * @param pos 
+ *
+ * @param list
+ * @param pos
  */
 void complete(struct list_t *list, unsigned int pos);
 
 /**
  * @brief Destroyed a linked list
- * 
- * @param list 
+ *
+ * @param list
  */
 void destroy_list(struct list_t *list);
 

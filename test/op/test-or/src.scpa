@@ -1,0 +1,14 @@
+program test
+    var i,j,k: bool
+    begin
+        i := true;
+        j := false;
+	      k := i or j;
+	      write i;
+        write "\n";
+        write j;
+        write "\n";
+      	write k;
+      	write "\n";
+      	write "Fin du programme\n";
+    end

@@ -30,6 +30,10 @@ void yyerror(const char *s);
     struct symbol_t *sym;
     unsigned int a_type;
     enum operation_t operation;
+    struct {
+        struct list_t *next;
+        unsigned int quad;
+    } marker_n;
 }
 
 %token PROG VAR REF BEGIN_TOK END_TOK ASSIGN
@@ -47,7 +51,8 @@ void yyerror(const char *s);
 %type <sym> lvalue fundecl par K
 %type <a_type> varsdecl atomictype typename arraytype
 %type <list> fundecllist vardeclist identlist parlist exprlist funexprlist
-%type <quad> M N
+%type <quad> M
+%type <marker_n> N
 
 %left XOR OR '+' '-'
 %left AND '*' '/'
@@ -126,7 +131,7 @@ rangelist: INT '.' '.' INT
          | INT '.''.' INT ',' rangelist
          ;
 
-fundecllist: /*epsilon*/              { $$ = NULL; }
+fundecllist: /*epsilon*/             { $$ = NULL; }
            | fundecl ';' fundecllist { }
            ;
 
@@ -134,8 +139,8 @@ K: /* epsilon */ {
  }
  ;
  
-fundecl: FUNC IDENT K {  
-            $3 = sym_create($2, SYM_FUN, 0); 
+fundecl: FUNC IDENT K {
+            $3 = sym_create($2, SYM_FUN, 0);
             st_put($3);
             st_unshift();
        } '(' parlist ')' ':' atomictype vardeclist M {
@@ -178,8 +183,9 @@ loop: WHILE M expr DO M instr {
         complete($3.true , $5);
         complete($6.next , $2);
         $$.next=$3.false;
-        gencode(OP_GOTO,$2);
+        gencode(OP_GOTO, &tabQuad[$2]);
     }
+
     | IF expr THEN M instr %prec NO_ELSE {
         complete($2.true, $4);
         $$.next = concat($2.false, $5.next);
@@ -187,14 +193,14 @@ loop: WHILE M expr DO M instr {
         gencode(OP_GOTO, NULL);
     }
     | IF expr THEN M instr ELSE N instr {
-            /* complete($2.true , $4);
-            complete($2.false , $7);
+            complete($2.true , $4);
+            complete($2.false , $7.quad);
             $$.next = concat($5.next , $8.next);
             $$.next = concat($$.next , $7.next);
             $$.next = concat($$.next , crelist(nextquad));
-            gencode(OP_GOTO , NULL); */
+            gencode(OP_GOTO, NULL); 
     }
-
+    ;
 instr: loop { $$.next = $1.next; }
      | lvalue ASSIGN expr {
             $$.next = action_assign($1, $3);
@@ -212,24 +218,23 @@ instr: loop { $$.next = $1.next; }
      | IDENT '(' funexprlist ')' {
             $$.next = NULL;
             struct symbol_t *sym = st_get($1);
-            
+
             action_call(sym, $3);
      }
      | IDENT '(' ')' {
             $$.next = NULL;
             struct symbol_t *sym = st_get($1);
-            
             action_call(sym, NULL);
      }
      | BEGIN_TOK sequence END_TOK { $$.next = $2.next; }
      | BEGIN_TOK END_TOK { $$.next = NULL; }
-     | READ lvalue { 
-            $$.next = NULL; 
+     | READ lvalue {
+            $$.next = NULL;
             if($2->atomic_type != A_INT) {
-                log_syntax_error("syntax error: invalid write of type %s", 
+                log_syntax_error("syntax error: invalid write of type %s",
                         atomic_type_str[$2->atomic_type]);
             }
-            gencode(OP_READ, $2); 
+            gencode(OP_READ, $2);
      }
      | WRITE expr {
         $$.next = NULL;
@@ -273,9 +278,9 @@ M: /* empty */  { $$ = nextquad; }
  ;
 
 N:  /* empty */  {
-/*  $$.next = crelist(nextquad);
+    $$.next = crelist(nextquad);
     gencode(OP_GOTO,NULL);
-    $$ = nextquad; */
+    $$.quad = nextquad;
  }
  ;
 
@@ -329,7 +334,6 @@ expr: INT {
     | op { $$ = $1; }
     | IDENT '(' funexprlist ')' {
         struct symbol_t *sym = st_get($1);
-        
         action_call(sym, $3);
 
         struct symbol_t *ret = newtemp(SYM_VAR, sym->atomic_type);
@@ -347,7 +351,6 @@ expr: INT {
     | IDENT '(' ')' {
         struct symbol_t *sym = st_get($1);
         action_call(sym, NULL);
-        
         struct symbol_t *ret = newtemp(SYM_VAR, sym->atomic_type);
         gencode(OP_POP_RET, ret);
         if(ret->atomic_type == A_BOOL) {
@@ -393,14 +396,14 @@ op: expr '+' M expr { $$ = action_opb($1, OP_ADD, $4, $3); }
    | expr AND M expr { $$ = action_opb($1, OP_AND, $4, $3); }
    | expr OR M expr { $$ = action_opb($1, OP_OR, $4, $3); }
    | expr XOR M expr { $$ = action_opb($1, OP_XOR, $4, $3); }
-   | '-' expr %prec OPU { 
+   | '-' expr %prec OPU {
         if($2.ptr->atomic_type == A_INT) {
             $$.ptr = newtemp(SYM_VAR, A_INT);
             $$.true = NULL;
             $$.false = NULL;
             $$.a_type = A_INT;
             gencode(OP_NEGATE, $2.ptr, $$.ptr);
-        } 
+        }
    }
    | NOT expr {
         if($2.ptr->atomic_type == A_BOOL) {

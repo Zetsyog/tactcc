@@ -102,9 +102,9 @@ void mips(FILE *out, ...);
 
 /**
  * @brief Get the name of a symbol
- * 
+ *
  * @param dest The string where to write the name
- * @param sym 
+ * @param sym
  */
 void get_sym_name(char *dest, struct symbol_t *sym);
 

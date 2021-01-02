@@ -66,7 +66,6 @@ void log_error(const char *message, ...) {
 
 void log_syntax_error(const char *message, ...) {
 	syntax_error = 1;
-	
 	can_log(LOG_LEVEL_ERROR);
 	fprintf(stderr, "\n");
 	print_scanner_current_line();
