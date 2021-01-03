@@ -7,22 +7,23 @@
 
 struct symbol_t *newtemp(enum sym_type_t sym_type,
 						 enum atomic_type_t atomic_type, ...) {
-	static unsigned int nextTmp = 0;
+	unsigned int nextTmp;
 	char name[SYM_NAME_MAX_LEN] = {0};
 	va_list args;
 	va_start(args, atomic_type);
 	int n;
 	do {
+		nextTmp = st_next_tmp_id();
 		if(sym_type == SYM_CST) {
 			n = snprintf(name, SYM_NAME_MAX_LEN - 1, "%s%u", CONST_PREFIX, nextTmp);
 		} else {
 			n = snprintf(name, SYM_NAME_MAX_LEN - 1, "%s%u", TMP_VAR_PREFIX, nextTmp);
 		}
 		name[n] = 0;
-		nextTmp++;
 	} while (st_get(name) != NULL);
 
 	struct symbol_t *sym = sym_create(name, sym_type, atomic_type);
+	sym->is_tmp = 1;
 	if (sym_type == SYM_CST) {
 		if (atomic_type == A_INT || atomic_type == A_BOOL) {
 			sym->int_val = va_arg(args, int);

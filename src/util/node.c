@@ -50,6 +50,13 @@ struct node_t *node_unshift(struct node_t *list, void *data) {
 	return tmp;
 }
 
+struct node_t *node_unshift_int(struct node_t *list, int data){
+	struct node_t *tmp = node_create_int(data);
+	tmp->next		   = list;
+	return tmp;
+}
+
+
 void *node_shift(struct node_t **list) {
 	if (list == NULL || *list == NULL) {
 		return NULL;

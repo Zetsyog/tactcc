@@ -22,7 +22,6 @@ extern char *sym_type_str[];
 /**
  * Atomic types availables in Scalpa
  */
-// TODO: move in a more appropriate location
 enum atomic_type_t { A_UNIT = 0, A_INT = 1, A_BOOL = 2, A_STR = 3 };
 extern char *atomic_type_str[];
 
@@ -31,8 +30,9 @@ extern char *atomic_type_str[];
  */
 struct fun_desc_t {
 	unsigned int par_nb; /** Number of parameters */
-	struct quad_t *quad;
-	struct node_t *par_sym_list;
+	struct quad_t *quad; /** First quad of function */
+	struct node_t *par_sym_list; /** List of parameters */
+	struct node_t *sym_list; /** List of all symbols */
 };
 
 struct symbol_t {
@@ -49,6 +49,7 @@ struct symbol_t {
 	unsigned int depth;
 	enum sym_type_t sym_type;		/** Symbol type */
 	enum atomic_type_t atomic_type; /** Atomic type */
+	unsigned int is_tmp;
 	union {
 		/**
 		 * @brief Int value of the symbol

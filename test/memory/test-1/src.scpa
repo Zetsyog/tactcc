@@ -4,7 +4,7 @@ de la mémoire lors d'une mauvaise syntaxe dans la déclaration d'une fonction *
 program test
     var i,j: int;
     var b1, b2, b3: bool
-    function f(a: int, b: bool): int;
+    function f(a: int, b: bool): int;<--syntax error
         begin
             if(b) then
                 write a;

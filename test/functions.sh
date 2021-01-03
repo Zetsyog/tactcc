@@ -125,9 +125,14 @@ test_compil_exec_in() {
         coloredEcho "OK" green
     fi
 
-    echo "spim -file $ASM_FILE > $OUT" >>$LOG
+    echo "" >>$LOG
+
     printf "Exec test/$ASM_FILE "
-    $2 | spim -file $ASM_FILE | tail -n +6 >$OUT
+    echo "$2 | spim -file $ASM_FILE 2>&1 > $OUT" >>$LOG
+    $2 | spim -file $ASM_FILE 2>&1 | tail -n +6 >$OUT
+
+    echo "#### Output" >> $LOG
+    cat $OUT >> $LOG
 
     echo "" >>$LOG
     echo "#### Comp" >>$LOG

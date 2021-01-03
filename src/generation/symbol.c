@@ -46,13 +46,16 @@ struct fun_desc_t *fun_desc_create(unsigned int quad,
 	desc->quad		   = tabQuad + quad;
 	desc->par_nb	   = node_length(par_sym_list);
 	desc->par_sym_list = par_sym_list;
+	desc->sym_list	   = NULL;
 
 	return desc;
 }
 
 void fun_desc_destroy(struct fun_desc_t *desc) {
-	if(desc == NULL)
+	if (desc == NULL)
 		return;
 	node_destroy(desc->par_sym_list, 0);
+	if (desc->sym_list != NULL)
+		node_destroy(desc->sym_list, 0);
 	free(desc);
 }

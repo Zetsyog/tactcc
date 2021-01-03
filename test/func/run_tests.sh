@@ -4,3 +4,5 @@ test_compil_exec "test-1" test_diff
 test_compil_exec "test-2" test_diff
 test_compil_exec "test-3" test_diff
 test_compil_exec_in_file "test-4" test_diff
+test_compil_exec_in_file "test-5" test_diff
+test_compil_exec_in_file "pow" test_diff

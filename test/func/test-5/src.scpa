@@ -1,0 +1,14 @@
+(* Test recursive function (not working) *)
+program test
+    var n: int
+    function fact(n: int): int
+        begin
+            if(n == 0) then
+                return 1;
+            return n * fact(n - 1);
+        end;
+    begin
+        read n;
+        write fact(n);
+        write "\nFIN\n";
+    end

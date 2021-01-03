@@ -40,9 +40,10 @@ struct symtable_t *st_create(unsigned int size) {
 		free(st);
 		return NULL;
 	}
-	st->size  = size;
-	st->usage = 0;
-	st->list  = NULL;
+	st->size	 = size;
+	st->usage	 = 0;
+	st->list	 = NULL;
+	st->next_tmp = NULL;
 	return st;
 }
 
@@ -98,20 +99,22 @@ struct symbol_t *st_put(struct symbol_t *value) {
 
 	// Getting here means the key doesn't already exists
 
-	// Add the element at the beginning of the linked list
-	// entry->next		= st->list;
-	// st->list		= entry;
-
 	value->depth = block_stack_size;
+
 	// add the symbol in the list of all symbols
 	st->list		= node_unshift(st->list, value);
+
+	// insert symbol in hashtable
 	st->table[hash] = value;
+
+	// increase table usage number
 	st->usage++;
+
 	// add the symbol in the symbol stack
-	if (sym_stack_root == NULL) {
+	if (sym_stack_root == NULL) { // if sym stack empty, create one
 		sym_stack_root = node_create(value);
 		sym_stack	   = sym_stack_root;
-	} else {
+	} else { // append at the end
 		sym_stack = node_append(sym_stack_root, value);
 	}
 
@@ -122,27 +125,46 @@ struct symbol_t *st_put(struct symbol_t *value) {
 }
 
 void st_unshift() {
-	cur_block = node_unshift(cur_block, sym_stack);
+	cur_block	 = node_unshift(cur_block, sym_stack);
+	st->next_tmp = node_unshift_int(st->next_tmp, 0);
 	block_stack_size++;
 }
 
-void st_shift() {
+struct node_t *st_shift() {
 	// shift all symbols from this block
 	struct symbol_t *sym;
 	struct node_t *it = node_shift(&cur_block);
 	sym_stack		  = it;
 	it				  = it->next;
+
 	while (it != NULL) {
-		sym				   = it->data;
+		sym = it->data;
+
+		// Replace all symbols declared in this block by its parent
 		unsigned long hash = st_hash(sym);
 		st->table[hash]	   = sym->parent;
-		it				   = it->next;
+
+		// Iterate
+		it = it->next;
 	}
-	node_destroy(sym_stack->next, 0);
+
+	// remove all entries of this block in the stack
+	// node_destroy(sym_stack->next, 0);
+	struct node_t *ret = sym_stack->next;
 	sym_stack->next = NULL;
 	if (block_stack_size > 0) {
 		block_stack_size--;
 	}
+
+	free(node_shift(&st->next_tmp));
+
+	return ret;
+}
+
+unsigned int st_next_tmp_id() {
+	unsigned int ret = *((unsigned int *)st->next_tmp->data);
+	*((unsigned int *)st->next_tmp->data) += 1;
+	return ret;
 }
 
 void st_destroy() {
@@ -156,6 +178,7 @@ void st_destroy() {
 	node_destroy(st->list, 0);
 	node_destroy(cur_block, 0);
 	node_destroy(sym_stack_root, 0);
+	node_destroy(st->next_tmp, 1);
 	free(st->table);
 	free(st);
 }
