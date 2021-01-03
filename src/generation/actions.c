@@ -132,8 +132,17 @@ struct expr_val_t action_opb(struct expr_val_t arg1, enum operation_t op,
 			ret.true   = concat(arg1.true, arg2.true);
 			ret.false	 = arg2.false;
 			ret.a_type = A_BOOL;
-		} 
-		// TODO: xor
+		} else if (op == OP_XOR) {
+			struct symbol_t *sym1 = action_eval_par(arg1);
+			struct symbol_t *sym2 = action_eval_par(arg2);
+			struct symbol_t *res = newtemp(SYM_VAR, A_BOOL);
+			gencode(OP_XOR, sym1, sym2, res);
+			ret.a_type = A_BOOL;
+			ret.true	 = crelist(nextquad);
+			gencode(OP_EQUALS, res, newtemp(SYM_CST, A_INT, 1), NULL);
+			ret.false	 = crelist(nextquad);
+			gencode(OP_GOTO, NULL);
+		}
 	}
 	return ret;
 }
