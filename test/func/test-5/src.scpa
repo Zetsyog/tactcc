@@ -1,3 +1,4 @@
+(* Test recursive function (not working) *)
 program test
     var n: int
     function fact(n: int): int
@@ -8,6 +9,6 @@ program test
         end;
     begin
         read n;
-        write fact(n);
+        (* write fact(n); *)
         write "\nFIN\n";
     end

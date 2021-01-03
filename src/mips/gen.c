@@ -133,7 +133,7 @@ void gen_push(FILE *out, struct symbol_t *sym) {
 void gen_push_arg(FILE *out, struct quad_t *quad) {
 	if (push_arg_idx == -1) {
 		unsigned int i = current_quad;
-		while(tabQuad[i].op != OP_CALL) {
+		while (tabQuad[i].op != OP_CALL) {
 			i++;
 		}
 		push_arg_idx = i - current_quad - 1;
@@ -183,6 +183,27 @@ void gen_exit(FILE *out) {
 	fprintf(out, "\n");
 	mips(out, TAB, RAW, "exit", COLON, END);
 	gen_syscall(out, SYS_EXIT);
+}
+
+void gen_pow_func(FILE *out) {
+	mips(out, TAB, RAW, "power:", END);
+	mips(out, LI, REG, "t0", IMM, 0, END);
+	mips(out, LI, REG, "t1", IMM, 1, END);
+	mips(out, TAB, RAW, "power_loop:", END);
+	mips(out, BGE, REG, "t0", REG, "a1", RAW, "power_exit", END);
+	mips(out, INSTR_MULT, REG, "t1", REG, "t1", REG, "a0", END);
+	mips(out, INSTR_ADDI, REG, "t0", REG, "t0", IMM, 1, END);
+	mips(out, BRANCH, RAW, "power_loop", END);
+	mips(out, TAB, RAW, "power_exit:", END);
+	mips(out, MOVE, REG, "v0", REG, "t1", END);
+	mips(out, JR, REG, "ra", END);
+}
+
+void gen_pow(FILE *out, struct quad_t *quad) {
+	mips(out, LOAD, REG, "a0", SYM, quad->arg1, END);
+	mips(out, LOAD, REG, "a1", SYM, quad->arg2, END);
+	mips(out, JAL, RAW, "power", END);
+	mips(out, SW, REG, "v0", SYM, quad->res, END);
 }
 
 void gen_quad(FILE *out, struct quad_t *quad) {
@@ -261,13 +282,8 @@ void gen_quad(FILE *out, struct quad_t *quad) {
 		mips(out, INSTR_DIV, REG, "t2", REG, "t0", REG, "t1", END);
 		mips(out, SW, REG, "t2", SYM, quad->res, END);
 		break;
-	case OP_POWER :
-		mips(out, LOAD, REG, "t0", SYM, quad->arg1, END);
-		mips(out, INSTR_MULT, REG, "t1", REG, "t0", REG, "t0", END);
-		for(int i = 1 ; i < quad->arg2->int_val-1; i++) {
-			mips(out, INSTR_MULT, REG, "t1", REG, "t1", REG, "t0", END);
-			mips(out, SW, REG, "t1", SYM, quad->res, END);
-		}
+	case OP_POWER:
+		gen_pow(out, quad);
 		break;
 	case OP_AND:
 		mips(out, LOAD, REG, "t0", SYM, quad->arg1, END);
@@ -308,9 +324,20 @@ void gen_quad(FILE *out, struct quad_t *quad) {
 }
 
 void gen_mips(FILE *out) {
+	int use_pow = 0;
+	for (current_quad = 0; current_quad < nextquad; current_quad++) {
+		if (tabQuad[current_quad].op == OP_POWER) {
+			use_pow = 1;
+			break;
+		}
+	}
+
 	gen_st(out);
 	fprintf(out, "\t.text\n");
 	fprintf(out, "\t.globl main\n");
+	if (use_pow) {
+		gen_pow_func(out);
+	}
 	for (current_quad = 0; current_quad < nextquad; current_quad++) {
 		gen_quad(out, &tabQuad[current_quad]);
 	}
