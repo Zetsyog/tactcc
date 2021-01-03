@@ -1,3 +1,5 @@
+(* Ce programme implémente une fonction et vérifie son bon fonctionnement *)
+
 program test
     var a, b, c: int
     function j(p1: int, p2: bool): unit

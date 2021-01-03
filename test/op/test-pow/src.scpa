@@ -1,3 +1,5 @@
+(* Ce programme vérifie que l'opérateur puissance "^" est fonctionnel *)
+
 program test
     var i,j,k: int
     begin

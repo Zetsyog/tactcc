@@ -1,3 +1,5 @@
+(* Ce programme test l'implémentation d'un court programme *)
+
 program test
     var i,j: int
     begin

@@ -1,3 +1,5 @@
+(* Ce programme vérifie la fonction "write" sur des strings *)
+
 program test
     var i,j: int
     begin

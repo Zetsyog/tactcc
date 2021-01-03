@@ -1,3 +1,5 @@
+(* Ce programme vérifie que la structure de contrôle "if then else" est fonctionnelle *)
+
 program test
     var b1, b2: bool
     begin

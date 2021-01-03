@@ -43,6 +43,7 @@ int gencode(uint op, ...) {
 	case OP_MULTIPLIES:
 	case OP_DIVIDES:
 	case OP_POWER:
+	case OP_XOR:
 		size  = 2;
 		label = 0;
 		break;

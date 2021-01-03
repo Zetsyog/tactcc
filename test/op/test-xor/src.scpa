@@ -1,11 +1,9 @@
-(* Ce programme vérifie que l'opérateur booléen "or" est bien implémentée *)
-
 program test
     var i,j,k: bool
     begin
         i := true;
         j := false;
-	      k := i or j;
+	      k := i xor j;
 	      write i;
         write "\n";
         write j;

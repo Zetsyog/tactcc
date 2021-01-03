@@ -155,13 +155,14 @@ fundecl: FUNC IDENT K {
                 ((struct symbol_t *)it->data)->str_val = $3->name;
                 it = it->next;
             }
-            node_shift(&garbage);
+            gb_set(GB_PARLIST, NULL);
        } vardeclist M {
             struct node_t *it = $6;
             while(it != NULL) {
                 gencode(OP_POP_ARG, it->data);
                 it = it->next;
             }
+            gb_set(GB_VARDECLIST, NULL);
        } instr {
             tabQuad[$12].fun_entry = $3;
             $3->fun_desc->quad = &tabQuad[$12];
@@ -172,7 +173,7 @@ fundecl: FUNC IDENT K {
        ;
 
 parlist: /*epsilon*/     { $$ = NULL; }
-       | par             { $$ = node_create($1); garbage = node_unshift(garbage, $$); }
+       | par             { $$ = node_create($1); gb_set(GB_PARLIST, $$); }
        | parlist ',' par {
            node_append($1, $3);
            $$ = $1;
@@ -226,6 +227,7 @@ instr: loop { $$.next = $1.next; }
             struct symbol_t *sym = st_get($1);
 
             action_call(sym, $3);
+            gb_set(GB_EXPRLIST, NULL);
      }
      | IDENT '(' ')' {
             $$.next = NULL;
@@ -264,6 +266,7 @@ instr: loop { $$.next = $1.next; }
 
 funexprlist: expr {
             $$ = node_create(action_eval_par($1));
+            gb_set(GB_EXPRLIST, $$);
         }
         | funexprlist ',' expr {
             node_append($1, action_eval_par($3));

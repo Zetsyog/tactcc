@@ -1,5 +1,6 @@
 (* Ce programme à pour but de tester la libération
-de la mémoire lors d'une mauvaise déclaration de variable *)
+de la mémoire lors d'un mauvaise appel à une fonction:
+erreur d'argument ici *)
 
 program test
     var i,j: int;
@@ -13,6 +14,7 @@ program test
     begin
         read i;
         read j;
+        f(5 8);
         if i <> j then
             write "diff\n";
     end
