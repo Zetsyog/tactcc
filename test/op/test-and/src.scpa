@@ -1,7 +1,7 @@
 program test
     var i,j,k: bool
     begin
-        i := true;
+        i := false;
         j := true;
 	k := i and j;
 	write i;

@@ -77,7 +77,7 @@ enum mips_helper_op_t {
 	BGT		   = 32,
 	BLE		   = 33,
 	BGE		   = 34,
-	BNE		   = 35,
+	BNE		   = 35, 
 	// Char
 	TAB	  = 100, // Print tab char
 	COLON = 101, // Print colon char

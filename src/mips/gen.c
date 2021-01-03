@@ -281,6 +281,12 @@ void gen_quad(FILE *out, struct quad_t *quad) {
 		mips(out, INSTR_OR, REG, "t2", REG, "t0", REG, "t1", END);
 		mips(out, SW, REG, "t2", SYM, quad->res, END);
 		break;
+	case OP_XOR:
+		mips(out, LOAD, REG, "t0", SYM, quad->arg1, END);
+		mips(out, LOAD, REG, "t1", SYM, quad->arg2, END);
+		mips(out, INSTR_XOR, REG, "t2", REG, "t0", REG, "t1", END);
+		mips(out, SW, REG, "t2", SYM, quad->res, END);
+		break;
 	case OP_PUSH_ARG:
 		gen_push_arg(out, quad);
 		break;
