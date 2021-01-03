@@ -70,6 +70,7 @@ void yyerror(const char *s);
 program: PROG IDENT { st_unshift(); } vardeclist fundecllist M instr {
             tabQuad[$6].is_main = 1;
             tabQuad[$6].print_label = 1;
+            tabQuad[$6].fun_entry = NULL;
             complete($7.next, nextquad);
             gencode(OP_EXIT, NULL);
        }
@@ -144,6 +145,9 @@ fundecl: FUNC IDENT K {
             st_put($3);
             st_unshift();
        } '(' parlist ')' ':' atomictype {
+            if(node_length($6) > 4) {
+                log_syntax_error("syntax error: functions can take at maximum 4 parameters");
+            }
             $3->atomic_type = $9;
             $3->fun_desc = fun_desc_create(0, $6);
             struct node_t *it = $6;
@@ -159,10 +163,11 @@ fundecl: FUNC IDENT K {
                 it = it->next;
             }
        } instr {
+            tabQuad[$12].fun_entry = $3;
             $3->fun_desc->quad = &tabQuad[$12];
             complete($14.next, nextquad);
             gencode(OP_RETURN, NULL);
-            st_shift();
+            $3->fun_desc->sym_list = st_shift();
        }
        ;
 
@@ -210,8 +215,7 @@ instr: loop { $$.next = $1.next; }
      | RETURN expr {
             $$.next = NULL;
             struct symbol_t *sym = action_eval_par($2);
-            gencode(OP_PUSH_RET, sym);
-            gencode(OP_RETURN, NULL);
+            gencode(OP_RETURN, sym);
      }
      | RETURN {
             $$.next = NULL;

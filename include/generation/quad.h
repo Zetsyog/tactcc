@@ -35,9 +35,8 @@ enum operation_t {
 	OP_RETURN	= 21, /** return from function */
 	OP_PUSH_ARG = 22,
 	OP_POP_ARG	= 23,
-	OP_PUSH_RET = 24,
-	OP_POP_RET  = 25,
-	OP_EXIT     = 26
+	OP_POP_RET	= 24,
+	OP_EXIT		= 25
 };
 
 struct quad_t {
@@ -45,6 +44,7 @@ struct quad_t {
 	enum operation_t op;
 	unsigned int print_label : 1;
 	unsigned int is_main : 1;
+	struct symbol_t *fun_entry;
 	struct symbol_t *arg1;
 	struct symbol_t *arg2;
 	union {

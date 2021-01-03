@@ -168,10 +168,6 @@ void print_intermediate_code() {
 			printf("pop_arg ");
 			print_sym_val(quad.res);
 			break;
-		case OP_PUSH_RET:
-			printf("push_ret ");
-			print_sym_val(quad.res);
-			break;
 		case OP_POP_RET:
 			printf("pop_ret ");
 			print_sym_val(quad.res);

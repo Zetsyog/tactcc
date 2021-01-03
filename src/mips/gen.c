@@ -11,7 +11,7 @@ static int pop_arg_idx			   = 0;
 static int push_arg_idx			   = -1;
 static unsigned int current_quad   = 0;
 
-static void gen_var_decl(FILE *out, struct symbol_t *sym) {
+static void gen_global_var_decl(FILE *out, struct symbol_t *sym) {
 	char *name = malloc(SYM_NAME_MAX_LEN * sizeof(char));
 
 	struct node_t *it = declared_var;
@@ -41,6 +41,12 @@ static void gen_var_decl(FILE *out, struct symbol_t *sym) {
 	declared_var = node_unshift(declared_var, name);
 }
 
+void add_stack_var(struct symbol_t *sym) {
+	// Used to store offset in stack
+	sym->int_val = next_stack_offset();
+	grow_stack_size();
+}
+
 void gen_st(FILE *out) {
 	// Segment data
 	mips(out, TAB, RAW, ".data", END);
@@ -51,21 +57,16 @@ void gen_st(FILE *out) {
 		tmp = it->data;
 		if (tmp != NULL) {
 			if (tmp->sym_type == SYM_VAR) {
-				gen_var_decl(out, tmp);
+				if (tmp->depth == 1) {
+					if (tmp->is_tmp) {
+						add_stack_var(tmp);
+					} else {
+						gen_global_var_decl(out, tmp);
+					}
+				}
 			} else if (tmp->sym_type == SYM_CST) {
 				if (tmp->atomic_type == A_STR) {
-					gen_var_decl(out, tmp);
-				}
-			} else if (tmp->sym_type == SYM_FUN) {
-				struct node_t *it = tmp->fun_desc->par_sym_list;
-				struct symbol_t *s;
-				while (it != NULL) {
-					s = it->data;
-					if (s != NULL) {
-						gen_var_decl(out, s);
-					}
-
-					it = it->next;
+					gen_global_var_decl(out, tmp);
 				}
 			}
 		}
@@ -109,24 +110,42 @@ void gen_assign(FILE *out, struct quad_t *quad) {
 void gen_call(FILE *out, struct quad_t *quad) {
 	push_arg_idx = -1;
 
+	static unsigned int nb_reg = 5;
+
 	// save registers t0-2
-	mips(out, INSTR_SUB, REG, "sp", REG, "sp", IMM, 12, END);
+	mips(out, INSTR_SUB, REG, "sp", REG, "sp", IMM, nb_reg * WS, END);
+	mips(out, SW, REG, "fp", RAW, "16($sp)", END);
+	mips(out, SW, REG, "ra", RAW, "12($sp)", END);
 	mips(out, SW, REG, "t0", RAW, "8($sp)", END);
 	mips(out, SW, REG, "t1", RAW, "4($sp)", END);
 	mips(out, SW, REG, "t2", RAW, "0($sp)", END);
 
+	mips(out, MOVE, REG, "fp", REG, "sp", END);
+
 	mips(out, JAL, QLABEL, quad->label, END);
 
 	// restore registers after jump
-	mips(out, LW, REG, "t0", RAW, "8($sp)", END);
-	mips(out, LW, REG, "t1", RAW, "4($sp)", END);
 	mips(out, LW, REG, "t2", RAW, "0($sp)", END);
-	mips(out, INSTR_ADDI, REG, "sp", REG, "sp", IMM, 12, END);
+	mips(out, LW, REG, "t1", RAW, "4($sp)", END);
+	mips(out, LW, REG, "t0", RAW, "8($sp)", END);
+	mips(out, LW, REG, "ra", RAW, "12($sp)", END);
+	mips(out, LW, REG, "fp", RAW, "16($sp)", END);
+
+	mips(out, INSTR_ADDI, REG, "sp", REG, "sp", IMM, nb_reg * WS, END);
+}
+
+void gen_ret(FILE *out, struct quad_t *quad) {
+	pop_arg_idx = 0;
+	if (quad->res)
+		mips(out, LOAD, REG, "v0", SYM, quad->res, END);
+
+	mips(out, MOVE, REG, "sp", REG, "fp", END);
+	mips(out, JR, REG, "ra", END);
 }
 
 void gen_push(FILE *out, struct symbol_t *sym) {
-	mips(out, LOAD, REG, "t0", SYM, sym, END);
 	mips(out, INSTR_SUB, REG, "sp", REG, "sp", IMM, 4, END);
+	mips(out, LOAD, REG, "t0", SYM, sym, END);
 	mips(out, SW, REG, "t0", ADDR, "$sp", END);
 }
 
@@ -145,7 +164,7 @@ void gen_push_arg(FILE *out, struct quad_t *quad) {
 				: push_arg_idx == 1 ? "a1" : push_arg_idx == 2 ? "a2" : "a3";
 		mips(out, LOAD, REG, reg, SYM, quad->res, END);
 	} else {
-		gen_push(out, quad->res);
+		// Too many args
 	}
 	push_arg_idx--;
 }
@@ -154,6 +173,24 @@ void gen_pop(FILE *out, struct symbol_t *sym) {
 	mips(out, LW, REG, "t0", ADDR, "$sp", END);
 	mips(out, SW, REG, "t0", SYM, sym, END);
 	mips(out, INSTR_ADDI, REG, "sp", REG, "sp", IMM, 4, END);
+}
+
+void gen_fun_ctx(FILE *out, struct quad_t *quad) {
+	stack_offset = node_unshift_int(stack_offset, 0);
+	stack_size	 = node_unshift_int(stack_size, 0);
+
+	struct node_t *it = quad->fun_entry->fun_desc->sym_list;
+	struct symbol_t *sym;
+	while (it != NULL) {
+		sym = it->data;
+		if (sym->sym_type == SYM_VAR || sym->sym_type == SYM_PAR) {
+			add_stack_var(it->data);
+		}
+
+		it = it->next;
+	}
+
+	mips(out, INSTR_SUB, REG, "sp", REG, "sp", IMM, cur_stack_size() * WS, END);
 }
 
 void gen_pop_arg(FILE *out, struct quad_t *quad) {
@@ -165,14 +202,9 @@ void gen_pop_arg(FILE *out, struct quad_t *quad) {
 	if (pop_arg_idx < 4) {
 		mips(out, SW, REG, reg, SYM, s, END);
 	} else {
-		gen_pop(out, s);
+		// Too many args
 	}
 	pop_arg_idx++;
-}
-
-void gen_push_ret(FILE *out, struct quad_t *quad) {
-	pop_arg_idx = 0;
-	mips(out, LOAD, REG, "v0", SYM, quad->res, END);
 }
 
 void gen_pop_ret(FILE *out, struct quad_t *quad) {
@@ -185,6 +217,10 @@ void gen_exit(FILE *out) {
 	gen_syscall(out, SYS_EXIT);
 }
 
+/**
+ * @brief Generate a power function in mips code that will be called
+ * by power operator
+ */
 void gen_pow_func(FILE *out) {
 	mips(out, TAB, RAW, "power:", END);
 	mips(out, LI, REG, "t0", IMM, 0, END);
@@ -209,6 +245,14 @@ void gen_pow(FILE *out, struct quad_t *quad) {
 void gen_quad(FILE *out, struct quad_t *quad) {
 	if (quad->print_label) {
 		mips(out, TAB, QLABEL, quad, COLON, END);
+	}
+	if (quad->is_main) {
+		mips(out, INSTR_SUB, REG, "sp", REG, "sp", IMM, cur_stack_size() * WS,
+			 END);
+	}
+	if (quad->fun_entry != NULL) { // if this quad is beginning of function
+		// we need to grow stack for vars
+		gen_fun_ctx(out, quad);
 	}
 	switch (quad->op) {
 	case OP_ASSIGNMENT:
@@ -304,13 +348,10 @@ void gen_quad(FILE *out, struct quad_t *quad) {
 		gen_call(out, quad);
 		break;
 	case OP_RETURN:
-		mips(out, JR, REG, "ra", END);
+		gen_ret(out, quad);
 		break;
 	case OP_POP_ARG:
 		gen_pop_arg(out, quad);
-		break;
-	case OP_PUSH_RET:
-		gen_push_ret(out, quad);
 		break;
 	case OP_POP_RET:
 		gen_pop_ret(out, quad);
@@ -324,6 +365,9 @@ void gen_quad(FILE *out, struct quad_t *quad) {
 }
 
 void gen_mips(FILE *out) {
+	stack_offset = node_unshift_int(stack_offset, 0);
+	stack_size	 = node_unshift_int(stack_size, 0);
+
 	int use_pow = 0;
 	for (current_quad = 0; current_quad < nextquad; current_quad++) {
 		if (tabQuad[current_quad].op == OP_POWER) {

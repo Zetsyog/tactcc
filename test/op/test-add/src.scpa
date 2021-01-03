@@ -3,12 +3,12 @@ program test
     begin
         i := 8;
         j := -4;
-	k := i+j;
+	    k := i + j;
         write i;
         write "\n";
         write j;
         write "\n";
-	write k;
-	write "\n";
-	write "Fin du programme\n";
+        write k;
+        write "\n";
+        write "Fin du programme\n";
     end

@@ -37,6 +37,8 @@ struct symtable_t {
 	 * Store all the registred symbols
 	 */
 	struct symbol_t **table;
+
+	struct node_t *next_tmp;
 };
 
 /**
@@ -55,6 +57,8 @@ extern struct node_t *sym_stack;
  */
 struct symtable_t *st_create(unsigned int size);
 
+unsigned int st_next_tmp_id();
+
 /**
  * Retrieve data for a given key
  * @param t the symtable to search in
@@ -70,8 +74,9 @@ void st_unshift();
 
 /**
  * Pop the current local table of symbol
+ * @return the list of declared symbols in this scope
  */
-void st_shift();
+struct node_t *st_shift();
 
 /**
  * Print the symbol table in stdout
@@ -82,8 +87,6 @@ void st_print_scope();
 /**
  * Store a value in the table with the given key \n
  * If data is already store with the same key it will be replaced \n
- * TODO : check if it is not better to use symbol_t * as value
- * @param key
  * @param value
  * @return NULL on error
  */
@@ -101,9 +104,6 @@ unsigned long st_hash_str(char *str);
  * @return depth of symbol in the table of symbol
  */
 unsigned int get_sym_depth(struct symbol_t *sym);
-
-// TODO: maybe add new functions like clear, remove, iterate
-// dunno if needed
 
 /**
  * Destroy a symbol table

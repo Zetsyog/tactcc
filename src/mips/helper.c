@@ -37,15 +37,24 @@ static const char *op_str[SYSCALL] = {
 	[INSTR_TO_STR_IDX(BNE)]		   = "bne",
 };
 
+struct node_t *stack_offset = NULL;
+struct node_t *stack_size	= NULL;
+
 void get_sym_name(char *dest, struct symbol_t *sym) {
 	if (sym->sym_type == SYM_VAR) {
-		dest += sprintf(dest, VAR_PREFIX);
-	} else if (sym->sym_type == SYM_FUN) {
-		// TODO
+		if (sym->is_tmp || sym->depth > 1) {
+			dest += sprintf(dest, "%u($sp)",
+							(cur_stack_size() - sym->int_val) * WS);
+			return;
+		} else {
+			dest += sprintf(dest, VAR_PREFIX);
+		}
 	} else if (sym->sym_type == SYM_ARRAY) {
 		// TODO
 	} else if (sym->sym_type == SYM_PAR) {
-		dest += sprintf(dest, "%s_%s_", PAR_PREFIX, sym->str_val);
+		dest += sprintf(dest, "%u($sp)",
+							(cur_stack_size() - sym->int_val) * WS);
+		return;
 	}
 	if (sym->depth > 1) {
 		dest += sprintf(dest, "d%u_", sym->depth);
@@ -67,8 +76,10 @@ static void print_quad_label(FILE *out, struct quad_t *quad) {
 	fprintf(out, "%s_%u",
 			quad->op == OP_ASSIGNMENT
 				? ASSIGN_LABEL_PREFIX
-				: IS_BOOL_OP(quad->op) ? LOOP_LABEL_PREFIX
-									   : DEFAULT_LABEL_PREFIX,
+				: IS_BOOL_OP(quad->op)
+					  ? LOOP_LABEL_PREFIX
+					  : quad->fun_entry != NULL ? FUN_LABEL_PREFIX
+												: DEFAULT_LABEL_PREFIX,
 			quad->id);
 }
 
@@ -155,4 +166,17 @@ void mips(FILE *out, ...) {
 	va_end(args);
 
 	fprintf(out, "\n");
+}
+
+unsigned int next_stack_offset() {
+	unsigned int *ret = stack_offset->data;
+	*ret += 1;
+	return *ret;
+}
+void grow_stack_size() {
+	*((unsigned int *)stack_size->data) += 1;
+}
+
+unsigned int cur_stack_size() {
+	return *((unsigned int *)stack_size->data);
 }

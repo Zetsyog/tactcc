@@ -9,6 +9,6 @@ program test
         end;
     begin
         read n;
-        (* write fact(n); *)
+        write fact(n);
         write "\nFIN\n";
     end

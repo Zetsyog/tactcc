@@ -11,6 +11,7 @@
 #define LOOP_LABEL_PREFIX "__loop"
 #define ASSIGN_LABEL_PREFIX "__assign"
 #define DEFAULT_LABEL_PREFIX "__label"
+#define FUN_LABEL_PREFIX "__func"
 #define PAR_PREFIX "__par"
 
 /**
@@ -90,6 +91,15 @@ enum mips_helper_op_t {
 
 #define FIRST_INSTR_IDX LI
 #define LAST_INSTR_IDX SYSCALL - LI
+
+#define WS 4 // Word size
+
+extern struct node_t *stack_offset;
+extern struct node_t *stack_size;
+
+unsigned int next_stack_offset();
+void grow_stack_size();
+unsigned int cur_stack_size();
 
 /**
  * @brief A helper function to generate mips assembly in a file
