@@ -14,16 +14,18 @@ struct symbol_t *newtemp(enum sym_type_t sym_type,
 	int n;
 	do {
 		nextTmp = st_next_tmp_id();
-		if(sym_type == SYM_CST) {
-			n = snprintf(name, SYM_NAME_MAX_LEN - 1, "%s%u", CONST_PREFIX, nextTmp);
+		if (sym_type == SYM_CST) {
+			n = snprintf(name, SYM_NAME_MAX_LEN - 1, "%s%u", CONST_PREFIX,
+						 nextTmp);
 		} else {
-			n = snprintf(name, SYM_NAME_MAX_LEN - 1, "%s%u", TMP_VAR_PREFIX, nextTmp);
+			n = snprintf(name, SYM_NAME_MAX_LEN - 1, "%s%u", TMP_VAR_PREFIX,
+						 nextTmp);
 		}
 		name[n] = 0;
 	} while (st_get(name) != NULL);
 
 	struct symbol_t *sym = sym_create(name, sym_type, atomic_type);
-	sym->is_tmp = 1;
+	sym->is_tmp			 = 1;
 	if (sym_type == SYM_CST) {
 		if (atomic_type == A_INT || atomic_type == A_BOOL) {
 			sym->int_val = va_arg(args, int);
@@ -34,7 +36,7 @@ struct symbol_t *newtemp(enum sym_type_t sym_type,
 			strncpy(sym->str_val, str, len);
 		} else {
 			log_syntax_error("syntax error: unsupported constant type %s",
-					  atomic_type_str[atomic_type]);
+							 atomic_type_str[atomic_type]);
 		}
 	} else if (sym_type == SYM_VAR) {
 

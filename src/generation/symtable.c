@@ -81,6 +81,7 @@ struct symbol_t *st_put(struct symbol_t *value) {
 				log_syntax_error(
 					"syntax error : var %s already declared in this scope",
 					value->name);
+				return NULL;
 			} else { // Redfine var in upper scope
 				value->parent = sym;
 				break;
@@ -102,7 +103,7 @@ struct symbol_t *st_put(struct symbol_t *value) {
 	value->depth = block_stack_size;
 
 	// add the symbol in the list of all symbols
-	st->list		= node_unshift(st->list, value);
+	st->list = node_unshift(st->list, value);
 
 	// insert symbol in hashtable
 	st->table[hash] = value;
@@ -151,7 +152,7 @@ struct node_t *st_shift() {
 	// remove all entries of this block in the stack
 	// node_destroy(sym_stack->next, 0);
 	struct node_t *ret = sym_stack->next;
-	sym_stack->next = NULL;
+	sym_stack->next	   = NULL;
 	if (block_stack_size > 0) {
 		block_stack_size--;
 	}

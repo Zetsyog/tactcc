@@ -29,10 +29,10 @@ extern char *atomic_type_str[];
  * Function descriptor struct
  */
 struct fun_desc_t {
-	unsigned int par_nb; /** Number of parameters */
-	struct quad_t *quad; /** First quad of function */
+	unsigned int par_nb;		 /** Number of parameters */
+	struct quad_t *quad;		 /** First quad of function */
 	struct node_t *par_sym_list; /** List of parameters */
-	struct node_t *sym_list; /** List of all symbols */
+	struct node_t *sym_list;	 /** List of all symbols */
 };
 
 struct symbol_t {

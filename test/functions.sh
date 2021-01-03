@@ -131,8 +131,8 @@ test_compil_exec_in() {
     echo "$2 | spim -file $ASM_FILE 2>&1 > $OUT" >>$LOG
     $2 | spim -file $ASM_FILE 2>&1 | tail -n +6 >$OUT
 
-    echo "#### Output" >> $LOG
-    cat $OUT >> $LOG
+    echo "#### Output" >>$LOG
+    cat $OUT >>$LOG
 
     echo "" >>$LOG
     echo "#### Comp" >>$LOG

@@ -9,5 +9,5 @@ program test
         write "\n";
         write j;
         write "\n";
-	      write "Fin du programme\n";
+	    write "Fin du programme\n";
     end

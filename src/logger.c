@@ -11,7 +11,7 @@
 	}
 
 static int _log_level = LOG_LEVEL_ALL;
-int syntax_error = 0;
+int syntax_error	  = 0;
 
 void set_log_level(int level) {
 	_log_level = level;
@@ -35,12 +35,12 @@ void log_format(FILE *file, const char *tag, const char *message,
 
 void log_debug(const char *message, ...) {
 	can_log(LOG_LEVEL_DEBUG);
-	//printf("\033[0;36m");
+	// printf("\033[0;36m");
 	va_list args;
 	va_start(args, message);
 	log_format(stdout, "DEBUG", message, args);
 	va_end(args);
-	//printf("\033[0m");
+	// printf("\033[0m");
 }
 
 void log_info(const char *message, ...) {

@@ -17,7 +17,8 @@ static int get_next_line(void) {
 	line_nb++;
 	if (fgets(buffer, LINE_BUF_SIZE, yyin) == NULL) {
 		cur_line_idx = 0;
-		cur_line[0]	 = 0;
+		if (cur_line != NULL)
+			cur_line[0] = 0;
 		return EOF;
 	}
 	cur_line_len = strlen(buffer);
@@ -33,8 +34,7 @@ void print_scanner_current_line() {
 		if (cur_line[i] == '\t')
 			cur_line[i] = ' ';
 	}
-	fprintf(stderr,
-			"|....+....:....+....:....+....:....+....:....+\n");
+	fprintf(stderr, "|....+....:....+....:....+....:....+....:....+\n");
 	fprintf(stderr, "%-5lu| %s", line_nb, cur_line);
 	fprintf(stderr, ".... ! ");
 	size_t i;

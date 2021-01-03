@@ -50,12 +50,11 @@ struct node_t *node_unshift(struct node_t *list, void *data) {
 	return tmp;
 }
 
-struct node_t *node_unshift_int(struct node_t *list, int data){
+struct node_t *node_unshift_int(struct node_t *list, int data) {
 	struct node_t *tmp = node_create_int(data);
 	tmp->next		   = list;
 	return tmp;
 }
-
 
 void *node_shift(struct node_t **list) {
 	if (list == NULL || *list == NULL) {
@@ -98,19 +97,19 @@ void node_destroy(struct node_t *node, int free_mem) {
 }
 
 void *node_remove_last(struct node_t **list) {
-	if((*list) == NULL)
+	if ((*list) == NULL)
 		return NULL;
 
 	void *data;
 	if ((*list)->next == NULL) {
-		data = (*list)->data;
+		data  = (*list)->data;
 		*list = NULL;
 		node_destroy(*list, 0);
 		return data;
 	}
 
 	struct node_t *second_last = *list;
-	while(second_last->next->next != NULL) {
+	while (second_last->next->next != NULL) {
 		second_last = second_last->next;
 	}
 	data = second_last->next->data;

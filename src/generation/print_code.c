@@ -179,7 +179,7 @@ void print_intermediate_code() {
 			printf("???");
 			break;
 		}
-		if(quad.is_main) {
+		if (quad.is_main) {
 			printf(" <----- main");
 		}
 		printf("\n");

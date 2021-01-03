@@ -4,7 +4,6 @@
 #include <stdarg.h>
 #include <stdio.h>
 
-// 		mips(out, SW, REG, "t0", SYM, quad->res, END);
 #define INSTR_TO_STR_IDX(instr) (instr - FIRST_INSTR_IDX)
 
 static const char *op_str[SYSCALL] = {
@@ -52,8 +51,8 @@ void get_sym_name(char *dest, struct symbol_t *sym) {
 	} else if (sym->sym_type == SYM_ARRAY) {
 		// TODO
 	} else if (sym->sym_type == SYM_PAR) {
-		dest += sprintf(dest, "%u($sp)",
-							(cur_stack_size() - sym->int_val) * WS);
+		dest +=
+			sprintf(dest, "%u($sp)", (cur_stack_size() - sym->int_val) * WS);
 		return;
 	}
 	if (sym->depth > 1) {

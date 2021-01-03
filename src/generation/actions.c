@@ -128,14 +128,14 @@ struct expr_val_t action_opb(struct expr_val_t arg1, enum operation_t op,
 			ret.a_type = A_BOOL;
 		} else if (op == OP_OR) {
 			complete(arg1.false, marker);
-			ret.ptr		 = NULL;
+			ret.ptr	   = NULL;
 			ret.true   = concat(arg1.true, arg2.true);
-			ret.false	 = arg2.false;
+			ret.false  = arg2.false;
 			ret.a_type = A_BOOL;
 		} else if (op == OP_XOR) {
 			struct symbol_t *sym1 = newtemp(SYM_VAR, A_BOOL);
 			struct symbol_t *sym2 = newtemp(SYM_VAR, A_BOOL);
-			struct list_t *next1 = action_assign(sym1, arg1);
+			struct list_t *next1  = action_assign(sym1, arg1);
 			complete(next1, marker);
 			struct list_t *next2 = action_assign(sym2, arg2);
 			complete(next2, nextquad);
@@ -143,9 +143,9 @@ struct expr_val_t action_opb(struct expr_val_t arg1, enum operation_t op,
 			struct symbol_t *res = newtemp(SYM_VAR, A_BOOL);
 			gencode(OP_XOR, sym1, sym2, res);
 			ret.a_type = A_BOOL;
-			ret.true	 = crelist(nextquad);
+			ret.true   = crelist(nextquad);
 			gencode(OP_EQUALS, res, newtemp(SYM_CST, A_INT, 1), NULL);
-			ret.false	 = crelist(nextquad);
+			ret.false = crelist(nextquad);
 			gencode(OP_GOTO, NULL);
 		}
 	}

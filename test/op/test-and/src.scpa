@@ -11,7 +11,7 @@ program test
         write "\n";
         write j;
         write "\n";
-	write k;
-	write "\n";
-	write "Fin du programme\n";
+        write k;
+        write "\n";
+        write "Fin du programme\n";
     end

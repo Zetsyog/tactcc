@@ -6,7 +6,6 @@
 #ifndef LOGGER_H
 #define LOGGER_H
 
-
 #define LOG_LEVEL_OFF 0
 #define LOG_LEVEL_ERROR 100
 #define LOG_LEVEL_INFO 400

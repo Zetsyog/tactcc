@@ -1,8 +1,7 @@
 #include "util.h"
 #include "generation/symtable.h"
-#include <string.h>
 #include <stdlib.h>
-
+#include <string.h>
 
 extern void yylex_destroy();
 
@@ -13,13 +12,13 @@ void gb_set(int id, struct node_t *list) {
 }
 
 void clean_exit(int exitcode) {
-	for(int id = 0; id<GB_EXPRLIST + 1; id++){
+	for (int id = 0; id < GB_EXPRLIST + 1; id++) {
 		node_destroy(garbage[id], 0);
 	}
 
 	st_destroy();
 	yylex_destroy();
-    destroy_scanner();
+	destroy_scanner();
 
 	exit(exitcode);
 }

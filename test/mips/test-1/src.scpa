@@ -1,0 +1,37 @@
+(* Ceci est un exemple de code SCALPA *)
+program maxi
+    var i,j : int;
+    function fini() : unit
+        begin
+            write "programme terminé\n"
+    end;
+    function max(a: int, b: int) : int
+        begin
+            if a < b then
+                return b
+            else
+                return a;
+        end;
+    function countToNTimes(max: int, n: int) : unit
+        var i, j : int
+        begin
+            i := 1;
+            j := 0;
+            while i <= n do
+            begin
+                while j < max do
+                begin
+                    j := j+1
+                end;
+                write j;
+                write "\n";
+                j := 1;
+                i := i+1;
+            end;
+        end;
+    begin
+        countToNTimes(10, 5);
+        write max(-12, 8);
+        write "\n";
+        fini()
+    end

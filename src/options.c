@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define USAGE "Usage: %s [-o, -output <file>] [-v, -version] [-?, -help] [-tos]"
+
 struct options_t options = {0};
 
 void print_version() {
@@ -18,6 +20,11 @@ void print_version() {
 	exit(EXIT_SUCCESS);
 }
 
+void print_usage(char *exec_name) {
+	printf(USAGE, exec_name);
+	printf("\n");
+}
+
 void parse_opt(int argc, char **argv) {
 	int c;
 
@@ -27,25 +34,29 @@ void parse_opt(int argc, char **argv) {
 			[0] = {"version", no_argument, 0, 0},
 			[1] = {"tos", no_argument, 0, 0},
 			[2] = {"output", required_argument, 0, 0},
+			[3] = {"help", no_argument, 0, 0},
 			{0, 0, 0, 0}};
 
-		c = getopt_long_only(argc, argv, "vo:", long_options, &option_index);
+		c = getopt_long_only(argc, argv, "?vo:", long_options, &option_index);
 		if (c == -1)
 			break;
 
 		switch (c) {
 		case 0:
-			printf("option %s", long_options[option_index].name);
 			if (option_index == 0) {
 				print_version();
-			}else if(option_index == 1) {
+				exit(EXIT_SUCCESS);
+			} else if (option_index == 1) {
 				options.print_tos = 1;
 			} else if (option_index == 2) {
-				if(!optarg) {
+				if (!optarg) {
 					log_error("arg is required for output option");
 					exit(EXIT_FAILURE);
 				}
 				options.output_path = optarg;
+			} else if (option_index == 3) {
+				print_usage(argv[0]);
+				exit(EXIT_SUCCESS);
 			}
 			printf("\n");
 			break;
@@ -54,9 +65,15 @@ void parse_opt(int argc, char **argv) {
 			break;
 		case 'v':
 			print_version();
+			exit(EXIT_SUCCESS);
+			break;
+		case '?':
+			print_usage(argv[0]);
+			exit(EXIT_SUCCESS);
 			break;
 		default:
 			log_error("Unknown option %c\n", c);
+			print_usage(argv[0]);
 			exit(EXIT_FAILURE);
 		}
 	}

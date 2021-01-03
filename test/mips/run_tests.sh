@@ -5,4 +5,4 @@ test_compil_exec "test-bool" test_diff
 test_compil_exec "test-cond" test_diff
 test_compil_exec "test-else" test_diff
 test_compil_exec "test-while" test_diff
-
+test_compil_exec "test-1" test_diff

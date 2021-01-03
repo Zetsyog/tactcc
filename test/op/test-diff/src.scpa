@@ -5,8 +5,8 @@ program test
     begin
         i := 8;
         j := 9;
-	if i <>j then
-        	write i;
+        if i <>j then
+                write i;
         write "\n";
-	write "Fin du programme\n";
+        write "Fin du programme\n";
     end
