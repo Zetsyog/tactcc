@@ -1,3 +1,6 @@
+(* Ce programme teste la bonne exécution de l'opérateur
+booléen "and" *)
+
 program test
     var i,j,k: bool
     begin

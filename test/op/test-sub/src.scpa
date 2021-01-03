@@ -1,3 +1,5 @@
+(* Ce programme vérifie que la soustraction "-" est bien implémentée *)
+
 program test
     var i,j,k: int
     begin

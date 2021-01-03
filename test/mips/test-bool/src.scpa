@@ -1,3 +1,5 @@
+(* Ce programme vérifie que les booléens sont bien implémentés *)
+
 program test
     var b: bool
     begin

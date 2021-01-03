@@ -1,3 +1,5 @@
+(* Ce programme vérifie que la structure de contrôle "while do" est fonctionnelle *)
+
 program test
     var b2: int
     begin

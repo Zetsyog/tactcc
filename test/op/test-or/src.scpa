@@ -1,3 +1,5 @@
+(* Ce programme vérifie que l'opérateur booléen "or" est bien implémentée *)
+
 program test
     var i,j,k: bool
     begin
