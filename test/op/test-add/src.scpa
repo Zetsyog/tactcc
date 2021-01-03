@@ -1,3 +1,5 @@
+(* Ce programme vérifie le bon fonctionnement de l'opérateur "+" *)
+
 program test
     var i,j,k: int
     begin

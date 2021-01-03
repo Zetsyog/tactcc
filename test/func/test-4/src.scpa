@@ -1,3 +1,5 @@
+(* Ce programme implémente deux fonctions et vérifie leur bon fonctionnement *)
+
 program test
     var a, b: int;
     var c: bool

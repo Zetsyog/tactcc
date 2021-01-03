@@ -1,3 +1,6 @@
+(* Ce programme à pour but de tester la libération
+de la mémoire lors d'une mauvaise déclaration de variable *)
+
 program test
     var i,j: int;
     var b1, b2, b3: bool

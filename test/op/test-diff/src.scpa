@@ -1,3 +1,5 @@
+(* Ce programme vérifie le bon fonctionnement de l'opérateur de comparaison "<>" est fonctionnel *)
+
 program test
     var i,j: int
     begin
