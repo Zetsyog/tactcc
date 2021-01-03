@@ -1,4 +1,4 @@
-(* Ce programme vérifie que la structure de contrôle "while do" est fonctionnelle *)
+(* Ce programme vérifie la fonction "write" sur des strings *)
 
 program test
     var i,j: int
