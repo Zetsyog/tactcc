@@ -70,14 +70,20 @@ Par contre en cas de fonctionnement normal tout est correct (voir les tests valg
 ## Limitations
 
 Ce compilateur est assez limité.
+
 Par exemple, un programe ne peut générer qu'au plus 10000 quads. 
 Cela pourrait être corrigé en remplaçant le tableau de taille fixe tabQuad (cf *quad.h*) par une liste chainée ou plus simplement en augmentent la taille du tableau.
+
 Les tableaux ne sont pas implémentés par manque de temps, l'implémentation des fonctions ayant été plus compliquée que prévue.
+
 Les symboles doivent avoir un nom de moins de 64 caractères (peut être modifié avec la constante SYM_NAME_MAX_LEN dans *symbol.h*)
 Les fonctions ne peuvent pas avoir plus de 4 arguments car MIPS ne propose que 4 registres pour passer des arguments aux fonctions.
+
 On pourrait les passer via la pile, mais l'implémentation auraient été encore une fois plus complexe, nous avons préféré rester plus simple.
 Par contre l'appel de fonction et la sauvegarde de contexte sont fonctionnelles (exemple : les fonctions récursives marchent)
+
 Le passage de paramètre par références n'est pas disponible non plus.
+
 Le programme généré n'est pas optimisé du tout, encore une fois par manque de temps.
 
 ## Authors
