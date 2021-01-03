@@ -54,13 +54,15 @@ Le projet est séparé en plusieurs dossiers :
 Le point d'entrée se situe dans les fichiers "grammar.y" et "grammar.l" dans le dossier "grammar".
 Il s'agit des fichiers Yacc et Lex qui permettent d'analyser la syntaxe d'un fichier et d'ainsi vérifier sa bonne
 implémentation et d'en reconnaitre les différentes composantes.
+
 Lors de leur exécution ceux-ci vont appeller les différents fichiers .c contenu dans les dossier voisins.
 Le dossier "génération" contient l'ensemble des fichiers .c nécessaire à la génération du code
-intermédiaire vers des quads. Les quads sont stockés dans un tableau global et représentés par la structure quad_t
+intermédiaire vers des quads. Les quads sont stockés dans un tableau global et représentés par la structure quad_t.
+
 Le dossier "mips" contient les fichiers nécessaires à la traduction des quads vers le langage mips.
 
-Nous nous sommes forcé à utiliser que l'API POSIX de Yacc, car certains d'entres nous codent sur mac.
-Cela a notamment posé problème pour la gestion de la mémoire (la directive `%destructor` n'étant pas POSIX).
+Nous nous sommes forcé à utiliser que l'API POSIX de Yacc, car certains d'entres nous codent sur mac et leur version de yacc ne disposait que de l'api POSIX.
+Cela a notamment posé problème pour la gestion de la mémoire (le paramètre `%destructor` n'étant pas POSIX).
 Nous avons cherché des alternatives mais le travail n'est pas totalement terminé. 
 Ainsi il est probable qu'en cas d'erreur la mémoire ne soit pas totalement libérée.
 Par contre en cas de fonctionnement normal tout est correct (voir les tests valgrind).
