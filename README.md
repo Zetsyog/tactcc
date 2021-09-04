@@ -1,4 +1,5 @@
-# 2A Projet Compilation
+# TACTcc - Thomas Alexandre Clément Téo compiler collection
+## 2A - Projet de compilation
 
 ## Usage
 
